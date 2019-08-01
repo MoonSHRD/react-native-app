@@ -1,6 +1,6 @@
 # MoonSHRD Messenger
 
-MoonSHRD is a decentralized messegnger based on Matrix protocol. Feel free to check out information about matrix at matrix.org
+MoonSHRD is a decentralized messegnger based on Matrix protocol and P2Chat. Feel free to check out information about Matrix at matrix.org
 
 
 ## Before you start
