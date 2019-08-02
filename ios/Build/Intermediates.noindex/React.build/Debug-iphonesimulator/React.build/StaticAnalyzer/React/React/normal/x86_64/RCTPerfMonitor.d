@@ -1,0 +1,33 @@
+dependencies: \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Profiler/RCTPerfMonitor.m \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Base/RCTDefines.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Base/RCTBridge.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Base/RCTBridgeDelegate.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Base/RCTJavaScriptLoader.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Base/RCTBridgeModule.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Base/RCTFrameUpdate.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Base/RCTInvalidating.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Modules/RCTDevSettings.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Profiler/RCTFPSGraph.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Base/RCTJavaScriptExecutor.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Base/RCTPerformanceLogger.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Base/RCTRootView.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Modules/RCTUIManager.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Views/RCTViewManager.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Base/RCTConvert.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Views/RCTAnimationType.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Views/RCTBorderStyle.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Base/RCTLog.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Base/RCTAssert.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Base/RCTUtils.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Views/RCTPointerEvents.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Views/RCTTextDecorationLineType.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/ios/Build/Products/Debug-iphonesimulator/include/yoga/Yoga.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/ios/Build/Products/Debug-iphonesimulator/include/yoga/YGEnums.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/ios/Build/Products/Debug-iphonesimulator/include/yoga/YGMacros.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/ios/Build/Products/Debug-iphonesimulator/include/yoga/YGValue.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Base/RCTEventDispatcher.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Views/UIView+React.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Views/RCTComponent.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/Base/RCTBridge+Private.h \
+  /Volumes/Second/MoonSHRD/moonshrd-react-native/MoonSHRD/node_modules/react-native/React/DevSupport/RCTDevMenu.h
