@@ -1,4 +1,4 @@
 /*
-* @todo 3
+* @todo 3:30/DEV
 * Specify react-navigation
 */
