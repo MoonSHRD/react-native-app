@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { StyleSheet, TextInput } from 'react-native'
-// import { Icon } from 'expo';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 import Text from './Text';
 import Block from './Block';
@@ -14,6 +14,8 @@ export default class Input extends Component {
 
   renderLabel() {
     const { label, error } = this.props;
+    
+    if (!label) return null
 
     return (
       <Block flex={false}>
@@ -33,6 +35,14 @@ export default class Input extends Component {
         style={styles.toggle}
         onPress={() => this.setState({ toggleSecure: !toggleSecure })}
       >
+      {
+        rightLabel ? rightLabel :
+          <Icon
+            color={theme.colors.gray}
+            size={theme.sizes.font * 1.35}
+            name={!toggleSecure ? "eye-outline" : "eye-off-outline"}
+        />
+      }
       </Button>
     );
   }
@@ -58,6 +68,7 @@ export default class Input extends Component {
       phone,
       number,
       secure,
+      label,
       error,
       style,
       ...props
@@ -65,6 +76,7 @@ export default class Input extends Component {
 
     const { toggleSecure } = this.state;
     const isSecure = toggleSecure ? false : secure;
+    const isLabel = label ? this.renderLabel() : null;
 
     const inputStyles = [
       styles.input,
@@ -78,8 +90,8 @@ export default class Input extends Component {
       ? 'phone-pad' : 'default';
 
     return (
-      <Block flex={false} margin={[theme.sizes.base, 0]}>
-        {this.renderLabel()}
+      <Block flex={false} margin={[theme.sizes.base / 2, 0]}>
+        {isLabel}
         <TextInput
           style={inputStyles}
           secureTextEntry={isSecure}
@@ -108,10 +120,12 @@ const styles = StyleSheet.create({
   },
   toggle: {
     position: 'absolute',
+    justifyContent: 'center',
     alignItems: 'flex-end',
     width: theme.sizes.base * 2,
     height: theme.sizes.base * 2,
-    top: theme.sizes.base,
+    // top: theme.sizes.base,
+    backgroundColor: theme.colors.lightGray,
     right: 0,
   }
 });

@@ -3,23 +3,34 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node node_modules/react-native/local-cli/cli.js start",
-    "android": "react-native run-android",
-    "ios": "react-native run-ios --simulator='iPhone 7'",
+    "start": "node node_modules/react-native/local-cli/cli.js start --port=8081",
+    "android": "react-native --port=8081 run-android",
+    "ios": "react-native run-ios --port=8081 --simulator='iPhone 7'",
     "test": "jest"
   },
   "dependencies": {
+    "babel-preset-react-native": "2.1.0",
     "react": "16.8.3",
     "react-native": "0.59.9",
+    "react-native-gesture-handler": "^1.3.0",
+    "react-native-linear-gradient": "^2.5.4",
+    "react-native-slider": "^0.11.0",
+    "react-native-svg": "^9.5.3",
+    "react-native-svg-uri": "^1.2.3",
+    "react-native-vector-icons": "^6.6.0",
     "react-navigation": "^3.11.0"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",
     "@babel/runtime": "^7.5.5",
     "babel-jest": "^24.8.0",
+    "braces": ">=2.3.1",
     "jest": "^24.8.0",
+    "mem": ">=4.0.0",
     "metro-react-native-babel-preset": "^0.55.0",
-    "react-test-renderer": "16.8.3"
+    "react-native-svg-transformer": "^0.13.0",
+    "react-test-renderer": "16.8.3",
+    "ws": ">=3.3.1"
   },
   "jest": {
     "preset": "react-native"
