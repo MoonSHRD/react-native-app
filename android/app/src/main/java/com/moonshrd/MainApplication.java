@@ -31,7 +31,8 @@ public class MainApplication extends Application implements ReactApplication {
             new VectorIconsPackage(),
             new SvgPackage(),
             new RNGestureHandlerPackage(),
-            new LinearGradientPackage()
+            new LinearGradientPackage(),
+            new MatrixClientPackage()
       );
     }
 
