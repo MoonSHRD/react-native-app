@@ -9,7 +9,12 @@ import Twitter from '../assets/icons/twitter.svg';
 import Facebook from '../assets/icons/instagram.svg';
 import Instagram from '../assets/icons/facebook.svg';
 
+import { onSignIn } from "../state/auth";
+
 const { width, height } = Dimensions.get('window');
+
+const VALID_EMAIL = "login@renaissance.com";
+const VALID_PASSWORD = "subscribe";
 
 export default class Login extends Component {
   static navigationOptions = {
@@ -41,7 +46,7 @@ export default class Login extends Component {
     this.setState({ errors, loading: false });
 
     if (!errors.length) {
-      navigation.navigate("Contacts");
+      navigation.navigate("ContactList");
     }
   }
 
@@ -78,7 +83,11 @@ export default class Login extends Component {
               placeholder={'Enter password'}
               onChangeText={text => this.setState({ password: text })}
             />
-            <Button gradient style={styles.confirmButton} onPress={() => this.handleSignUp()}>
+            <Button gradient style={styles.confirmButton}               
+              onPress={() => {
+                onSignIn().then(() => navigation.navigate("SignedIn"));
+              }}
+            >
               {loading ?
                 <ActivityIndicator size="small" color="white" /> :
                 <Text headline bold white center>Confirm</Text>
