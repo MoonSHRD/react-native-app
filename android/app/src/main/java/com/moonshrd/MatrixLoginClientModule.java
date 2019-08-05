@@ -6,7 +6,7 @@ import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.moonshrd.models.AuthParamsLPWith3PID;
+import com.moonshrd.model.matrix.AuthParamsLPWith3PID;
 
 import org.matrix.androidsdk.HomeServerConnectionConfig;
 import org.matrix.androidsdk.core.callback.ApiCallback;
@@ -17,17 +17,17 @@ import org.matrix.androidsdk.rest.model.login.RegistrationParams;
 
 import javax.annotation.Nonnull;
 
-public class MatrixClientModule extends ReactContextBaseJavaModule {
+public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
     private HomeServerConnectionConfig hsConfig = null;
 
-    public MatrixClientModule(@Nonnull ReactApplicationContext reactContext) {
+    public MatrixLoginClientModule(@Nonnull ReactApplicationContext reactContext) {
         super(reactContext);
     }
 
     @Nonnull
     @Override
     public String getName() {
-        return "MatrixClient";
+        return "MatrixLoginClient";
     }
 
     @ReactMethod

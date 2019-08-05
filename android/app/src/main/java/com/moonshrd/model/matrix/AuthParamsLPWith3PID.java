@@ -1,4 +1,4 @@
-package com.moonshrd.models;
+package com.moonshrd.model.matrix;
 
 import org.matrix.androidsdk.rest.model.login.AuthParams;
 
