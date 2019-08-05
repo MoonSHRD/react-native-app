@@ -7,6 +7,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.moonshrd.model.matrix.AuthParamsLPWith3PID;
+import com.moonshrd.model.realm.CredentialsModel;
 
 import org.matrix.androidsdk.HomeServerConnectionConfig;
 import org.matrix.androidsdk.core.callback.ApiCallback;
@@ -64,6 +65,11 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
             @Override
             public void onSuccess(Credentials info) {
                 onSuccess.invoke();
+                Globals.currentRealm.executeTransactionAsync(realm -> {
+                    realm.delete(CredentialsModel.class); // probably we may use multi-account feature, so FIXME
+                    realm.copyToRealm(new CredentialsModel(info.userId, info.wellKnown.homeServer.baseURL,
+                            info.accessToken, info.refreshToken, info.deviceId));
+                });
                 Globals.currMatrixCreds = info;
             }
         });
@@ -95,6 +101,11 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
             @Override
             public void onSuccess(Credentials info) {
                 onSuccess.invoke();
+                Globals.currentRealm.executeTransactionAsync(realm -> {
+                    realm.delete(CredentialsModel.class); // probably we may use multi-account feature, so FIXME
+                    realm.copyToRealm(new CredentialsModel(info.userId, info.wellKnown.homeServer.baseURL,
+                            info.accessToken, info.refreshToken, info.deviceId));
+                });
                 Globals.currMatrixCreds = info;
             }
         });
