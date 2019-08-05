@@ -18,8 +18,6 @@ import org.matrix.androidsdk.rest.model.login.RegistrationParams;
 import javax.annotation.Nonnull;
 
 public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
-    private HomeServerConnectionConfig hsConfig = null;
-
     public MatrixLoginClientModule(@Nonnull ReactApplicationContext reactContext) {
         super(reactContext);
     }
@@ -31,18 +29,11 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setCurrentHomeserver(String homeserverUri) {
-        hsConfig = new HomeServerConnectionConfig.Builder()
+    public void register(String homeserverUri, String email, String password, Callback onNetworkError, Callback onMatrixError,
+                         Callback onUnexpectedError, Callback onSuccess) {
+        HomeServerConnectionConfig hsConfig = new HomeServerConnectionConfig.Builder()
                 .withHomeServerUri(Uri.parse(homeserverUri))
                 .build();
-    }
-
-    @ReactMethod
-    public void register(String email, String password, Callback onNetworkError, Callback onMatrixError,
-                         Callback onUnexpectedError, Callback onSuccess) throws IllegalStateException {
-        if(hsConfig == null) {
-            throw new IllegalStateException("Homeserver isn't set!");
-        }
 
         RegistrationParams params = new RegistrationParams();
 
@@ -79,11 +70,11 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void login(String email, String password, Callback onNetworkError, Callback onMatrixError,
-                      Callback onUnexpectedError, Callback onSuccess) throws IllegalStateException {
-        if(hsConfig == null) {
-            throw new IllegalStateException("Homeserver isn't set!");
-        }
+    public void login(String homeserverUri, String email, String password, Callback onNetworkError, Callback onMatrixError,
+                      Callback onUnexpectedError, Callback onSuccess) {
+        HomeServerConnectionConfig hsConfig = new HomeServerConnectionConfig.Builder()
+                .withHomeServerUri(Uri.parse(homeserverUri))
+                .build();
 
         new LoginRestClient(hsConfig).loginWith3Pid("email", email, password, new ApiCallback<Credentials>() {
             @Override
