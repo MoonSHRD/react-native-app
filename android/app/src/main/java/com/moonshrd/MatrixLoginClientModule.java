@@ -6,7 +6,8 @@ import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.moonshrd.models.AuthParamsLPWith3PID;
+import com.moonshrd.model.matrix.AuthParamsLPWith3PID;
+import com.moonshrd.model.realm.CredentialsModel;
 
 import org.matrix.androidsdk.HomeServerConnectionConfig;
 import org.matrix.androidsdk.core.callback.ApiCallback;
@@ -17,32 +18,23 @@ import org.matrix.androidsdk.rest.model.login.RegistrationParams;
 
 import javax.annotation.Nonnull;
 
-public class MatrixClientModule extends ReactContextBaseJavaModule {
-    private HomeServerConnectionConfig hsConfig = null;
-
-    public MatrixClientModule(@Nonnull ReactApplicationContext reactContext) {
+public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
+    public MatrixLoginClientModule(@Nonnull ReactApplicationContext reactContext) {
         super(reactContext);
     }
 
     @Nonnull
     @Override
     public String getName() {
-        return "MatrixClient";
+        return "MatrixLoginClient";
     }
 
     @ReactMethod
-    public void setCurrentHomeserver(String homeserverUri) {
-        hsConfig = new HomeServerConnectionConfig.Builder()
+    public void register(String homeserverUri, String email, String password, Callback onNetworkError, Callback onMatrixError,
+                         Callback onUnexpectedError, Callback onSuccess) {
+        HomeServerConnectionConfig hsConfig = new HomeServerConnectionConfig.Builder()
                 .withHomeServerUri(Uri.parse(homeserverUri))
                 .build();
-    }
-
-    @ReactMethod
-    public void register(String email, String password, Callback onNetworkError, Callback onMatrixError,
-                         Callback onUnexpectedError, Callback onSuccess) throws IllegalStateException {
-        if(hsConfig == null) {
-            throw new IllegalStateException("Homeserver isn't set!");
-        }
 
         RegistrationParams params = new RegistrationParams();
 
@@ -73,17 +65,22 @@ public class MatrixClientModule extends ReactContextBaseJavaModule {
             @Override
             public void onSuccess(Credentials info) {
                 onSuccess.invoke();
+                Globals.currentRealm.executeTransactionAsync(realm -> {
+                    realm.delete(CredentialsModel.class); // probably we may use multi-account feature, so FIXME
+                    realm.copyToRealm(new CredentialsModel(info.userId, info.wellKnown.homeServer.baseURL,
+                            info.accessToken, info.refreshToken, info.deviceId));
+                });
                 Globals.currMatrixCreds = info;
             }
         });
     }
 
     @ReactMethod
-    public void login(String email, String password, Callback onNetworkError, Callback onMatrixError,
-                      Callback onUnexpectedError, Callback onSuccess) throws IllegalStateException {
-        if(hsConfig == null) {
-            throw new IllegalStateException("Homeserver isn't set!");
-        }
+    public void login(String homeserverUri, String email, String password, Callback onNetworkError, Callback onMatrixError,
+                      Callback onUnexpectedError, Callback onSuccess) {
+        HomeServerConnectionConfig hsConfig = new HomeServerConnectionConfig.Builder()
+                .withHomeServerUri(Uri.parse(homeserverUri))
+                .build();
 
         new LoginRestClient(hsConfig).loginWith3Pid("email", email, password, new ApiCallback<Credentials>() {
             @Override
@@ -104,6 +101,11 @@ public class MatrixClientModule extends ReactContextBaseJavaModule {
             @Override
             public void onSuccess(Credentials info) {
                 onSuccess.invoke();
+                Globals.currentRealm.executeTransactionAsync(realm -> {
+                    realm.delete(CredentialsModel.class); // probably we may use multi-account feature, so FIXME
+                    realm.copyToRealm(new CredentialsModel(info.userId, info.wellKnown.homeServer.baseURL,
+                            info.accessToken, info.refreshToken, info.deviceId));
+                });
                 Globals.currMatrixCreds = info;
             }
         });
