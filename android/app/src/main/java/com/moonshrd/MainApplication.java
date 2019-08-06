@@ -62,14 +62,6 @@ public class MainApplication extends Application implements ReactApplication {
             //.migration(new MyMigration()) // TODO: DB migration
             .build();
 
-    RealmConfiguration realmMatrixConfig = new RealmConfiguration.Builder()
-            .name("realm.matrix")
-            //.encryptionKey() // TODO: DB encryption
-            .schemaVersion(0)
-            //.migration(new MyMigration()) // TODO: DB migration
-            .build();
-
     Globals.credsRealm = Realm.getInstance(realmCredsConfig);
-    Globals.matrixRealm = Realm.getInstance(realmMatrixConfig);
   }
 }
