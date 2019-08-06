@@ -3,7 +3,6 @@ package com.moonshrd;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
-import com.oney.WebRTCModule.WebRTCModulePackage;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.horcrux.svg.SvgPackage;
 import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
@@ -17,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import io.realm.Realm;
+import io.realm.RealmConfiguration;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -54,6 +54,14 @@ public class MainApplication extends Application implements ReactApplication {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
     Realm.init(this.getApplicationContext());
-    Globals.currentRealm = Realm.getDefaultInstance();
+
+    RealmConfiguration realmCredsConfig = new RealmConfiguration.Builder()
+            .name("realm.creds")
+            //.encryptionKey() // TODO: DB encryption
+            .schemaVersion(0)
+            //.migration(new MyMigration()) // TODO: DB migration
+            .build();
+
+    Globals.credsRealm = Realm.getInstance(realmCredsConfig);
   }
 }

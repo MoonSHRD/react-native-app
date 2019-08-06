@@ -10,8 +10,11 @@ import com.moonshrd.model.matrix.AuthParamsLPWith3PID;
 import com.moonshrd.model.realm.CredentialsModel;
 
 import org.matrix.androidsdk.HomeServerConnectionConfig;
+import org.matrix.androidsdk.MXDataHandler;
+import org.matrix.androidsdk.MXSession;
 import org.matrix.androidsdk.core.callback.ApiCallback;
 import org.matrix.androidsdk.core.model.MatrixError;
+import org.matrix.androidsdk.data.store.MXFileStore;
 import org.matrix.androidsdk.rest.client.LoginRestClient;
 import org.matrix.androidsdk.rest.model.login.Credentials;
 import org.matrix.androidsdk.rest.model.login.RegistrationParams;
@@ -67,6 +70,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
                 onSuccess.invoke();
                 saveCredentials(info);
                 Globals.currMatrixCreds = info;
+                Globals.currMatrixSession = createSession(hsConfig, info);
             }
         });
     }
@@ -99,15 +103,22 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
                 onSuccess.invoke();
                 saveCredentials(info);
                 Globals.currMatrixCreds = info;
+                Globals.currMatrixSession = createSession(hsConfig, info);
             }
         });
     }
 
     private void saveCredentials(Credentials creds) {
-        Globals.currentRealm.executeTransactionAsync(realm -> {
+        Globals.credsRealm.executeTransactionAsync(realm -> {
             realm.delete(CredentialsModel.class); // probably we may use multi-account feature, so FIXME
             realm.copyToRealm(new CredentialsModel(creds.userId, creds.wellKnown.homeServer.baseURL,
                     creds.accessToken, creds.refreshToken, creds.deviceId));
         });
+    }
+
+    private MXSession createSession(HomeServerConnectionConfig hsConfig, Credentials info) {
+        MXFileStore store = new MXFileStore(hsConfig, true, getReactApplicationContext());
+        return new MXSession.Builder(hsConfig, new MXDataHandler(store, info), getReactApplicationContext())
+                .build();
     }
 }
