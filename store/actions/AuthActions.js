@@ -1,7 +1,6 @@
 import { AsyncStorage } from "react-native";
-export const USER_KEY = "auth-demo-key";
 
-import * as types from './constants/ActionTypes';
+import * as types from './constants';
 
 export const getToken = (accessToken) => ({
     type: types.GET_TOKEN,
@@ -28,7 +27,7 @@ export const error = error => ({
 });
 
 export const getUserToken = () => dispatch => 
-    AsyncStorage.getItem(USER_KEY)
+    AsyncStorage.getItem('userToken')
         .then((data) => {
             dispatch(isLoading(true));
             dispatch(getToken(data));
@@ -41,7 +40,8 @@ export const getUserToken = () => dispatch =>
         })
 
 export const saveUserToken = (data) => dispatch =>
-    AsyncStorage.setItem(USER_KEY, 'newToken')
+    alert('Save Token')
+    AsyncStorage.setItem('userToken', 'newToken')
         .then((data) => {
             dispatch(isLoading(true));
             dispatch(saveToken('token saved'));
@@ -54,7 +54,7 @@ export const saveUserToken = (data) => dispatch =>
         })
 
 export const removeUserToken = () => dispatch =>
-    AsyncStorage.removeItem(USER_KEY)
+    AsyncStorage.removeItem('userToken')
         .then((data) => {
             dispatch(loading(false));
             dispatch(removeToken(data));

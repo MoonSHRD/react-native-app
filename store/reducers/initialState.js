@@ -11,12 +11,12 @@ const initialState = {
                 avatar: null,
             },
     },
-    ui: {
-        signedIn: false,
-        checkedSignIn: false,
-        isLoading: false,
-        errors: [],      
-    },
+    // ui: {
+    //     signedIn: false,
+    //     checkedSignIn: false,
+    //     isLoading: false,
+    //     errors: [],      
+    // },
     profile: {
         email: null,
         password: '',

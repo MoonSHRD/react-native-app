@@ -51,9 +51,8 @@ class Login extends Component {
     }
   }
 
-  _signInAsync =  () => {
-    export const USER_KEY = "auth-demo-key";
-    this.props.saveUserToken(USER_KEY, "true")
+  signInAsync =  () => {
+    this.props.saveToken('newToken')
         .then(() => {
             this.props.navigation.navigate('SignedIn');
         })
@@ -96,7 +95,7 @@ class Login extends Component {
               onChangeText={text => this.setState({ password: text })}
             />
             <Button gradient style={styles.confirmButton}               
-              onPress={this._signInAsync}
+              onPress={this.signInAsync}
             >
               {loading ?
                 <ActivityIndicator size="small" color="white" /> :
@@ -194,12 +193,15 @@ const styles = StyleSheet.create({
 })
 
 const mapStateToProps = state => ({
-  accessToken: state.accessToken,
+  accessToken: state.profile.accessToken,
 });
 
-
-const mapDispatchToProps = dispatch => ({
-  saveUserToken: () => dispatch(saveUserToken()),
-});
+const mapDispatchToProps = dispatch => {
+  return {
+    saveToken: data => {
+      dispatch(saveUserToken(data))
+    }
+  }
+}
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login);
