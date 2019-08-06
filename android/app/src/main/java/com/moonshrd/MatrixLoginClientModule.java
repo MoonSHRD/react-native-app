@@ -65,11 +65,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
             @Override
             public void onSuccess(Credentials info) {
                 onSuccess.invoke();
-                Globals.currentRealm.executeTransactionAsync(realm -> {
-                    realm.delete(CredentialsModel.class); // probably we may use multi-account feature, so FIXME
-                    realm.copyToRealm(new CredentialsModel(info.userId, info.wellKnown.homeServer.baseURL,
-                            info.accessToken, info.refreshToken, info.deviceId));
-                });
+                saveCredentials(info);
                 Globals.currMatrixCreds = info;
             }
         });
@@ -101,13 +97,17 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
             @Override
             public void onSuccess(Credentials info) {
                 onSuccess.invoke();
-                Globals.currentRealm.executeTransactionAsync(realm -> {
-                    realm.delete(CredentialsModel.class); // probably we may use multi-account feature, so FIXME
-                    realm.copyToRealm(new CredentialsModel(info.userId, info.wellKnown.homeServer.baseURL,
-                            info.accessToken, info.refreshToken, info.deviceId));
-                });
+                saveCredentials(info);
                 Globals.currMatrixCreds = info;
             }
+        });
+    }
+
+    private void saveCredentials(Credentials creds) {
+        Globals.currentRealm.executeTransactionAsync(realm -> {
+            realm.delete(CredentialsModel.class); // probably we may use multi-account feature, so FIXME
+            realm.copyToRealm(new CredentialsModel(creds.userId, creds.wellKnown.homeServer.baseURL,
+                    creds.accessToken, creds.refreshToken, creds.deviceId));
         });
     }
 }
