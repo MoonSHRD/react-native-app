@@ -5,7 +5,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { Button, Block, Input, Text } from '../components';
 import { theme } from '../constants';
 
-import { onSignOut } from '../state/auth';
+import { onSignOut } from '../store/auth';
   
 const { width, height } = Dimensions.get('window');
 

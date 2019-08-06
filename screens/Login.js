@@ -9,7 +9,7 @@ import Twitter from '../assets/icons/twitter.svg';
 import Facebook from '../assets/icons/instagram.svg';
 import Instagram from '../assets/icons/facebook.svg';
 
-import { onSignIn } from "../state/auth";
+import { onSignIn } from "../store/auth";
 
 const { width, height } = Dimensions.get('window');
 

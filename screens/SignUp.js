@@ -10,7 +10,7 @@ import Facebook from '../assets/icons/instagram.svg';
 import Instagram from '../assets/icons/facebook.svg';
 import { hidden } from 'ansi-colors';
 
-import { onSignIn } from "../state/auth";
+import { onSignIn } from "../store/auth";
 
 const { width, height } = Dimensions.get('window');
 

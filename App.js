@@ -1,13 +1,14 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { isSignedIn } from "./state/auth";
+import { isSignedIn } from "./store/auth";
+import {connect} from 'react-redux';
 
 import { Block } from './components';
 import { createRootNavigator } from "./navigation/router";
 
 console.disableYellowBox = true;
 
-export default class App extends React.Component {
+class App extends React.Component {
   constructor(props) {
     super(props);
 
@@ -15,7 +16,6 @@ export default class App extends React.Component {
       signedIn: false,
       checkedSignIn: false,
       isLoadingComplete: false,
-
     };
   }
 
@@ -44,3 +44,14 @@ export default class App extends React.Component {
 
 const styles = StyleSheet.create({
 });
+
+
+const mapStateToProps = (state) => ({
+  state
+});
+
+const mapDispatchToProps = (dispatch) => ({
+  dispatch
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
