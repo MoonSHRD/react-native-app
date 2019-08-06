@@ -1,10 +1,10 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { isSignedIn } from "./store/auth";
+import { StyleSheet } from 'react-native';
 import {connect} from 'react-redux';
 
 import { Block } from './components';
 import { createRootNavigator } from "./navigation/router";
+import { getUserToken } from "./store/actions/AuthActions";
 
 console.disableYellowBox = true;
 
@@ -20,11 +20,24 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    isSignedIn()
+    this._isSignedInAsync()
       .then(res => this.setState({ signedIn: res, checkedSignIn: true }))
       .catch(err => alert("An error occurred"));
   }
 
+  _isSignedInAsync =  () => {
+    return new Promise((resolve, reject) => {
+    this.props.getUserToken()
+        .then(res => {
+          if (res !== null) {
+          resolve(true);
+          } else {
+          resolve(false);
+          }
+        })
+        .catch(err => reject(err));
+    });
+};
 
   render() {
     const { checkedSignIn, signedIn } = this.state;
@@ -46,12 +59,12 @@ const styles = StyleSheet.create({
 });
 
 
-const mapStateToProps = (state) => ({
-  state
+const mapStateToProps = state => ({
+  accessToken: state.accessToken,
 });
 
-const mapDispatchToProps = (dispatch) => ({
-  dispatch
+const mapDispatchToProps = dispatch => ({
+  getUserToken: () => dispatch(getUserToken()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

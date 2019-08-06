@@ -10,11 +10,12 @@ import Facebook from '../assets/icons/instagram.svg';
 import Instagram from '../assets/icons/facebook.svg';
 import { hidden } from 'ansi-colors';
 
-import { onSignIn } from "../store/auth";
+import { connect } from 'react-redux';
+import { saveUserToken } from '../store/actions/AuthActions';
 
 const { width, height } = Dimensions.get('window');
 
-export default class SignUp extends Component {
+class SignUp extends Component {
   static navigationOptions = {
     header: null
   }
@@ -47,7 +48,7 @@ export default class SignUp extends Component {
         [
           {
             text: 'Continue', onPress: () => {
-              navigation.navigate('ContactList')
+              navigation.navigate('SignedIn')
             }
           }
         ],
@@ -55,6 +56,18 @@ export default class SignUp extends Component {
       )
     }
   }
+
+  _signInAsync =  () => {
+    const USER_KEY = "auth-demo-key";
+    this.props.saveUserToken(USER_KEY, "true")
+        .then(() => {
+            this.props.navigation.navigate('SignedIn');
+        })
+        .catch(error => {
+            this.setState({ error })
+        })
+};
+
 
   render() {
     const { navigation } = this.props;
@@ -90,9 +103,7 @@ export default class SignUp extends Component {
               onChangeText={text => this.setState({ password: text })}
             />
             <Button gradient style={styles.confirmButton}         
-              onPress={() => {
-                onSignIn().then(() => navigation.navigate("SignedIn"));
-              }}
+              onPress={this._signInAsync}
             >
               {loading ?
                 <ActivityIndicator size="small" color="white" /> :
@@ -188,3 +199,14 @@ const styles = StyleSheet.create({
     borderBottomColor: theme.colors.accent,
   }
 })
+
+const mapStateToProps = state => ({
+  accessToken: state.accessToken,
+});
+
+
+const mapDispatchToProps = dispatch => ({
+  saveUserToken: () => dispatch(saveUserToken()),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(SignUp);

@@ -9,14 +9,15 @@ import Twitter from '../assets/icons/twitter.svg';
 import Facebook from '../assets/icons/instagram.svg';
 import Instagram from '../assets/icons/facebook.svg';
 
-import { onSignIn } from "../store/auth";
+import { connect } from 'react-redux';
+import { saveUserToken } from '../store/actions/AuthActions'
 
 const { width, height } = Dimensions.get('window');
 
 const VALID_EMAIL = "login@renaissance.com";
 const VALID_PASSWORD = "subscribe";
 
-export default class Login extends Component {
+class Login extends Component {
   static navigationOptions = {
     header: null
   }
@@ -49,6 +50,17 @@ export default class Login extends Component {
       navigation.navigate("ContactList");
     }
   }
+
+  _signInAsync =  () => {
+    export const USER_KEY = "auth-demo-key";
+    this.props.saveUserToken(USER_KEY, "true")
+        .then(() => {
+            this.props.navigation.navigate('SignedIn');
+        })
+        .catch(error => {
+            this.setState({ error })
+        })
+};
 
   render() {
     const { navigation } = this.props;
@@ -84,9 +96,7 @@ export default class Login extends Component {
               onChangeText={text => this.setState({ password: text })}
             />
             <Button gradient style={styles.confirmButton}               
-              onPress={() => {
-                onSignIn().then(() => navigation.navigate("SignedIn"));
-              }}
+              onPress={this._signInAsync}
             >
               {loading ?
                 <ActivityIndicator size="small" color="white" /> :
@@ -182,3 +192,14 @@ const styles = StyleSheet.create({
     borderBottomColor: theme.colors.accent,
   }
 })
+
+const mapStateToProps = state => ({
+  accessToken: state.accessToken,
+});
+
+
+const mapDispatchToProps = dispatch => ({
+  saveUserToken: () => dispatch(saveUserToken()),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Login);

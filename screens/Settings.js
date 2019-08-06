@@ -4,12 +4,13 @@ import { View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, Keybo
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Button, Block, Input, Text } from '../components';
 import { theme } from '../constants';
+import { connect } from 'react-redux';
 
-import { onSignOut } from '../store/auth';
+import { removeUserToken } from '../store/actions/AuthActions'
   
 const { width, height } = Dimensions.get('window');
 
-export default class Settings extends Component {
+class Settings extends Component {
   static navigationOptions = {
     headerRight: (
       <Icon
@@ -37,9 +38,7 @@ export default class Settings extends Component {
         >
         <Block>
             <Button gradient style={styles.confirmButton}               
-                onPress={() => {
-                onSignOut().then(() => navigation.navigate("SignedOut"));
-                }}
+                onPress={() => {this._signOutAsync}}
             >
                 {loading ?
                 <ActivityIndicator size="small" color="white" /> :
@@ -51,7 +50,29 @@ export default class Settings extends Component {
       </KeyboardAvoidingView>
     )
   }
+
+  _signOutAsync =  () => {
+    this.props.removeUserToken()
+        .then(() => {
+            this.props.navigation.navigate('SignedOut');
+        })
+        .catch(error => {
+            this.setState({ error })
+        })
+};
+
+
 }
 
 const styles = StyleSheet.create({
 })
+
+const mapStateToProps = state => ({
+  accessToken: state.accessToken,
+});
+
+const mapDispatchToProps = dispatch => ({
+  removeUserToken: () => dispatch(removeUserToken()),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Settings);
