@@ -9,7 +9,7 @@ import java.lang.RuntimeException
 
 class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
     override fun getName(): String {
-        return "MatrixClientModule"
+        return "MatrixClient"
     }
 
     @ReactMethod
