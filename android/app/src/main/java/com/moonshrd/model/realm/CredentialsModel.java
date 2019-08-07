@@ -8,13 +8,15 @@ public class CredentialsModel extends RealmObject {
     private String accessToken;
     private String refreshToken;
     private String deviceId;
+    private String identityServer;
 
-    public CredentialsModel(String userId, String homeServer, String accessToken, String refreshToken, String deviceId) {
+    public CredentialsModel(String userId, String homeServer, String accessToken, String refreshToken, String deviceId, String identityServer) {
         this.userId = userId;
         this.homeServer = homeServer;
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.deviceId = deviceId;
+        this.identityServer = identityServer;
     }
 
     public String getUserId() {
@@ -55,5 +57,13 @@ public class CredentialsModel extends RealmObject {
 
     public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
+    }
+
+    public String getIdentityServer() {
+        return identityServer;
+    }
+
+    public void setIdentityServer(String identityServer) {
+        this.identityServer = identityServer;
     }
 }
