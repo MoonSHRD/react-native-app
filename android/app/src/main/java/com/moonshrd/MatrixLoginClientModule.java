@@ -143,8 +143,31 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
         return false;
     }
 
-    public void logout() {
+    @ReactMethod
+    public void logout(Callback onUnexpectedError, Callback onSuccess) {
         Globals.credsRealm.delete(CredentialsModel.class);
+        Globals.currMatrixSession.clear(getReactApplicationContext(), new ApiCallback<Void>() {
+            @Override
+            public void onNetworkError(Exception e) {
+                //
+            }
+
+            @Override
+            public void onMatrixError(MatrixError e) {
+                //
+            }
+
+            @Override
+            public void onUnexpectedError(Exception e) {
+                onUnexpectedError.invoke(e.getMessage());
+            }
+
+            @Override
+            public void onSuccess(Void info) {
+                onSuccess.invoke();
+            }
+        });
+        Globals.currMatrixCreds = null;
     }
 
     private Credentials createCredentialsFromRealmModel(CredentialsModel model) {
