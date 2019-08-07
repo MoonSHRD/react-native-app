@@ -1,23 +1,19 @@
 import React, { Component } from 'react';
-import { View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
+import { View, Dimensions, NetInfo, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
 
 import { Button, Block, Input, Text } from '../components';
 import { theme } from '../constants';
+import MatrixLoginClient from '../native/MatrixLoginClient';
+
 import Logo from '../assets/images/logo-small.svg';
 import TextLogo from '../assets/images/text-logo.svg';
 import Twitter from '../assets/icons/twitter.svg';
 import Facebook from '../assets/icons/instagram.svg';
 import Instagram from '../assets/icons/facebook.svg';
 
-import { connect } from 'react-redux';
-import { saveUserToken } from '../store/actions/AuthActions'
-
 const { width, height } = Dimensions.get('window');
 
-const VALID_EMAIL = "login@renaissance.com";
-const VALID_PASSWORD = "subscribe";
-
-class Login extends Component {
+export default class Login extends Component {
   static navigationOptions = {
     header: null
   }
@@ -28,38 +24,54 @@ class Login extends Component {
     loading: false,
   }
 
-  handleLogin() {
+  validateEmail(email) {
+    var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+  }  
+
+  async checkInternetStatus() {
+    const netStatus = await NetInfo.fetch()
+  }
+
+  handleLogin = () => {
     const { navigation } = this.props;
     const { email, password } = this.state;
     const errors = [];
+    const homeserverUri = 'https://matrix.moonshard.tech';
+    const identityUri = 'https://matrix.moonshard.tech'
 
     Keyboard.dismiss();
     this.setState({ loading: true });
 
-    // check with backend API or with some static data
-    if (email !== VALID_EMAIL) {
-      errors.push('email');
+    if (!email) errors.push('email');
+    if (!password) errors.push('password');
+
+    if (email !== null) {
+      if (!this.validateEmail(email)) {
+          errors.push('email');
+      }
     }
-    if (password !== VALID_PASSWORD) {
-      errors.push('password');
+
+    if (this.checkInternetStatus === 'none' || this.checkInternetStatus === 'NONE') {
+      errors.push('internet')
     }
 
     this.setState({ errors, loading: false });
 
     if (!errors.length) {
-      navigation.navigate("ContactList");
+      MatrixLoginClient.login(
+        homeserverUri,
+        identityUri,
+        email,
+        password,
+        (networkError)=>console.log(networkError),
+        (matrixError)=>console.log(matrixError),
+        (unexpectedError)=>console.log(unexpectedError),
+        (res)=>console.log(res)
+      )
+      navigation.navigate('SignedIn');
     }
   }
-
-  signInAsync =  () => {
-    this.props.saveToken('newToken')
-        .then(() => {
-            this.props.navigation.navigate('SignedIn');
-        })
-        .catch(error => {
-            this.setState({ error })
-        })
-};
 
   render() {
     const { navigation } = this.props;
@@ -95,7 +107,7 @@ class Login extends Component {
               onChangeText={text => this.setState({ password: text })}
             />
             <Button gradient style={styles.confirmButton}               
-              onPress={this.signInAsync}
+              onPress={this.handleLogin}
             >
               {loading ?
                 <ActivityIndicator size="small" color="white" /> :
@@ -191,17 +203,3 @@ const styles = StyleSheet.create({
     borderBottomColor: theme.colors.accent,
   }
 })
-
-const mapStateToProps = state => ({
-  accessToken: state.profile.accessToken,
-});
-
-const mapDispatchToProps = dispatch => {
-  return {
-    saveToken: data => {
-      dispatch(saveUserToken(data))
-    }
-  }
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(Login);

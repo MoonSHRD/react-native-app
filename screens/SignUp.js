@@ -8,14 +8,10 @@ import TextLogo from '../assets/images/text-logo.svg';
 import Twitter from '../assets/icons/twitter.svg';
 import Facebook from '../assets/icons/instagram.svg';
 import Instagram from '../assets/icons/facebook.svg';
-import { hidden } from 'ansi-colors';
-
-import { connect } from 'react-redux';
-import { saveUserToken } from '../store/actions/AuthActions';
 
 const { width, height } = Dimensions.get('window');
 
-class SignUp extends Component {
+export default class SignUp extends Component {
   static navigationOptions = {
     header: null
   }
@@ -26,29 +22,58 @@ class SignUp extends Component {
     loading: false,
   }
 
-  handleSignUp() {
+  validateEmail(email) {
+    var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+  }  
+
+  async checkInternetStatus() {
+    const netStatus = await NetInfo.fetch()
+  }
+
+  handleSignUp = () => {
     const { navigation } = this.props;
-    const { email, username, password } = this.state;
+    const { email, password } = this.state;
     const errors = [];
+    const homeserverUri = 'https://matrix.moonshard.tech';
+    const identityUri = 'https://matrix.moonshard.tech'
 
     Keyboard.dismiss();
     this.setState({ loading: true });
 
     // check with backend API or with some static data
     if (!email) errors.push('email');
-    if (!username) errors.push('username');
     if (!password) errors.push('password');
+    if (this.checkInternetStatus === 'none' || this.checkInternetStatus === 'NONE') {
+      errors.push('internet')
+    }
+
+    if (email !== null) {
+      if (!this.validateEmail(email)) {
+          errors.push('email');
+      }
+    }
 
     this.setState({ errors, loading: false });
 
     if (!errors.length) {
+      MatrixLoginClient.login(
+        homeserverUri,
+        identityUri,
+        email,
+        password,
+        (networkError)=>console.log(networkError),
+        (matrixError)=>console.log(matrixError),
+        (unexpectedError)=>console.log(unexpectedError),
+        (res)=>console.log(res)
+      )
       Alert.alert(
         'Success!',
         'Your account has been created',
         [
           {
             text: 'Continue', onPress: () => {
-              navigation.navigate('SignedIn')
+              navigation.navigate('SignedIn');
             }
           }
         ],
@@ -56,18 +81,6 @@ class SignUp extends Component {
       )
     }
   }
-
-  _signInAsync =  () => {
-    const USER_KEY = "auth-demo-key";
-    this.props.saveUserToken(USER_KEY, "true")
-        .then(() => {
-            this.props.navigation.navigate('SignedIn');
-        })
-        .catch(error => {
-            this.setState({ error })
-        })
-};
-
 
   render() {
     const { navigation } = this.props;
@@ -103,7 +116,7 @@ class SignUp extends Component {
               onChangeText={text => this.setState({ password: text })}
             />
             <Button gradient style={styles.confirmButton}         
-              onPress={this._signInAsync}
+              onPress={this.handleSignUp}
             >
               {loading ?
                 <ActivityIndicator size="small" color="white" /> :
@@ -199,14 +212,3 @@ const styles = StyleSheet.create({
     borderBottomColor: theme.colors.accent,
   }
 })
-
-const mapStateToProps = state => ({
-  accessToken: state.accessToken,
-});
-
-
-const mapDispatchToProps = dispatch => ({
-  saveUserToken: () => dispatch(saveUserToken()),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(SignUp);

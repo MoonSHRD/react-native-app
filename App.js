@@ -1,15 +1,13 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, AsyncStorage } from 'react-native';
 import {connect} from 'react-redux';
 
 import { Block } from './components';
 import { createRootNavigator } from "./navigation/router";
-import { USER_KEY } from './store/actions/AuthActions';
-import { getUserToken } from "./store/actions/AuthActions";
 
 console.disableYellowBox = true;
 
-class App extends React.Component {
+export default class App extends React.Component {
   constructor(props) {
     super(props);
 
@@ -58,14 +56,3 @@ class App extends React.Component {
 
 const styles = StyleSheet.create({
 });
-
-
-const mapStateToProps = state => ({
-  accessToken: state.profile.accessToken,
-});
-
-const mapDispatchToProps = dispatch => ({
-  getUserToken: () => dispatch(getUserToken()),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(App);

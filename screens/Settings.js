@@ -1,16 +1,14 @@
 import React, { Component } from 'react';
 import { View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
+import MatrixLoginClient from '../native/MatrixLoginClient';
 
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Button, Block, Input, Text } from '../components';
 import { theme } from '../constants';
-import { connect } from 'react-redux';
 
-import { removeUserToken } from '../store/actions/AuthActions'
-  
 const { width, height } = Dimensions.get('window');
 
-class Settings extends Component {
+export default class Settings extends Component {
   static navigationOptions = {
     headerRight: (
       <Icon
@@ -23,7 +21,13 @@ class Settings extends Component {
     ),
   };
   state = {
+  }
 
+  handleSignOut = () => {
+    MatrixLoginClient.logout(
+      (err)=>console.log(err),
+      (res)=>console.log(res)
+    )
   }
 
   render() {
@@ -38,7 +42,7 @@ class Settings extends Component {
         >
         <Block>
             <Button gradient style={styles.confirmButton}               
-                onPress={() => {this._signOutAsync}}
+                onPress={() => {this.handleSignOut}}
             >
                 {loading ?
                 <ActivityIndicator size="small" color="white" /> :
@@ -50,29 +54,7 @@ class Settings extends Component {
       </KeyboardAvoidingView>
     )
   }
-
-  _signOutAsync =  () => {
-    this.props.removeUserToken()
-        .then(() => {
-            this.props.navigation.navigate('SignedOut');
-        })
-        .catch(error => {
-            this.setState({ error })
-        })
-};
-
-
 }
 
 const styles = StyleSheet.create({
 })
-
-const mapStateToProps = state => ({
-  accessToken: state.accessToken,
-});
-
-const mapDispatchToProps = dispatch => ({
-  removeUserToken: () => dispatch(removeUserToken()),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(Settings);

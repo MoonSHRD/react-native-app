@@ -39,8 +39,8 @@ export default class Input extends Component {
         rightLabel ? rightLabel :
           <Icon
             color={theme.colors.gray}
-            size={theme.sizes.font * 1.35}
-            name={!toggleSecure ? "eye-outline" : "eye-off-outline"}
+            size={theme.sizes.font * 2}
+            name={!toggleSecure ? "md-eye-off" : "md-eye"}
         />
       }
       </Button>
@@ -126,6 +126,6 @@ const styles = StyleSheet.create({
     height: theme.sizes.base * 2,
     // top: theme.sizes.base,
     backgroundColor: theme.colors.lightGray,
-    right: 0,
+    right: 15,
   }
 });
