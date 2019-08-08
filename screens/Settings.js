@@ -26,7 +26,7 @@ export default class Settings extends Component {
   handleSignOut = () => {
     MatrixLoginClient.logout(
       (err)=>console.log(err),
-      (res)=>console.log(res)
+      ()=>console.log('success')
     )
   }
 
@@ -42,7 +42,7 @@ export default class Settings extends Component {
         >
         <Block>
             <Button gradient style={styles.confirmButton}               
-                onPress={() => {this.handleSignOut}}
+                onPress={this.handleSignOut}
             >
                 {loading ?
                 <ActivityIndicator size="small" color="white" /> :

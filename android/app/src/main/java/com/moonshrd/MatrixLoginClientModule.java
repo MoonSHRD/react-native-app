@@ -35,7 +35,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void register(String homeserverUri, String identityUri, String email, String password, Callback onNetworkError, Callback onMatrixError,
+    public void register(String homeserverUri, String identityUri, String email, String password,
                          Callback onUnexpectedError, Callback onSuccess) {
         HomeServerConnectionConfig hsConfig = new HomeServerConnectionConfig.Builder()
                 .withHomeServerUri(Uri.parse(homeserverUri))
@@ -55,12 +55,10 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
         new LoginRestClient(hsConfig).register(params, new ApiCallback<Credentials>() {
             @Override
             public void onNetworkError(Exception e) {
-                onNetworkError.invoke(e.getMessage());
             }
 
             @Override
             public void onMatrixError(MatrixError e) {
-                onMatrixError.invoke(e.getMessage());
             }
 
             @Override
@@ -79,7 +77,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void login(String homeserverUri, String identityUri, String email, String password, Callback onNetworkError, Callback onMatrixError,
+    public void login(String homeserverUri, String identityUri, String email, String password,
                       Callback onUnexpectedError, Callback onSuccess) {
         HomeServerConnectionConfig hsConfig = new HomeServerConnectionConfig.Builder()
                 .withHomeServerUri(Uri.parse(homeserverUri))
@@ -89,12 +87,10 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
         new LoginRestClient(hsConfig).loginWith3Pid("email", email, password, new ApiCallback<Credentials>() {
             @Override
             public void onNetworkError(Exception e) {
-                onNetworkError.invoke(e.getMessage());
             }
 
             @Override
             public void onMatrixError(MatrixError e) {
-                onMatrixError.invoke(e.getMessage());
             }
 
             @Override
@@ -149,12 +145,10 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
         Globals.currMatrixSession.clear(getReactApplicationContext(), new ApiCallback<Void>() {
             @Override
             public void onNetworkError(Exception e) {
-                //
             }
 
             @Override
             public void onMatrixError(MatrixError e) {
-                //
             }
 
             @Override

@@ -38,8 +38,8 @@ export default class Login extends Component {
     const { navigation } = this.props;
     const { email, password } = this.state;
     const errors = [];
-    const homeserverUri = 'https://matrix.moonshard.tech';
-    const identityUri = 'https://matrix.moonshard.tech';
+    const homeserverUri = "https://matrix.moonshard.tech";
+    const identityUri = "https://vector.im";
 
     Keyboard.dismiss();
     this.setState({ loading: true });
@@ -65,20 +65,9 @@ export default class Login extends Component {
         identityUri,
         email,
         password,
-        (networkError) => {
-          console.log(networkError)
-        },
-        (matrixError) => {
-          console.log(matrixError)
-        },
-        (unexpectedError) => {
-          console.log(unexpectedError)
-        },
-        (data) => {
-          this.setState({loginResult: data})
-        }
+        (err)=>console.log(err),
+        ()=>console.log('success')  
       )
-      navigation.navigate('SignedIn');
     }
   }
 

@@ -60,15 +60,13 @@ export default class SignUp extends Component {
     this.setState({ errors, loading: false });
 
     if (!errors.length) {
-      MatrixLoginClient.login(
+      MatrixLoginClient.register(
         homeserverUri,
         identityUri,
         email,
         password,
-        (networkError)=>console.log(networkError),
-        (matrixError)=>console.log(matrixError),
-        (unexpectedError)=>console.log(unexpectedError),
-        (res)=>this.setState({loginResult:res})
+        (err)=>console.log(err),
+        ()=>console.log('success')  
       )
       Alert.alert(
         'Success!',
