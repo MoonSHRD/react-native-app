@@ -22,6 +22,7 @@ export default class Login extends Component {
     password: null,
     errors: [],
     loading: false,
+    loginResult: {},
   }
 
   validateEmail(email) {
@@ -38,7 +39,7 @@ export default class Login extends Component {
     const { email, password } = this.state;
     const errors = [];
     const homeserverUri = 'https://matrix.moonshard.tech';
-    const identityUri = 'https://matrix.moonshard.tech'
+    const identityUri = 'https://matrix.moonshard.tech';
 
     Keyboard.dismiss();
     this.setState({ loading: true });
@@ -64,10 +65,18 @@ export default class Login extends Component {
         identityUri,
         email,
         password,
-        (networkError)=>console.log(networkError),
-        (matrixError)=>console.log(matrixError),
-        (unexpectedError)=>console.log(unexpectedError),
-        (res)=>console.log(res)
+        (networkError) => {
+          console.log(networkError)
+        },
+        (matrixError) => {
+          console.log(matrixError)
+        },
+        (unexpectedError) => {
+          console.log(unexpectedError)
+        },
+        (data) => {
+          this.setState({loginResult: data})
+        }
       )
       navigation.navigate('SignedIn');
     }

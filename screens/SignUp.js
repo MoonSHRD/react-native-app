@@ -3,6 +3,8 @@ import { View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, Keybo
 
 import { Button, Block, Input, Text } from '../components';
 import { theme } from '../constants';
+import MatrixLoginClient from '../native/MatrixLoginClient';
+
 import Logo from '../assets/images/logo-small.svg';
 import TextLogo from '../assets/images/text-logo.svg';
 import Twitter from '../assets/icons/twitter.svg';
@@ -20,6 +22,7 @@ export default class SignUp extends Component {
     password: null,
     errors: [],
     loading: false,
+    loginResult: {}
   }
 
   validateEmail(email) {
@@ -65,7 +68,7 @@ export default class SignUp extends Component {
         (networkError)=>console.log(networkError),
         (matrixError)=>console.log(matrixError),
         (unexpectedError)=>console.log(unexpectedError),
-        (res)=>console.log(res)
+        (res)=>this.setState({loginResult:res})
       )
       Alert.alert(
         'Success!',

@@ -3,12 +3,15 @@ package com.moonshrd.model.realm;
 import io.realm.RealmObject;
 
 public class CredentialsModel extends RealmObject {
-    private String userId;
-    private String homeServer;
-    private String accessToken;
-    private String refreshToken;
-    private String deviceId;
-    private String identityServer;
+     private String userId;
+     private String homeServer;
+     private String accessToken;
+     private String refreshToken;
+     private String deviceId;
+     private String identityServer;
+
+    public CredentialsModel() {
+    }
 
     public CredentialsModel(String userId, String homeServer, String accessToken, String refreshToken, String deviceId, String identityServer) {
         this.userId = userId;
