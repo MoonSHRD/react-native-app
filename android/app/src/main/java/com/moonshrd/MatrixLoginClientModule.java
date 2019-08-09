@@ -109,7 +109,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
     }
 
     private void saveCredentials(Credentials creds) {
-        Globals.credsRealm.executeTransactionAsync(realm -> {
+        MainApplication.getCredsRealmInstance().executeTransaction(realm -> {
             realm.delete(CredentialsModel.class); // probably we may use multi-account feature, so FIXME
             realm.copyToRealm(new CredentialsModel(creds.userId, creds.wellKnown.homeServer.baseURL,
                     creds.accessToken, creds.refreshToken, creds.deviceId, creds.wellKnown.identityServer.baseURL));
@@ -124,7 +124,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public boolean onAppStart() {
-        CredentialsModel credsModel = Globals.credsRealm.where(CredentialsModel.class).findFirst();
+        CredentialsModel credsModel = MainApplication.getCredsRealmInstance().where(CredentialsModel.class).findFirst();
         if(credsModel != null) {
             Credentials creds = createCredentialsFromRealmModel(credsModel);
             HomeServerConnectionConfig hsConfig = new HomeServerConnectionConfig.Builder()
@@ -141,7 +141,9 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void logout(Callback onUnexpectedError, Callback onSuccess) {
-        Globals.credsRealm.delete(CredentialsModel.class);
+        MainApplication.getCredsRealmInstance().executeTransactionAsync(realm -> {
+            realm.delete(CredentialsModel.class);
+        });
         Globals.currMatrixSession.clear(getReactApplicationContext(), new ApiCallback<Void>() {
             @Override
             public void onNetworkError(Exception e) {

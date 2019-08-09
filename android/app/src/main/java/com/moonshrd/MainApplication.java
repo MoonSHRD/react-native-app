@@ -54,14 +54,15 @@ public class MainApplication extends Application implements ReactApplication {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
     Realm.init(this.getApplicationContext());
+  }
 
+  public static Realm getCredsRealmInstance() {
     RealmConfiguration realmCredsConfig = new RealmConfiguration.Builder()
             .name("realm.creds")
             //.encryptionKey() // TODO: DB encryption
             .schemaVersion(0)
             //.migration(new MyMigration()) // TODO: DB migration
             .build();
-
-    Globals.credsRealm = Realm.getInstance(realmCredsConfig);
+    return Realm.getInstance(realmCredsConfig);
   }
 }
