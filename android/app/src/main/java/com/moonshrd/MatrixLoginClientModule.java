@@ -39,7 +39,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void register(String homeserverUri, String identityUri, String email, String password,
-                         Callback onUnexpectedError, Callback onSuccess) {
+                         Callback onNetworkError, Callback onMatrixError, Callback onUnexpectedError, Callback onSuccess) {
         HomeServerConnectionConfig hsConfig = new HomeServerConnectionConfig.Builder()
                 .withHomeServerUri(Uri.parse(homeserverUri))
                 .withIdentityServerUri(Uri.parse(identityUri))
@@ -59,11 +59,13 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
             @Override
             public void onNetworkError(Exception e) {
                 Log.e(LOG_TAG, "# onNetworkError: " + e.getMessage());
+                onNetworkError.invoke(e.getMessage());
             }
 
             @Override
             public void onMatrixError(MatrixError e) {
                 Log.e(LOG_TAG, "# onMatrixError: " + e.getMessage());
+                onMatrixError.invoke(e.getMessage());
             }
 
             @Override
@@ -85,7 +87,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void login(String homeserverUri, String identityUri, String email, String password,
-                      Callback onUnexpectedError, Callback onSuccess) {
+                      Callback onNetworkError, Callback onMatrixError, Callback onUnexpectedError, Callback onSuccess) {
         HomeServerConnectionConfig hsConfig = new HomeServerConnectionConfig.Builder()
                 .withHomeServerUri(Uri.parse(homeserverUri))
                 .withIdentityServerUri(Uri.parse(identityUri))
@@ -95,11 +97,13 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
             @Override
             public void onNetworkError(Exception e) {
                 Log.e(LOG_TAG, "# onNetworkError: " + e.getMessage());
+                onNetworkError.invoke(e.getMessage());
             }
 
             @Override
             public void onMatrixError(MatrixError e) {
                 Log.e(LOG_TAG, "# onMatrixError: " + e.getMessage());
+                onMatrixError.invoke(e.getMessage());
             }
 
             @Override
@@ -151,17 +155,19 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void logout(Callback onUnexpectedError, Callback onSuccess) {
+    public void logout(Callback onNetworkError, Callback onMatrixError, Callback onUnexpectedError, Callback onSuccess) {
         MainApplication.getCredsRealmInstance().executeTransactionAsync(realm -> {
             realm.delete(CredentialsModel.class);
         });
         Globals.currMatrixSession.clear(getReactApplicationContext(), new ApiCallback<Void>() {
             @Override
             public void onNetworkError(Exception e) {
+                onNetworkError.invoke(e.getMessage());
             }
 
             @Override
             public void onMatrixError(MatrixError e) {
+                onMatrixError.invoke(e.getMessage());
             }
 
             @Override
