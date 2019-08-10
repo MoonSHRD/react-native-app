@@ -59,15 +59,32 @@ export default class Login extends Component {
 
     this.setState({ errors, loading: false });
 
+    var error = null
+    
     if (!errors.length) {
       MatrixLoginClient.login(
         homeserverUri,
         identityUri,
         email,
         password,
-        (err)=>console.log(err),
+        (err) => { error = err },
+        (err) => { error = err },
+        (err) => { error = err },
         ()=>console.log('success')  
       )
+    }
+    
+    if (error != null) {
+      Alert.alert(
+          'Error!',
+          'Error occured: ' + error,
+          [
+          {
+            text: 'OK', onPress: () => {}
+          }
+          ],
+          { cancelable: false }
+      );
     }
   }
 

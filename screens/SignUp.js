@@ -59,27 +59,45 @@ export default class SignUp extends Component {
 
     this.setState({ errors, loading: false });
 
+    var error = null
+    
     if (!errors.length) {
       MatrixLoginClient.register(
         homeserverUri,
         identityUri,
         email,
         password,
-        (err)=>console.log(err),
-        ()=>console.log('success')  
+        (err) => { error = err },
+        (err) => { error = err },
+        (err) => { error = err },
+        ()=>console.log('success')
       )
-      Alert.alert(
-        'Success!',
-        'Your account has been created',
-        [
-          {
-            text: 'Continue', onPress: () => {
-              navigation.navigate('SignedIn');
+      
+      if (error == null) {
+        Alert.alert(
+            'Success!',
+            'Your account has been created',
+            [
+            {
+                text: 'Continue', onPress: () => {
+                navigation.navigate('SignedIn');
+                }
             }
-          }
-        ],
-        { cancelable: false }
-      )
+            ],
+            { cancelable: false }
+        )
+      } else {
+            Alert.alert(
+            'Error!',
+            'Error occured: ' + error,
+            [
+            {
+                text: 'OK', onPress: () => {}
+            }
+            ],
+            { cancelable: false }
+        )
+      }
     }
   }
 
