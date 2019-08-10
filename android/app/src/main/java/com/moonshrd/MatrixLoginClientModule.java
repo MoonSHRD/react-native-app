@@ -12,6 +12,7 @@ import com.moonshrd.model.realm.CredentialsModel;
 import org.matrix.androidsdk.HomeServerConnectionConfig;
 import org.matrix.androidsdk.MXDataHandler;
 import org.matrix.androidsdk.MXSession;
+import org.matrix.androidsdk.core.Log;
 import org.matrix.androidsdk.core.callback.ApiCallback;
 import org.matrix.androidsdk.core.model.MatrixError;
 import org.matrix.androidsdk.data.store.MXFileStore;
@@ -24,6 +25,8 @@ import org.matrix.androidsdk.rest.model.login.RegistrationParams;
 import javax.annotation.Nonnull;
 
 public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
+    private static String LOG_TAG = MatrixLoginClientModule.class.getSimpleName();
+
     public MatrixLoginClientModule(@Nonnull ReactApplicationContext reactContext) {
         super(reactContext);
     }
@@ -55,14 +58,17 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
         new LoginRestClient(hsConfig).register(params, new ApiCallback<Credentials>() {
             @Override
             public void onNetworkError(Exception e) {
+                Log.e(LOG_TAG, "# onNetworkError: " + e.getMessage());
             }
 
             @Override
             public void onMatrixError(MatrixError e) {
+                Log.e(LOG_TAG, "# onMatrixError: " + e.getMessage());
             }
 
             @Override
             public void onUnexpectedError(Exception e) {
+                Log.e(LOG_TAG, "# onUnexpectedError: " + e.getMessage());
                 onUnexpectedError.invoke(e.getMessage());
             }
 
@@ -72,6 +78,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
                 saveCredentials(info);
                 Globals.currMatrixCreds = info;
                 Globals.currMatrixSession = createSession(hsConfig, info);
+                Log.i(LOG_TAG, "# onSuccess: Successful login!");
             }
         });
     }
@@ -87,14 +94,17 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
         new LoginRestClient(hsConfig).loginWith3Pid("email", email, password, new ApiCallback<Credentials>() {
             @Override
             public void onNetworkError(Exception e) {
+                Log.e(LOG_TAG, "# onNetworkError: " + e.getMessage());
             }
 
             @Override
             public void onMatrixError(MatrixError e) {
+                Log.e(LOG_TAG, "# onMatrixError: " + e.getMessage());
             }
 
             @Override
             public void onUnexpectedError(Exception e) {
+                Log.e(LOG_TAG, "# onUnexpectedError: " + e.getMessage());
                 onUnexpectedError.invoke(e.getMessage());
             }
 
@@ -104,6 +114,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
                 saveCredentials(info);
                 Globals.currMatrixCreds = info;
                 Globals.currMatrixSession = createSession(hsConfig, info);
+                Log.i(LOG_TAG, "# onSuccess: Successful login!");
             }
         });
     }
