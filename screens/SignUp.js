@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
+import { Platform, View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
 
 import { Button, Block, Input, Text } from '../components';
 import { theme } from '../constants';
@@ -62,16 +62,18 @@ export default class SignUp extends Component {
     var error = null
     
     if (!errors.length) {
-      MatrixLoginClient.register(
-        homeserverUri,
-        identityUri,
-        email,
-        password,
-        (err) => { error = err },
-        (err) => { error = err },
-        (err) => { error = err },
-        ()=>console.log('success')
-      )
+      if (Platform.OS === 'android') {
+        MatrixLoginClient.register(
+          homeserverUri,
+          identityUri,
+          email,
+          password,
+          (err) => { error = err },
+          (err) => { error = err },
+          (err) => { error = err },
+          ()=>console.log('success')
+        )  
+      }
       
       if (error == null) {
         Alert.alert(

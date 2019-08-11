@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
+import { Platform, View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
 import MatrixLoginClient from '../native/MatrixLoginClient';
 
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -24,10 +24,14 @@ export default class Settings extends Component {
   }
 
   handleSignOut = () => {
-    MatrixLoginClient.logout(
-      (err)=>console.log(err),
-      ()=>console.log('success')
-    )
+    if (Platform.OS === 'android') {
+      MatrixLoginClient.logout(
+        (err) => { error = err },
+        (err) => { error = err },
+        (err)=>console.log(err),
+        ()=>console.log('success')
+      )  
+    }
   }
 
   render() {
