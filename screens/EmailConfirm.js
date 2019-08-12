@@ -8,13 +8,12 @@ import TextLogo from '../assets/images/text-logo.svg';
 
 const { width, height } = Dimensions.get('window');
 
-export default class ResetPassword extends Component {
+export default class EmailConfirm extends Component {
   static navigationOptions = {
     header: null
   }
   state = {
     email: null,
-    password: null,
     errors: [],
     loading: false,
   }
@@ -34,20 +33,21 @@ export default class ResetPassword extends Component {
             <Logo width={width / 6.7} height={height / 6.7} />
             <TextLogo style={styles.textLogo}/>
           </View>
-          <Text headline semibold center>Password recovery</Text>
+          <Text headline semibold center>Confirm your email</Text>
+          <Text gray footnote center style={{marginTop: 14}}>We just need your email address to confirm your registration</Text>
           <Block middle style={styles.formContainer}>
-          <Input
-            secure
-            error={hasErrors('password')}
-            style={[styles.input, hasErrors('password')]}
-            defaultValue={this.state.password}
-            placeholder={'Enter password'}
-            onChangeText={text => this.setState({ password: text })}
+            <Input
+              email
+              error={hasErrors('email')}
+              style={[styles.input, hasErrors('email')]}
+              defaultValue={this.state.email}
+              placeholder={'Enter your email'}
+              onChangeText={text => this.setState({ email: text })}
             />
-            <Button gradient style={styles.confirmButton} onPress={() => navigation.navigate('Login')}>
+            <Button gradient style={styles.confirmButton} onPress={() => navigation.navigate('ResetPassword')}>
               {loading ?
                 <ActivityIndicator size="small" color="white" /> :
-                <Text headline bold white center>Reset Password</Text>
+                <Text headline bold white center>Confirm</Text>
               }
             </Button>
           </Block>

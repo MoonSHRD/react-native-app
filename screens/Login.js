@@ -96,7 +96,7 @@ export default class Login extends Component {
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
 
     return (
-      <KeyboardAvoidingView style={styles.signup} behavior="padding">
+      <KeyboardAvoidingView style={styles.login} behavior="padding">
         <ScrollView
           showsVerticalScrollIndicator={false}
         >
@@ -155,7 +155,7 @@ export default class Login extends Component {
 }
 
 const styles = StyleSheet.create({
-  signup: {
+  login: {
     flex: 1,
     justifyContent: 'center',
     backgroundColor: theme.colors.blueBackground,

@@ -40,7 +40,7 @@ export default class Settings extends Component {
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
 
     return (
-      <KeyboardAvoidingView style={styles.signup} behavior="padding">
+      <KeyboardAvoidingView behavior="padding">
         <ScrollView
           showsVerticalScrollIndicator={false}
         >

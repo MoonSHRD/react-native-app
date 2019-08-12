@@ -8,11 +8,14 @@ import SignUp from "../screens/SignUp";
 import Login from "../screens/Login";
 import ForgotPassword from "../screens/ForgotPassword";
 import ResetPassword from "../screens/ResetPassword";
+import EmailConfirm from '../screens/EmailConfirm';
 
 import ContactList from "../screens/ContactList";
 import ChatList from "../screens/ChatList";
 import Settings from "../screens/Settings";
 import MatchesList from "../screens/MatchesList";
+import NewChat from "../screens/NewChat";
+import NewGroupChat from "../screens/NewGroupChat"
 
 const headerStyle = {
   // marginTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
@@ -45,6 +48,13 @@ export const SignedOut = createStackNavigator({
     screen: ForgotPassword,
     navigationOptions: {
       title: "Forgot Password",
+      headerStyle
+    }
+  },
+  EmailConfirm: {
+    screen: EmailConfirm,
+    navigationOptions: {
+      title: "Confirm Email",
       headerStyle
     }
   },
@@ -87,6 +97,22 @@ export const SignedIn = createBottomTabNavigator({
                 headerStyle,
                 headerTitleStyle: theme.headerTitle,
             }
+        },
+        NewChat: {
+          screen: NewChat,
+          navigationOptions: {
+              headerTitle: 'New Chat',
+              headerStyle,
+              headerTitleStyle: theme.headerTitle,
+          }
+        },
+        NewGroupChat: {
+          screen: NewGroupChat,
+          navigationOptions: {
+              headerTitle: 'New Group Chat',
+              headerStyle,
+              headerTitleStyle: theme.headerTitle,
+          }
         }
     }),
     navigationOptions: {

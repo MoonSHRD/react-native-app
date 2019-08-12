@@ -25,7 +25,7 @@ export default class ForgotPassword extends Component {
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
 
     return (
-      <KeyboardAvoidingView style={styles.signup} behavior="padding">
+      <KeyboardAvoidingView style={styles.container} behavior="padding">
         <ScrollView
           showsVerticalScrollIndicator={false}
         >
@@ -45,7 +45,7 @@ export default class ForgotPassword extends Component {
               placeholder={'Enter your email'}
               onChangeText={text => this.setState({ email: text })}
             />
-            <Button gradient style={styles.confirmButton} onPress={() => navigation.navigate('ResetPassword')}>
+            <Button gradient style={styles.confirmButton} onPress={() => navigation.navigate('EmailConfirm')}>
               {loading ?
                 <ActivityIndicator size="small" color="white" /> :
                 <Text headline bold white center>Reset Password</Text>
@@ -60,7 +60,7 @@ export default class ForgotPassword extends Component {
 }
 
 const styles = StyleSheet.create({
-  signup: {
+  container: {
     flex: 1,
     justifyContent: 'center',
     backgroundColor: theme.colors.blueBackground,

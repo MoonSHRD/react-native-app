@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { Platform, View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
+import { Platform, View, Dimensions, Image, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
 
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Button, Block, Input, Text } from '../components';
-import { SearchBar, ListItem, ThemeConsumer } from 'react-native-elements';
+import { SearchBar, ListItem, ThemeConsumer, CheckBox } from 'react-native-elements';
 import { theme } from '../constants';
 
 const { width, height } = Dimensions.get('window');
@@ -13,13 +13,17 @@ export default class ContactList extends Component {
   static navigationOptions = ({ navigation }) => {
     return {
       headerRight: (
-        <Icon
-          name="ios-person" 
-          size={24} 
-          color={theme.colors.blue}
-          onPress={() => alert('This is a button!')}
-          style={{paddingVertical: 10, paddingHorizontal: 20,}}
-        />
+        <Text
+            onPress={() => alert('This is a button!')}
+            style={{
+                paddingVertical: 10, 
+                paddingHorizontal: 20, 
+                color: theme.colors.blue,
+                fontSize: theme.sizes.subhead,
+            }}  
+        >
+            Create
+        </Text>
       ),
     };
   }
@@ -31,60 +35,81 @@ export default class ContactList extends Component {
       {
         name: 'Amy Farha',
         avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg',
-        subtitle: 'Online'
+        subtitle: 'Online',
+        isSelected: false,
       },
       {
         name: 'Chris Jackson',
         avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Last seen June 12th 22:30'
+        subtitle: 'Last seen June 12th 22:30',
+        isSelected: true,
       },
       {
         name: 'Secret Friend',
         avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Online'
+        subtitle: 'Online',
+        isSelected: false,
       },
       {
         name: 'Windrunner',
         avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Last seen June 12th 22:30'
+        subtitle: 'Last seen June 12th 22:30',
+        isSelected: false,
       },
       {
         name: 'Secret Friend',
         avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Online'
+        subtitle: 'Online',
+        isSelected: false,
       },
       {
         name: 'Secret Friend',
         avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Online'
+        subtitle: 'Online',
+        isSelected: false,
       },
       {
         name: 'Windrunner',
         avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Last seen June 12th 22:30'
+        subtitle: 'Last seen June 12th 22:30',
+        isSelected: false,
       },
       {
         name: 'Secret Friend',
         avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Online'
+        subtitle: 'Online',
+        isSelected: false,
       },
       {
         name: 'Secret Friend',
         avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Online'
+        subtitle: 'Online',
+        isSelected: false,
       },
       {
         name: 'Windrunner',
         avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Last seen June 12th 22:30'
+        subtitle: 'Last seen June 12th 22:30',
+        isSelected: false,
       },
       {
         name: 'Secret Friend',
         avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Online'
+        subtitle: 'Online',
+        isSelected: false,
       },
-    ]
+    ],
   };
+
+    handleChange = (e) => {
+      this.setState(prevState => ({
+          contactList: {
+              ...prevState.contactList,
+              [prevState.contactList[1].name]: e.target.value,
+          },
+      }));
+  };
+  
 
   onContentSizeChange = (contentWidth, contentHeight) => {
     this.setState({ screenHeight: contentHeight });
@@ -127,21 +152,6 @@ export default class ContactList extends Component {
           />
         }
         <View>
-          <ListItem 
-            key="newcontact"
-            title="Add contact"
-            titleStyle={styles.title}
-            leftIcon={{name:'person-add'}}
-            containerStyle={styles.listItem}
-          />
-          <ListItem 
-            key="findmatches"
-            title="Find matches on this place"
-            titleStyle={styles.title}
-            leftIcon={{name:'near-me'}}
-            containerStyle={styles.listItem}
-            onPress={() => navigation.navigate('MatchesList')}
-          />
           {
             contactList.map((l, i) => (
               <View style={styles.viewList}>
@@ -153,6 +163,31 @@ export default class ContactList extends Component {
                   subtitle={l.subtitle}
                   subtitleStyle={styles.subtitle}
                   containerStyle={styles.list}
+                  name={l}
+                  value={l.isSelected}
+                  leftIcon={
+                      l.isSelected
+                      ?
+                      <Icon
+                        name="ios-checkmark-circle" 
+                        size={24} 
+                        color={theme.colors.blue}
+                      />
+                      :
+                      <Icon
+                        name="ios-radio-button-off" 
+                        size={24} 
+                        color={theme.colors.lightGray}
+                      />
+                  }
+                  onPress={() => {
+                    this.setState(prevState => {
+                      const newContactList = [...prevState.contactList];
+                      newContactList[i].isSelected = !newContactList[i].isSelected;
+                      return {contactList: newContactList};
+                  })
+                  
+                  }}
                 />
                 </View>
             ))

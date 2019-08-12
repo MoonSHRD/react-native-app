@@ -1,28 +1,89 @@
 import React, { Component } from 'react';
 import { Platform, View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
 
-import Icon from 'react-native-vector-icons/Ionicons';
-import { SearchBar, ListItem } from 'react-native-elements';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Button, Block, Input, Text } from '../components';
+import { SearchBar, ListItem, ThemeConsumer } from 'react-native-elements';
 import { theme } from '../constants';
 
 const { width, height } = Dimensions.get('window');
 
-export default class MatchesList extends Component {
-  static navigationOptions = {
-    headerRight: (
-      <Icon
-        name="ios-person" 
-        size={24} 
-        color={theme.colors.blue}
-        onPress={() => alert('This is a button!')}
-        style={{paddingVertical: 10, paddingHorizontal: 20,}}
-      />
-    ),
-  };
-  
+export default class ContactList extends Component {
+
+  static navigationOptions = ({ navigation }) => {
+    return {
+      headerRight: (
+        <Icon
+          name="ios-person" 
+          size={24} 
+          color={theme.colors.blue}
+          onPress={() => alert('This is a button!')}
+          style={{paddingVertical: 10, paddingHorizontal: 20,}}
+        />
+      ),
+    };
+  }
+
   state = {
     search: '',
     screenHeight: height,
+    contactList: [
+      {
+        name: 'Amy Farha',
+        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg',
+        subtitle: 'Online',
+      },
+      {
+        name: 'Chris Jackson',
+        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
+        subtitle: 'Last seen June 12th 22:30'
+      },
+      {
+        name: 'Secret Friend',
+        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
+        subtitle: 'Online'
+      },
+      {
+        name: 'Windrunner',
+        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
+        subtitle: 'Last seen June 12th 22:30'
+      },
+      {
+        name: 'Secret Friend',
+        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
+        subtitle: 'Online'
+      },
+      {
+        name: 'Secret Friend',
+        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
+        subtitle: 'Online'
+      },
+      {
+        name: 'Windrunner',
+        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
+        subtitle: 'Last seen June 12th 22:30'
+      },
+      {
+        name: 'Secret Friend',
+        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
+        subtitle: 'Online'
+      },
+      {
+        name: 'Secret Friend',
+        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
+        subtitle: 'Online'
+      },
+      {
+        name: 'Windrunner',
+        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
+        subtitle: 'Last seen June 12th 22:30'
+      },
+      {
+        name: 'Secret Friend',
+        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
+        subtitle: 'Online'
+      },
+    ]
   };
 
   onContentSizeChange = (contentWidth, contentHeight) => {
@@ -33,41 +94,11 @@ export default class MatchesList extends Component {
     this.setState({ search });
   };
   
-
   render() {
     const { navigation } = this.props;
-    const { loading, errors, search } = this.state;
+    const { loading, errors, search, contactList } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
     const scrollEnabled = this.state.screenHeight > height;
-
-    const list = [
-      {
-        name: 'Amy Farha',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg',
-        mathes: ['Bikes', 'Marvel', 'DC', 'Comix', 'Buzrum']
-      },
-      {
-        name: 'Chris Jackson',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        mathes: ['Bikes', 'Marvel', 'DC', 'Comix', 'Buzrum']
-      },
-      {
-        name: 'Secret Friend',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        mathes: ['Bikes', 'Marvel', 'DC', 'Comix', 'Buzrum']
-      },
-      {
-        name: 'Windrunner',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        mathes: ['Bikes', 'Marvel', 'DC', 'Comix', 'Buzrum']
-      },
-      {
-        name: 'Secret Friend',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        mathes: ['Bikes', 'Marvel', 'DC', 'Comix', 'Buzrum']
-      },
-
-    ] 
 
     return (
       <KeyboardAvoidingView behavior="padding">
@@ -80,8 +111,8 @@ export default class MatchesList extends Component {
           ? 
           <SearchBar 
             placeholder="Search"
-            platform="ios"
             onChangeText={this.updateSearch}
+            platform="ios"
             value={search}
             containerStyle={styles.searchBar}
             inputContainerStyle={styles.searchInputBar}
@@ -96,19 +127,27 @@ export default class MatchesList extends Component {
           />
         }
         <View>
+          <ListItem 
+            key="newgroupchat"
+            title="Create group chat"
+            titleStyle={styles.title}
+            leftIcon={{name:'group-add'}}
+            containerStyle={styles.listItem}
+            onPress={()=> navigation.navigate('NewGroupChat')}
+          />
           {
-            list.map((l, i) => (
+            contactList.map((l, i) => (
               <View style={styles.viewList}>
                 <ListItem
                   key={i}
                   leftAvatar={{ source: { uri: l.avatar_url } }}
                   title={l.name}
                   titleStyle={styles.title}
-                  subtitle={l.mathes.toString()}
+                  subtitle={l.subtitle}
                   subtitleStyle={styles.subtitle}
                   containerStyle={styles.list}
                 />
-              </View>
+                </View>
             ))
           }
         </View>
@@ -134,6 +173,14 @@ const styles = StyleSheet.create({
   searchInputText: {
     fontSize: theme.sizes.caption,
     color: theme.colors.gray
+  },
+  listItem: {
+    width: width - 16,
+    marginHorizontal: 8,
+    borderBottomColor: theme.colors.lightGray,
+    borderBottomWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   viewList: {
     width: width - 16,
