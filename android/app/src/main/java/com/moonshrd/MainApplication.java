@@ -12,8 +12,12 @@ import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
 
+import org.matrix.androidsdk.MXSession;
+
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -64,5 +68,65 @@ public class MainApplication extends Application implements ReactApplication {
             //.migration(new MyMigration()) // TODO: DB migration
             .build();
     return Realm.getInstance(realmCredsConfig);
+  }
+
+  //==============================================================================================================
+  // Syncing mxSessions
+  //==============================================================================================================
+
+  /**
+   * syncing sessions
+   */
+  private static final Set<MXSession> mSyncingSessions = new HashSet<>();
+
+  /**
+   * Add a session in the syncing sessions list
+   *
+   * @param session the session
+   */
+  public static void addSyncingSession(MXSession session) {
+    synchronized (mSyncingSessions) {
+      mSyncingSessions.add(session);
+    }
+  }
+
+  /**
+   * Remove a session in the syncing sessions list
+   *
+   * @param session the session
+   */
+  public static void removeSyncingSession(MXSession session) {
+    if (null != session) {
+      synchronized (mSyncingSessions) {
+        mSyncingSessions.remove(session);
+      }
+    }
+  }
+
+  /**
+   * Clear syncing sessions list
+   */
+  public static void clearSyncingSessions() {
+    synchronized (mSyncingSessions) {
+      mSyncingSessions.clear();
+    }
+  }
+
+  /**
+   * Tell if a session is syncing
+   *
+   * @param session the session
+   * @return true if the session is syncing
+   */
+  public static boolean isSessionSyncing(MXSession session) {
+    boolean isSyncing = false;
+
+    if (null != session) {
+      synchronized (mSyncingSessions) {
+        isSyncing = mSyncingSessions.contains(session);
+      }
+    }
+
+    return isSyncing;
   }
 }

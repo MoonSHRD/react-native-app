@@ -20,7 +20,11 @@ import org.matrix.androidsdk.rest.client.LoginRestClient;
 import org.matrix.androidsdk.rest.model.WellKnown;
 import org.matrix.androidsdk.rest.model.WellKnownBaseConfig;
 import org.matrix.androidsdk.rest.model.login.Credentials;
+import org.matrix.androidsdk.rest.model.login.LocalizedFlowDataLoginTerms;
 import org.matrix.androidsdk.rest.model.login.RegistrationParams;
+import org.matrix.androidsdk.rest.model.pid.ThreePid;
+
+import java.util.List;
 
 import javax.annotation.Nonnull;
 
@@ -38,96 +42,82 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void register(String homeserverUri, String identityUri, String email, String password,
-                         Callback onNetworkError, Callback onMatrixError, Callback onUnexpectedError, Callback onSuccess) {
+    public void register(String homeserverUri, String identityUri, String email, String password) {
         HomeServerConnectionConfig hsConfig = new HomeServerConnectionConfig.Builder()
                 .withHomeServerUri(Uri.parse(homeserverUri))
                 .withIdentityServerUri(Uri.parse(identityUri))
                 .build();
 
-        RegistrationParams params = new RegistrationParams();
-
-        AuthParamsLPWith3PID authParams = new AuthParamsLPWith3PID();
-        authParams.identifier.medium = "email";
-        authParams.identifier.address = email;
-
-        params.auth = authParams;
-        params.bind_email = true;
-        params.password = password;
-
-        new LoginRestClient(hsConfig).register(params, new ApiCallback<Credentials>() {
+        RegistrationManager registrationManager = new RegistrationManager(null);
+        registrationManager.setAccountData(null, password);
+        registrationManager.addEmailThreePid(new ThreePid(email, ThreePid.MEDIUM_EMAIL));
+        registrationManager.attemptRegistration(getReactApplicationContext(), new RegistrationManager.RegistrationListener() {
             @Override
-            public void onNetworkError(Exception e) {
-                Log.e(LOG_TAG, "# onNetworkError: " + e.getMessage());
-                onNetworkError.invoke(e.getMessage());
+            public void onRegistrationSuccess(String warningMessage) {
+
             }
 
             @Override
-            public void onMatrixError(MatrixError e) {
-                Log.e(LOG_TAG, "# onMatrixError: " + e.getMessage());
-                onMatrixError.invoke(e.getMessage());
+            public void onRegistrationFailed(String message) {
+
             }
 
             @Override
-            public void onUnexpectedError(Exception e) {
-                Log.e(LOG_TAG, "# onUnexpectedError: " + e.getMessage());
-                onUnexpectedError.invoke(e.getMessage());
+            public void onWaitingEmailValidation() {
+
             }
 
             @Override
-            public void onSuccess(Credentials info) {
-                onSuccess.invoke();
-                saveCredentials(info);
-                Globals.currMatrixCreds = info;
-                Globals.currMatrixSession = createSession(hsConfig, info);
-                Log.i(LOG_TAG, "# onSuccess: Successful login!");
+            public void onWaitingCaptcha(String publicKey) {
+
+            }
+
+            @Override
+            public void onWaitingTerms(List<LocalizedFlowDataLoginTerms> localizedFlowDataLoginTerms) {
+
+            }
+
+            @Override
+            public void onThreePidRequestFailed(String message) {
+
+            }
+
+            @Override
+            public void onResourceLimitExceeded(MatrixError e) {
+
             }
         });
+
     }
 
     @ReactMethod
-    public void login(String homeserverUri, String identityUri, String email, String password,
-                      Callback onNetworkError, Callback onMatrixError, Callback onUnexpectedError, Callback onSuccess) {
+    public void login(String homeserverUri, String identityUri, String email, String password) {
         HomeServerConnectionConfig hsConfig = new HomeServerConnectionConfig.Builder()
                 .withHomeServerUri(Uri.parse(homeserverUri))
                 .withIdentityServerUri(Uri.parse(identityUri))
                 .build();
 
-        new LoginRestClient(hsConfig).loginWith3Pid("email", email, password, new ApiCallback<Credentials>() {
+        LoginHandler loginHandler = new LoginHandler();
+        loginHandler.login(getReactApplicationContext(), hsConfig, email, "", "", password, new ApiCallback<Void>() {
             @Override
             public void onNetworkError(Exception e) {
-                Log.e(LOG_TAG, "# onNetworkError: " + e.getMessage());
-                onNetworkError.invoke(e.getMessage());
+
             }
 
             @Override
             public void onMatrixError(MatrixError e) {
-                Log.e(LOG_TAG, "# onMatrixError: " + e.getMessage());
-                onMatrixError.invoke(e.getMessage());
+
             }
 
             @Override
             public void onUnexpectedError(Exception e) {
-                Log.e(LOG_TAG, "# onUnexpectedError: " + e.getMessage());
-                onUnexpectedError.invoke(e.getMessage());
+
             }
 
             @Override
-            public void onSuccess(Credentials info) {
-                onSuccess.invoke();
-                saveCredentials(info);
-                Globals.currMatrixCreds = info;
-                Globals.currMatrixSession = createSession(hsConfig, info);
-                Log.i(LOG_TAG, "# onSuccess: Successful login!");
-            }
-        });
-    }
+            public void onSuccess(Void info) {
 
-    private void saveCredentials(Credentials creds) {
-        MainApplication.getCredsRealmInstance().executeTransaction(realm -> {
-            realm.delete(CredentialsModel.class); // probably we may use multi-account feature, so FIXME
-            realm.copyToRealm(new CredentialsModel(creds.userId, creds.wellKnown.homeServer.baseURL,
-                    creds.accessToken, creds.refreshToken, creds.deviceId, creds.wellKnown.identityServer.baseURL));
+            }
         });
     }
 
@@ -139,66 +129,11 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public boolean onAppStart() {
-        CredentialsModel credsModel = MainApplication.getCredsRealmInstance().where(CredentialsModel.class).findFirst();
-        if(credsModel != null) {
-            Credentials creds = createCredentialsFromRealmModel(credsModel);
-            HomeServerConnectionConfig hsConfig = new HomeServerConnectionConfig.Builder()
-                    .withHomeServerUri(Uri.parse(creds.wellKnown.homeServer.baseURL))
-                    .withIdentityServerUri(Uri.parse(creds.wellKnown.identityServer.baseURL))
-                    .build();
-
-            Globals.currMatrixCreds = creds;
-            Globals.currMatrixSession = createSession(hsConfig, creds);
-            return true;
-        }
-        return false;
+        return Matrix.getInstance(getReactApplicationContext()).getLoginStorage().getCredentialsList().size() != 0;
     }
 
     @ReactMethod
-    public void logout(Callback onNetworkError, Callback onMatrixError, Callback onUnexpectedError, Callback onSuccess) {
-        MainApplication.getCredsRealmInstance().executeTransactionAsync(realm -> {
-            realm.delete(CredentialsModel.class);
-        });
-        Globals.currMatrixSession.clear(getReactApplicationContext(), new ApiCallback<Void>() {
-            @Override
-            public void onNetworkError(Exception e) {
-                onNetworkError.invoke(e.getMessage());
-            }
-
-            @Override
-            public void onMatrixError(MatrixError e) {
-                onMatrixError.invoke(e.getMessage());
-            }
-
-            @Override
-            public void onUnexpectedError(Exception e) {
-                onUnexpectedError.invoke(e.getMessage());
-            }
-
-            @Override
-            public void onSuccess(Void info) {
-                onSuccess.invoke();
-            }
-        });
-        Globals.currMatrixCreds = null;
-    }
-
-    private Credentials createCredentialsFromRealmModel(CredentialsModel model) {
-        Credentials creds = new Credentials();
-        creds.accessToken = model.getAccessToken();
-        creds.deviceId = model.getDeviceId();
-        creds.refreshToken = model.getRefreshToken();
-        creds.userId = model.getUserId();
-
-        WellKnown wk = new WellKnown();
-        wk.homeServer = new WellKnownBaseConfig();
-        wk.homeServer.baseURL = model.getHomeServer();
-
-        wk.identityServer = new WellKnownBaseConfig();
-        wk.identityServer.baseURL = model.getIdentityServer();
-
-        creds.wellKnown = wk;
-
-        return creds;
+    public void logout() {
+        Matrix.getInstance(getReactApplicationContext()).clearSessions(getReactApplicationContext(), true, null);
     }
 }
