@@ -8,16 +8,18 @@ import { theme } from '../constants';
 const { width, height } = Dimensions.get('window');
 
 export default class MatchesList extends Component {
-  static navigationOptions = {
-    headerRight: (
-      <Icon
-        name="ios-person" 
-        size={24} 
-        color={theme.colors.blue}
-        onPress={() => alert('This is a button!')}
-        style={{paddingVertical: 10, paddingHorizontal: 20,}}
-      />
-    ),
+  static navigationOptions = ({ navigation }) => {
+    return {
+      headerRight: (
+        <Icon
+          name="ios-person" 
+          size={24} 
+          color={theme.colors.blue}
+          onPress={() => navigation.navigate('Profile')}
+          style={{paddingVertical: 10, paddingHorizontal: 20,}}
+        />
+      ),  
+    }
   };
   
   state = {

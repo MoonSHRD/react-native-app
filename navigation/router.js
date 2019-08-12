@@ -15,7 +15,8 @@ import ChatList from "../screens/ChatList";
 import Settings from "../screens/Settings";
 import MatchesList from "../screens/MatchesList";
 import NewChat from "../screens/NewChat";
-import NewGroupChat from "../screens/NewGroupChat"
+import NewGroupChat from "../screens/NewGroupChat";
+import Profile from "../screens/Profile";
 
 const headerStyle = {
   // marginTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
@@ -79,6 +80,14 @@ export const SignedIn = createBottomTabNavigator({
                 headerStyle,
                 headerTitleStyle: theme.headerTitle,
             }
+          },
+          Profile: {
+            screen: Profile,
+            navigationOptions: {
+                headerTitle: 'Profile',
+                headerStyle,
+                headerTitleStyle: theme.headerTitle,
+            }
           }
       }),
       navigationOptions: {
@@ -113,6 +122,14 @@ export const SignedIn = createBottomTabNavigator({
               headerStyle,
               headerTitleStyle: theme.headerTitle,
           }
+        },
+        Profile: {
+          screen: Profile,
+          navigationOptions: {
+              headerTitle: 'Profile',
+              headerStyle,
+              headerTitleStyle: theme.headerTitle,
+          }
         }
     }),
     navigationOptions: {
@@ -131,6 +148,14 @@ export const SignedIn = createBottomTabNavigator({
                 headerStyle,
                 headerTitleStyle: theme.headerTitle,
             }
+        },
+        Profile: {
+          screen: Profile,
+          navigationOptions: {
+              headerTitle: 'Profile',
+              headerStyle,
+              headerTitleStyle: theme.headerTitle,
+          }
         }
     }),
     navigationOptions: {

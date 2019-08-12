@@ -24,7 +24,7 @@ export default class ChatList extends Component {
           name="ios-person" 
           size={24} 
           color={theme.colors.blue}
-          onPress={() => alert('This is a button!')}
+          onPress={() => navigation.navigate('Profile')}
           style={{paddingVertical: 10, paddingHorizontal: 20,}}
         />
       ),  

@@ -10,20 +10,6 @@ const { width, height } = Dimensions.get('window');
 
 export default class ContactList extends Component {
 
-  static navigationOptions = ({ navigation }) => {
-    return {
-      headerRight: (
-        <Icon
-          name="ios-person" 
-          size={24} 
-          color={theme.colors.blue}
-          onPress={() => alert('This is a button!')}
-          style={{paddingVertical: 10, paddingHorizontal: 20,}}
-        />
-      ),
-    };
-  }
-
   state = {
     search: '',
     screenHeight: height,

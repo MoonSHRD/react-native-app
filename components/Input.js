@@ -13,13 +13,19 @@ export default class Input extends Component {
   }
 
   renderLabel() {
-    const { label, error } = this.props;
+    const { label, error, labelStyle } = this.props;
     
+    const labelTextStyles = [
+      styles.label,
+      error && { borderColor: theme.colors.accent },
+      labelStyle,
+    ];
+
     if (!label) return null
 
     return (
       <Block flex={false}>
-        {label ? <Text gray2={!error} accent={error}>{label}</Text> : null}
+        {label ? <Text gray2={!error} accent={error} style={labelTextStyles}>{label}</Text> : null}
       </Block>
     )
   }
@@ -118,6 +124,7 @@ const styles = StyleSheet.create({
     color: theme.colors.black,
     height: theme.sizes.base * 3,
   },
+  label: {},
   toggle: {
     position: 'absolute',
     justifyContent: 'center',
