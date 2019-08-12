@@ -82,7 +82,7 @@ export default class SignUp extends Component {
             [
             {
                 text: 'Continue', onPress: () => {
-                navigation.navigate('SignedIn');
+                navigation.navigate('EmailConfirm');
                 }
             }
             ],

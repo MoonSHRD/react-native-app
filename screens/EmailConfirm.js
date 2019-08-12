@@ -44,7 +44,7 @@ export default class EmailConfirm extends Component {
               placeholder={'Enter your email'}
               onChangeText={text => this.setState({ email: text })}
             />
-            <Button gradient style={styles.confirmButton} onPress={() => navigation.navigate('ResetPassword')}>
+            <Button gradient style={styles.confirmButton} onPress={() => navigation.navigate('SignedIn')}>
               {loading ?
                 <ActivityIndicator size="small" color="white" /> :
                 <Text headline bold white center>Confirm</Text>

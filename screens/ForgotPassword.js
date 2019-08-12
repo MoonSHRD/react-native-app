@@ -45,7 +45,7 @@ export default class ForgotPassword extends Component {
               placeholder={'Enter your email'}
               onChangeText={text => this.setState({ email: text })}
             />
-            <Button gradient style={styles.confirmButton} onPress={() => navigation.navigate('EmailConfirm')}>
+            <Button gradient style={styles.confirmButton} onPress={() => navigation.navigate('ResetPassword')}>
               {loading ?
                 <ActivityIndicator size="small" color="white" /> :
                 <Text headline bold white center>Reset Password</Text>
