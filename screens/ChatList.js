@@ -129,7 +129,7 @@ export default class ChatList extends Component {
     const { navigation } = this.props;
     const { loading, errors, search, chatList } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
-    const scrollEnabled = this.state.screenHeight > height;
+    const scrollEnabled = this.state.screenHeight > height - 48.5;
 
     return (
       <KeyboardAvoidingView behavior="padding">

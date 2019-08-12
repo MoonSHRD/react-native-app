@@ -84,7 +84,7 @@ export default class ContactList extends Component {
     const { navigation } = this.props;
     const { loading, errors, search, contactList } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
-    const scrollEnabled = this.state.screenHeight > height;
+    const scrollEnabled = this.state.screenHeight > height - 48.5;
 
     return (
       <KeyboardAvoidingView behavior="padding">

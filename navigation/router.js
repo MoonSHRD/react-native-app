@@ -17,6 +17,7 @@ import MatchesList from "../screens/MatchesList";
 import NewChat from "../screens/NewChat";
 import NewGroupChat from "../screens/NewGroupChat";
 import Profile from "../screens/Profile";
+import ChatBackground from "../screens/ChatBackground";
 
 const headerStyle = {
   // marginTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
@@ -155,6 +156,14 @@ export const SignedIn = createBottomTabNavigator({
               headerTitle: 'Profile',
               headerStyle,
               headerTitleStyle: theme.headerTitle,
+          }
+        },
+        ChatBackground: {
+          screen: ChatBackground,
+          navigationOptions: {
+            headerTitle: 'Chat Background',
+            headerStyle,
+            headerTitleStyle: theme.headerTitle,
           }
         }
     }),

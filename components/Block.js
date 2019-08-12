@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { StyleSheet, View, Animated } from 'react-native'
 
 import { theme } from '../constants';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 export default class Block extends Component {
   handleMargins() {
@@ -117,6 +118,7 @@ export default class Block extends Component {
       wrap,
       style,
       children,
+      forPress,
       ...props
     } = this.props;
 
@@ -148,6 +150,14 @@ export default class Block extends Component {
         <Animated.View style={blockStyles} {...props}>
           {children}
         </Animated.View>
+      )
+    }
+
+    if (forPress) {
+      return (
+        <TouchableOpacity style={blockStyles} {...props}>
+          {children}
+        </TouchableOpacity>
       )
     }
 

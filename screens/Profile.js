@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Image, Platform, View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
-import MatrixLoginClient from '../native/MatrixLoginClient';
 
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Button, Block, Text, Input } from '../components';
@@ -50,7 +49,29 @@ export default class Profile extends Component {
           },
         ],
       newTag: null,
-      errors: []
+      errors: [],
+      suggestedTags: [
+        {
+            name: 'Cost',
+            matched: false
+        },
+        {
+            name: 'Cosplay',
+            matched: false,
+        },
+        {
+            name: 'Cosmopolitan',
+            matched: false 
+        },  
+        {
+            name: 'Costume',
+            matched: false,
+        },
+        {
+            name: 'Costumes',
+            matched: false,
+        },
+      ]
   }
 
   onContentSizeChange = (contentWidth, contentHeight) => {
@@ -59,16 +80,16 @@ export default class Profile extends Component {
 
   render() {
     const { navigation } = this.props;
-    const { loading, errors, name, phone, tags, newTag } = this.state;
+    const { loading, errors, name, phone, tags, newTag, suggestedTags } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
-    const scrollEnabled = this.state.screenHeight > height;
+    const scrollEnabled = this.state.screenHeight > height - 48.5;
 
     return (
       <KeyboardAvoidingView behavior="padding" >
         <ScrollView
-        showsVerticalScrollIndicator={false}
-        scrollEnabled={scrollEnabled}
-        onContentSizeChange={this.onContentSizeChange}
+            showsVerticalScrollIndicator={false}
+            scrollEnabled={scrollEnabled}
+            onContentSizeChange={this.onContentSizeChange}
         >
         <Block 
             style={styles.container}
@@ -77,7 +98,7 @@ export default class Profile extends Component {
                 source={require('../assets/images/backgroundImage.png')} 
                 style={styles.backgroundImage}
             />
-            <View style={styles.avatarContainer}>
+            <Block style={styles.avatarContainer}>
                 <Avatar 
                     rounded
                     source={{
@@ -87,7 +108,7 @@ export default class Profile extends Component {
                     containerStyle={styles.avatar}
                     avatarStyle={styles.avatarImage}
                 />
-            </View>
+            </Block>
             <Block style={styles.profileContainer}>
                 <Input
                     label="Name"
@@ -105,7 +126,7 @@ export default class Profile extends Component {
                     defaultValue={phone}
                     onChangeText={text => this.setState({ phone: text })}
                 />
-                <Text subhead gray>My Tags</Text>
+                <Text subhead gray style={{marginTop:20}}>My Tags</Text>
                 <Block style={styles.tagContainer}>
                 {
                     tags.map((l,i) => (
@@ -130,8 +151,36 @@ export default class Profile extends Component {
                     style={[styles.input, hasErrors('tags')]}
                     placeholder={'Enter New Tag'}
                     defaultValue={newTag}
-                    onChangeText={text => this.setState({ tag: text })}
+                    onChangeText={text => this.setState({ newTag: text })}
                 />
+                {
+                    newTag !== null 
+                    ?
+                    <Block style={styles.newTagContainer}>
+                        <Text caption2 gray style={styles.suggestedTagsText}>Suggested tags</Text>
+                        <Block style={styles.newTagList}>
+                            {
+                                suggestedTags.map((l,i) => (
+                                    l.matched
+                                    ?
+                                    <Button
+                                        key={i}
+                                        style={styles.matchedTag}>
+                                        <Text caption white center>{l.name}</Text>
+                                    </Button>
+                                    :
+                                    <Button
+                                        key={i}
+                                        style={styles.dismatchedTag}>
+                                        <Text caption blue center>{l.name}</Text>
+                                    </Button>
+                                ))
+                            }
+                        </Block>
+                    </Block>
+                    :
+                    null
+                }
                 <Button gradient style={styles.confirmButton}               
                     onPress={() => {Alert.alert('save profile')}}
                 >
@@ -152,7 +201,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 0,
-        margin: 0
+        margin: 0,
+        marginBottom: 15,
     },
     backgroundImage: {
         width: width,
@@ -194,12 +244,13 @@ const styles = StyleSheet.create({
         color: theme.colors.gray,
         letterSpacing: -0.016,
         lineHeight: 20,
+        marginTop: 15,
     },
     tagContainer: {
         flexDirection: "row",
         justifyContent: 'space-around',
         flexWrap: 'wrap',
-        flexBasis: '55%',
+        marginTop: 8,
     },  
     matchedTag: {
         backgroundColor: theme.colors.blue,
@@ -220,5 +271,22 @@ const styles = StyleSheet.create({
         marginHorizontal: 2,
         borderWidth: 1,
         borderColor: theme.colors.blue,
+    },
+    newTagContainer: {
+        backgroundColor: '#FAFAFA',
+        paddingHorizontal: 8,
+        marginTop: 20,
+    },
+    suggestedTagsText: {
+        paddingTop: 8,
+    },
+    newTagList: {
+        flexDirection: "row",
+        justifyContent: 'space-around',
+        flexWrap: 'wrap',
+        paddingTop: 11,
+    },
+    confirmButton: {
+        marginTop: 20,
     }
 })

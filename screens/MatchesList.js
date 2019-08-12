@@ -40,7 +40,7 @@ export default class MatchesList extends Component {
     const { navigation } = this.props;
     const { loading, errors, search } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
-    const scrollEnabled = this.state.screenHeight > height;
+    const scrollEnabled = this.state.screenHeight > height - 48.5;
 
     const list = [
       {

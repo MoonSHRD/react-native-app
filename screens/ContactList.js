@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Platform, View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
 
 import Icon from 'react-native-vector-icons/Ionicons';
-import { Button, Block, Input, Text } from '../components';
 import { SearchBar, ListItem, ThemeConsumer } from 'react-native-elements';
 import { theme } from '../constants';
 
@@ -98,7 +97,7 @@ export default class ContactList extends Component {
     const { navigation } = this.props;
     const { loading, errors, search, contactList } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
-    const scrollEnabled = this.state.screenHeight > height;
+    const scrollEnabled = this.state.screenHeight > height - 48.5;
 
     return (
       <KeyboardAvoidingView behavior="padding">
