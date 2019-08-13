@@ -39,7 +39,7 @@ export default class SignUp extends Component {
     const { email, password } = this.state;
     const errors = [];
     const homeserverUri = 'https://matrix.moonshard.tech';
-    const identityUri = 'https://matrix.moonshard.tech'
+    const identityUri = 'https://vector.im'
 
     Keyboard.dismiss();
     this.setState({ loading: true });
