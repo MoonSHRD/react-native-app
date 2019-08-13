@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Platform, View, Dimensions, NetInfo, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
+import { Platform, View, Dimensions, NetInfo, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet, DeviceEventEmitter } from 'react-native';
 
 import { Button, Block, Input, Text } from '../components';
 import { theme } from '../constants';
@@ -38,8 +38,8 @@ export default class Login extends Component {
     const { navigation } = this.props;
     const { email, password } = this.state;
     const errors = [];
-    const homeserverUri = "https://matrix.moonshard.tech";
-    const identityUri = "https://vector.im";
+    const homeserverUri = 'https://matrix.moonshard.tech';
+    const identityUri = 'https://vector.im';
 
     Keyboard.dismiss();
     this.setState({ loading: true });
@@ -84,6 +84,25 @@ export default class Login extends Component {
           { cancelable: false }
       );
     }
+  }
+
+  componentDidMount() {
+    DeviceEventEmitter.addListener("onNetworkError", event => {
+      console.log('onNetworkError')
+      console.log(event)
+    })
+    DeviceEventEmitter.addListener("onMatrixError", event => {
+      console.log('onMatrixError')
+      console.log(event)
+    })
+    DeviceEventEmitter.addListener("onUnexpectedError", event => {
+      console.log('onUnexpectedError')
+      console.log(event)
+    })
+    DeviceEventEmitter.addListener("onSuccess", event => {
+      console.log('onSuccess')
+      console.log(event)
+    })
   }
 
   render() {

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Platform, View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
+import { Platform, View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet, DeviceEventEmitter } from 'react-native';
 
 import { Button, Block, Input, Text } from '../components';
 import { theme } from '../constants';
@@ -43,6 +43,7 @@ export default class SignUp extends Component {
 
     Keyboard.dismiss();
     this.setState({ loading: true });
+    console.log('button pressed')
 
     // check with backend API or with some static data
     if (!email) errors.push('email');
@@ -72,18 +73,18 @@ export default class SignUp extends Component {
       }
       
       if (error == null) {
-        Alert.alert(
-            'Success!',
-            'Your account has been created',
-            [
-            {
-                text: 'Continue', onPress: () => {
-                  navigation.navigate('SignedIn');
-                }
-            }
-            ],
-            { cancelable: false }
-        )
+        // Alert.alert(
+        //     'Success!',
+        //     'Your account has been created',
+        //     [
+        //     {
+        //         text: 'Continue', onPress: () => {
+        //           navigation.navigate('SignedIn');
+        //         }
+        //     }
+        //     ],
+        //     { cancelable: false }
+        // )
       } else {
             Alert.alert(
             'Error!',
@@ -97,6 +98,33 @@ export default class SignUp extends Component {
         )
       }
     }
+  }
+
+  componentDidMount() {
+    DeviceEventEmitter.addListener("onRegistrationSuccess", event => {
+      console.log('onRegistrationSuccess')
+      console.log(event)
+    })
+    DeviceEventEmitter.addListener("onRegistrationFailed", event => {
+      console.log('onRegistrationFailed')
+      console.log(event)
+    })
+    DeviceEventEmitter.addListener("onWaitingEmailValidation", event => {
+      console.log('onWaitingEmailValidation')
+      console.log(event)
+    })
+    DeviceEventEmitter.addListener("onWaitingCaptcha", event => {
+      console.log('onWaitingCaptcha')
+      console.log(event)
+    })
+    DeviceEventEmitter.addListener("onThreePidRequestFailed", event => {
+      console.log('onThreePidRequestFailed')
+      console.log(event)
+    })
+    DeviceEventEmitter.addListener("onResourceLimitExceeded", event => {
+      console.log('onResourceLimitExceeded')
+      console.log(event)
+    })
   }
 
   render() {
