@@ -68,10 +68,6 @@ export default class Login extends Component {
           identityUri,
           email,
           password,
-          (err) => { error = err },
-          (err) => { error = err },
-          (err) => { error = err },
-          ()=>console.log('success')  
         )  
       }
     }
