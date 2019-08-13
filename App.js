@@ -15,10 +15,10 @@ export default class App extends React.Component {
     super(props);
 
     this.state = {
-      signedIn: false,
+      signedIn: true,
       checkedSignIn: true,
       isLoadingComplete: false,
-      visible: false,
+      visible: true,
       match: {
         name: 'Freddie Mercury',
         matches: 2,
@@ -77,7 +77,6 @@ export default class App extends React.Component {
                 borderRadius={16}
                 height="auto"
               >
-                <View style={styles.overlayWrapper}>
                   <Block style={styles.avatarContainer}>
                   <Avatar 
                       rounded
@@ -89,8 +88,9 @@ export default class App extends React.Component {
                       avatarStyle={styles.avatarImage}
                   />
                   </Block>
-                  <Text center h3 notBlack bold style={{marginTop:20}}>{match.name}</Text>
-                  <Text center subhead notBlack style={{marginTop:8}}>You have a match by {match.matches} tags</Text>
+                  <View style={{paddingHorizontal:14, marginTop: 42}}>
+                  <Text center h3 notBlack bold style={{marginTop:20, marginHorizontal: 14}}>{match.name}</Text>
+                  <Text center subhead notBlack style={{marginTop:8, marginHorizontal: 20}}>You have a match by {match.matches} tags</Text>
                   <Block style={styles.tagContainer}>
                     {
                         match.tags.map((l,i) => (
@@ -111,12 +111,12 @@ export default class App extends React.Component {
                     }
                   </Block>
                   <Block style={styles.buttonContainer}>
-                    <Button gradient style={styles.confirmButton}               
-                        onPress={() => {Alert.alert('close profile')}}
+                    <Button style={styles.closeButton}               
+                        onPress={()=>{this.setState({visible: false})}}
                     >
                         {loading ?
                         <ActivityIndicator size="small" color="white" /> :
-                        <Text headline bold white center>Close</Text>
+                        <Text headline bold blue center>Close</Text>
                         }
                     </Button>
                     <Button gradient style={styles.confirmButton}               
@@ -140,9 +140,9 @@ export default class App extends React.Component {
 
 const styles = StyleSheet.create({
   avatarContainer: {
-    position: 'absolute', 
-    top: 35,
-    width: width,
+    alignSelf: 'center',
+    position: 'absolute',
+    top: -55
   },
   avatar: {
       width: 110,
@@ -155,12 +155,10 @@ const styles = StyleSheet.create({
   },
   overlayContainer: {
     marginHorizontal: 64,
-    paddingHorizontal: 14,
     paddingBottom: 15.67,
+    paddingHorizontal: 0,
     flexDirection: 'column',
     alignSelf: 'center',
-  },
-  overlayWrapper: {
   },
   tagContainer: {
     flex:0,
@@ -169,18 +167,25 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     marginTop: 12,
   },  
-    matchedTag: {
-      backgroundColor: theme.colors.blue,
-      borderRadius: 16,
-      overflow: 'hidden',
-      height: 24,
-      paddingVertical: 4,
-      paddingHorizontal: 16,
-      marginHorizontal: 2,
+  matchedTag: {
+    backgroundColor: theme.colors.blue,
+    borderRadius: 16,
+    overflow: 'hidden',
+    height: 24,
+    paddingVertical: 4,
+    paddingHorizontal: 16,
+    marginHorizontal: 2,
   },
   buttonContainer: {
     flex: 0,
     marginTop:15.67,
+  },
+  closeButton: {
+    backgroundColor: theme.colors.white,
+    borderColor: theme.colors.blue,
+    borderWidth: 1,
+    borderRadius: 8,
+    overflow: 'hidden'
   }
 
 });
