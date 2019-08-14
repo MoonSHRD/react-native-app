@@ -128,15 +128,22 @@ export default class SignUp extends Component {
     })
   }
 
+  onContentSizeChange = (contentWidth, contentHeight) => {
+    this.setState({ screenHeight: contentHeight });
+  };
+
   render() {
     const { navigation } = this.props;
     const { loading, errors } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
+    const scrollEnabled = this.state.screenHeight > height - 100;
 
     return (
       <KeyboardAvoidingView style={styles.signup} behavior="padding">
         <ScrollView
-          showsVerticalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
+            scrollEnabled={scrollEnabled}
+            onContentSizeChange={this.onContentSizeChange}
         >
         <Block padding={[height / 10, theme.sizes.base * 2]}>
           <View style={styles.imageContainer}>

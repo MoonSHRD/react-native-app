@@ -11,6 +11,9 @@ const { width, height } = Dimensions.get('window');
 export default class Profile extends Component {
   static navigationOptions = ({ navigation }) => {
     return {
+        headerTitle: (
+            <Text notBlack style={{fontSize: 14, fontWeight: '600', letterSpacing: -0.0241176}}>Profile</Text>
+        ),      
       headerRight: (
         <Icon
           name="ios-more" 
@@ -82,7 +85,7 @@ export default class Profile extends Component {
     const { navigation } = this.props;
     const { loading, errors, name, phone, tags, newTag, suggestedTags } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
-    const scrollEnabled = this.state.screenHeight > height - 48.5;
+    const scrollEnabled = this.state.screenHeight > height - 100;
 
     return (
       <KeyboardAvoidingView behavior="padding" >

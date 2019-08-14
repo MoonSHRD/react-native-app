@@ -95,7 +95,7 @@ export default class Login extends Component {
     DeviceEventEmitter.addListener("onMatrixError", event => {
       console.log('onMatrixError')
       console.log(event)
-    })
+    }, this.goToHomeScreen)
     DeviceEventEmitter.addListener("onUnexpectedError", event => {
       console.log('onUnexpectedError')
       console.log(event)
@@ -118,17 +118,29 @@ export default class Login extends Component {
     })
   }
 
+  goToHomeScreen = () => {
+    const { navigation } = this.props;
+    navigation.navigate('SignedIn')
+  }
+
+  onContentSizeChange = (contentWidth, contentHeight) => {
+    this.setState({ screenHeight: contentHeight });
+  };
+
   render() {
     const { navigation } = this.props;
     const { loading, errors } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
+    const scrollEnabled = this.state.screenHeight > height - 100;
 
     return (
       <KeyboardAvoidingView style={styles.login} behavior="padding">
-        <ScrollView
+      <ScrollView
           showsVerticalScrollIndicator={false}
-        >
-        <Block padding={[height / 10, theme.sizes.base * 2]}>
+          scrollEnabled={scrollEnabled}
+          onContentSizeChange={this.onContentSizeChange}
+      >
+      <Block padding={[height / 10, theme.sizes.base * 2]}>
           <View style={styles.imageContainer}>
             <Logo width={width / 6.7} height={height / 6.7} />
             <TextLogo style={styles.textLogo}/>

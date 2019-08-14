@@ -21,7 +21,7 @@ import ChatBackground from "../screens/ChatBackground";
 
 const headerStyle = {
   // marginTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-  paddingTop: (Platform.OS === 'android') ? StatusBar.currentHeight : 20,
+  // paddingTop: (Platform.OS === 'android') ? StatusBar.currentHeight : 20,
 };
 
 export const SignedOut = createStackNavigator({
@@ -69,7 +69,6 @@ export const SignedIn = createBottomTabNavigator({
           ContactList: {
               screen: ContactList,
               navigationOptions: {
-                  headerTitle: 'Contacts',
                   headerStyle,
                   headerTitleStyle: theme.headerTitle,
               }
@@ -77,7 +76,6 @@ export const SignedIn = createBottomTabNavigator({
           MatchesList: {
             screen: MatchesList,
             navigationOptions: {
-                headerTitle: 'Matches',
                 headerStyle,
                 headerTitleStyle: theme.headerTitle,
             }
@@ -85,12 +83,11 @@ export const SignedIn = createBottomTabNavigator({
           Profile: {
             screen: Profile,
             navigationOptions: {
-                headerTitle: 'Profile',
                 headerStyle,
                 headerTitleStyle: theme.headerTitle,
             }
           }
-      }),
+      }, { headerLayoutPreset: 'center' }),
       navigationOptions: {
           title: 'Contacts',            
           tabBarIcon: ({ tintColor }) => (
@@ -103,7 +100,6 @@ export const SignedIn = createBottomTabNavigator({
         ChatList: {
             screen: ChatList,
             navigationOptions: {
-                headerTitle: 'Chatlist',
                 headerStyle,
                 headerTitleStyle: theme.headerTitle,
             }
@@ -111,7 +107,6 @@ export const SignedIn = createBottomTabNavigator({
         NewChat: {
           screen: NewChat,
           navigationOptions: {
-              headerTitle: 'New Chat',
               headerStyle,
               headerTitleStyle: theme.headerTitle,
           }
@@ -119,7 +114,6 @@ export const SignedIn = createBottomTabNavigator({
         NewGroupChat: {
           screen: NewGroupChat,
           navigationOptions: {
-              headerTitle: 'New Group Chat',
               headerStyle,
               headerTitleStyle: theme.headerTitle,
           }
@@ -127,12 +121,11 @@ export const SignedIn = createBottomTabNavigator({
         Profile: {
           screen: Profile,
           navigationOptions: {
-              headerTitle: 'Profile',
               headerStyle,
               headerTitleStyle: theme.headerTitle,
           }
         }
-    }),
+    }, { headerLayoutPreset: 'center' }),
     navigationOptions: {
         title: 'Chatlist',            
         tabBarIcon: ({ tintColor }) => (
@@ -145,7 +138,6 @@ export const SignedIn = createBottomTabNavigator({
         Settings: {
             screen: Settings,
             navigationOptions: {
-                headerTitle: 'Settings',
                 headerStyle,
                 headerTitleStyle: theme.headerTitle,
             }
@@ -153,7 +145,6 @@ export const SignedIn = createBottomTabNavigator({
         Profile: {
           screen: Profile,
           navigationOptions: {
-              headerTitle: 'Profile',
               headerStyle,
               headerTitleStyle: theme.headerTitle,
           }
@@ -161,12 +152,11 @@ export const SignedIn = createBottomTabNavigator({
         ChatBackground: {
           screen: ChatBackground,
           navigationOptions: {
-            headerTitle: 'Chat Background',
             headerStyle,
             headerTitleStyle: theme.headerTitle,
           }
         }
-    }),
+    }, { headerLayoutPreset: 'center' }),
     navigationOptions: {
         title: 'Settings',            
         tabBarIcon: ({ tintColor }) => (
@@ -180,7 +170,7 @@ export const SignedIn = createBottomTabNavigator({
       showLabel: false,
       showIcon: true,
       style: {
-        paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0
+        // paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0
       }
     }
   }

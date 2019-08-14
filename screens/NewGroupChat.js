@@ -12,6 +12,9 @@ export default class ContactList extends Component {
 
   static navigationOptions = ({ navigation }) => {
     return {
+      headerTitle: (
+        <Text notBlack style={{fontSize: 14, fontWeight: '600', letterSpacing: -0.0241176}}>New Group Chat</Text>
+      ),
       headerRight: (
         <Text
             onPress={() => alert('This is a button!')}
@@ -123,7 +126,7 @@ export default class ContactList extends Component {
     const { navigation } = this.props;
     const { loading, errors, search, contactList } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
-    const scrollEnabled = this.state.screenHeight > height - 48.5;
+    const scrollEnabled = this.state.screenHeight > height - 100;
 
     return (
       <KeyboardAvoidingView behavior="padding">

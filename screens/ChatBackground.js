@@ -57,7 +57,7 @@ export default class Settings extends Component {
     const { navigation } = this.props;
     const { loading, errors, dataSource } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
-    const scrollEnabled = this.state.screenHeight > height - 48.5;
+    const scrollEnabled = this.state.screenHeight > height - 100;
 
     return (
       <KeyboardAvoidingView behavior="padding">
