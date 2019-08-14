@@ -8,7 +8,7 @@ import com.facebook.react.bridge.ReactContext
 
 fun sendEvent(reactContext: ReactContext,
               eventName: String,
-              @Nullable params: WritableMap) {
+              params: WritableMap?) {
     reactContext
             .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
             .emit(eventName, params)

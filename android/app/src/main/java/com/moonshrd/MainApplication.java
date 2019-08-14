@@ -23,6 +23,7 @@ import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
 public class MainApplication extends Application implements ReactApplication {
+  private static Matrix matrixInstance = null;
 
   private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
     @Override
@@ -57,7 +58,11 @@ public class MainApplication extends Application implements ReactApplication {
   public void onCreate() {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
-    Realm.init(this.getApplicationContext());
+    matrixInstance = Matrix.getInstance(getApplicationContext());
+  }
+
+  public static Matrix getMatrixInstance() {
+    return matrixInstance;
   }
 
   public static Realm getCredsRealmInstance() {
@@ -73,6 +78,7 @@ public class MainApplication extends Application implements ReactApplication {
   //==============================================================================================================
   // Syncing mxSessions
   //==============================================================================================================
+
 
   /**
    * syncing sessions

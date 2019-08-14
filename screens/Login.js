@@ -47,11 +47,12 @@ export default class Login extends Component {
     if (!email) errors.push('email');
     if (!password) errors.push('password');
 
-    if (email !== null) {
+    // FIXME
+    /*if (email !== null) {
       if (!this.validateEmail(email)) {
           errors.push('email');
       }
-    }
+    }*/
 
     if (this.checkInternetStatus === 'none' || this.checkInternetStatus === 'NONE') {
       errors.push('internet')
@@ -127,7 +128,7 @@ export default class Login extends Component {
               error={hasErrors('email')}
               style={[styles.input, hasErrors('email')]}
               defaultValue={this.state.email}
-              placeholder={'Enter your email'}
+              placeholder={'Enter your username'} // FIXME
               onChangeText={text => this.setState({ email: text })}
             />
             <Input
