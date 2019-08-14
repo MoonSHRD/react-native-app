@@ -14,7 +14,7 @@ fun sendEvent(reactContext: ReactContext,
             .emit(eventName, params)
 }
 
-fun sendEventWithOneStringArg(reactContext: ReactContext, eventName: String, argName: String, arg: String) {
+fun sendEventWithOneStringArg(reactContext: ReactContext, eventName: String, argName: String, arg: String?) {
     val args = Arguments.createMap()
     args.putString(argName, arg)
     sendEvent(reactContext, eventName, args)
