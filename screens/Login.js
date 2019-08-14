@@ -99,9 +99,21 @@ export default class Login extends Component {
       console.log('onUnexpectedError')
       console.log(event)
     })
-    DeviceEventEmitter.addListener("onSuccess", event => {
+    DeviceEventEmitter.addListener("onSuccess", () => {
+      const { navigation } = this.props
       console.log('onSuccess')
-      console.log(event)
+      Alert.alert(
+            'Success!',
+            'Your login was successful',
+            [
+            {
+                text: 'Continue', onPress: () => {
+                  navigation.navigate('SignedIn');
+                }
+            }
+            ],
+            { cancelable: false }
+      )
     })
   }
 
