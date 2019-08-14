@@ -51,12 +51,13 @@ export default class SignUp extends Component {
     if (this.checkInternetStatus === 'none' || this.checkInternetStatus === 'NONE') {
       errors.push('internet')
     }
-
-    if (email !== null) {
+ 
+    // FIXME
+    /*if (email !== null) {
       if (!this.validateEmail(email)) {
           errors.push('email');
       }
-    }
+    }*/
 
     this.setState({ errors, loading: false });
 
@@ -149,7 +150,7 @@ export default class SignUp extends Component {
               error={hasErrors('email')}
               style={[styles.input, hasErrors('email')]}
               defaultValue={this.state.email}
-              placeholder={'Enter your email'}
+              placeholder={'Enter your username'} // FIXME
               onChangeText={text => this.setState({ email: text })}
             />
             <Input

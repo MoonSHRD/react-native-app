@@ -10,13 +10,13 @@ import com.facebook.react.bridge.WritableMap;
 import com.moonshrd.util.RNUtilsKt;
 
 import org.matrix.androidsdk.HomeServerConnectionConfig;
-import org.matrix.androidsdk.MXDataHandler;
-import org.matrix.androidsdk.MXSession;
+import org.matrix.androidsdk.core.JsonUtils;
+import org.matrix.androidsdk.core.Log;
 import org.matrix.androidsdk.core.callback.ApiCallback;
+import org.matrix.androidsdk.core.callback.SimpleApiCallback;
 import org.matrix.androidsdk.core.model.MatrixError;
-import org.matrix.androidsdk.data.store.MXFileStore;
-import org.matrix.androidsdk.rest.model.login.Credentials;
 import org.matrix.androidsdk.rest.model.login.LocalizedFlowDataLoginTerms;
+import org.matrix.androidsdk.rest.model.login.RegistrationFlowResponse;
 import org.matrix.androidsdk.rest.model.pid.ThreePid;
 
 import java.util.List;
@@ -45,48 +45,9 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
 
         RegistrationManager registrationManager = new RegistrationManager(null);
         registrationManager.setHsConfig(hsConfig);
-        registrationManager.setAccountData(null, password);
-        registrationManager.addEmailThreePid(new ThreePid(email, ThreePid.MEDIUM_EMAIL));
-        registrationManager.attemptRegistration(getReactApplicationContext(), new RegistrationManager.RegistrationListener() {
-            @Override
-            public void onRegistrationSuccess(String warningMessage) {
-                RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onRegistrationSuccess", "warningMessage", warningMessage);
-            }
-
-            @Override
-            public void onRegistrationFailed(String message) {
-                RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onRegistrationFailed", "message", message);
-            }
-
-            @Override
-            public void onWaitingEmailValidation() {
-                RNUtilsKt.sendEvent(getReactApplicationContext(), "onWaitingEmailValidation", null);
-            }
-
-            @Override
-            public void onWaitingCaptcha(String publicKey) {
-                RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onWaitingCaptcha", "publicKey", publicKey);
-            }
-
-            @Override
-            public void onWaitingTerms(List<LocalizedFlowDataLoginTerms> localizedFlowDataLoginTerms) {
-                //
-            }
-
-            @Override
-            public void onThreePidRequestFailed(String message) {
-                RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onThreePidRequestFailed", "message", message);
-            }
-
-            @Override
-            public void onResourceLimitExceeded(MatrixError e) {
-                WritableMap args = Arguments.createMap();
-                args.putString("message", e.error);
-                args.putInt("retryAfter", e.retry_after_ms);
-                RNUtilsKt.sendEvent(getReactApplicationContext(), "onResourceLimitExceeded", args);
-            }
-        });
-
+        registrationManager.setAccountData(email, password); // FIXME we temporary use usernames instead of email identity, should be changed in future
+        //registrationManager.addEmailThreePid(new ThreePid(email, ThreePid.MEDIUM_EMAIL));
+        getRegFlowsAndRegister(hsConfig, registrationManager);
     }
 
     @ReactMethod
@@ -128,5 +89,102 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void logout() {
         Matrix.getInstance(getReactApplicationContext()).clearSessions(getReactApplicationContext(), true, null);
+    }
+
+    private void getRegFlowsAndRegister(HomeServerConnectionConfig hsConfig, RegistrationManager registrationManager) {
+        Log.d(LOG_TAG, "## checkRegistrationFlows()");
+
+        if (!registrationManager.hasRegistrationResponse()) {
+            try {
+
+                new LoginHandler().getSupportedRegistrationFlows(getReactApplicationContext(), hsConfig, new SimpleApiCallback<Void>() {
+                    @Override
+                    public void onSuccess(Void avoid) {
+                        // should never be called
+                    }
+
+                    @Override
+                    public void onNetworkError(Exception e) {
+                        RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onNetworkError", "exceptionText", e.getMessage());
+                    }
+
+                    @Override
+                    public void onUnexpectedError(Exception e) {
+                        RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onUnexpectedError", "exceptionText", e.getMessage());
+                    }
+
+                    @Override
+                    public void onMatrixError(MatrixError e) {
+                        Log.d(LOG_TAG, "## checkRegistrationFlows(): onMatrixError - Resp=" + e.getLocalizedMessage());
+                        RegistrationFlowResponse registrationFlowResponse = null;
+
+                        // when a response is not completed the server returns an error message
+                        if (null != e.mStatus) {
+                            if (e.mStatus == 401) {
+                                try {
+                                    registrationFlowResponse = JsonUtils.toRegistrationFlowResponse(e.mErrorBodyAsString);
+                                } catch (Exception castExcept) {
+                                    Log.e(LOG_TAG, "JsonUtils.toRegistrationFlowResponse " + castExcept.getLocalizedMessage(), castExcept);
+                                }
+                            }
+                        }
+
+                        if (null != registrationFlowResponse) {
+                            registrationManager.setSupportedRegistrationFlows(registrationFlowResponse);
+                            attemptRegistration(registrationManager);
+                        } else {
+                            RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onMatrixError", "exceptionText", e.getMessage());
+                        }
+                    }
+                });
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "## checkRegistrationFlows(): ERROR " + e.getMessage());
+            }
+        }
+    }
+
+    private void attemptRegistration(RegistrationManager registrationManager) {
+        registrationManager.attemptRegistration(getReactApplicationContext(), new RegistrationManager.RegistrationListener() {
+            @Override
+            public void onRegistrationSuccess(String warningMessage) {
+                RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onRegistrationSuccess", "warningMessage", warningMessage);
+            }
+
+            @Override
+            public void onRegistrationFailed(String message) {
+                RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onRegistrationFailed", "message", message);
+            }
+
+            @Override
+            public void onWaitingEmailValidation() {
+                //RNUtilsKt.sendEvent(getReactApplicationContext(), "onWaitingEmailValidation", null);
+                //attemptRegistration(registrationManager);
+            }
+
+            @Override
+            public void onWaitingCaptcha(String publicKey) {
+                //RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onWaitingCaptcha", "publicKey", publicKey);
+                //attemptRegistration(registrationManager);
+            }
+
+            @Override
+            public void onWaitingTerms(List<LocalizedFlowDataLoginTerms> localizedFlowDataLoginTerms) {
+                Log.d(LOG_TAG, "# onWaitingTerms");
+                //attemptRegistration(registrationManager);
+            }
+
+            @Override
+            public void onThreePidRequestFailed(String message) {
+                RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onThreePidRequestFailed", "message", message);
+            }
+
+            @Override
+            public void onResourceLimitExceeded(MatrixError e) {
+                WritableMap args = Arguments.createMap();
+                args.putString("message", e.error);
+                args.putInt("retryAfter", e.retry_after_ms);
+                RNUtilsKt.sendEvent(getReactApplicationContext(), "onResourceLimitExceeded", args);
+            }
+        });
     }
 }
