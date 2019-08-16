@@ -74,18 +74,18 @@ export default class SignUp extends Component {
       }
       
       if (error == null) {
-        // Alert.alert(
-        //     'Success!',
-        //     'Your account has been created',
-        //     [
-        //     {
-        //         text: 'Continue', onPress: () => {
-        //           navigation.navigate('SignedIn');
-        //         }
-        //     }
-        //     ],
-        //     { cancelable: false }
-        // )
+        Alert.alert(
+            'Success!',
+            'Your account has been created',
+            [
+            {
+                text: 'Continue', onPress: () => {
+                  navigation.navigate('SignedIn');
+                }
+            }
+            ],
+            { cancelable: false }
+        )
       } else {
             Alert.alert(
             'Error!',

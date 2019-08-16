@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, AsyncStorage, Dimensions, View, Alert } from 'react-native';
 import {connect} from 'react-redux';
+import MatrixLoginClient from './native/MatrixLoginClient';
 
 import { Block, Text, Button } from './components';
 import { Overlay, Avatar } from 'react-native-elements';
@@ -15,7 +16,7 @@ export default class App extends React.Component {
     super(props);
 
     this.state = {
-      signedIn: true,
+      signedIn: false,
       checkedSignIn: true,
       isLoadingComplete: false,
       visible: false,
@@ -37,9 +38,11 @@ export default class App extends React.Component {
   }
 
   componentDidMount() {
-    // this._isSignedInAsync()
-    //   .then(res => this.setState({ signedIn: res, checkedSignIn: true }))
-    //   .catch(err => alert("An error occurred"));
+    this.setState({ signedIn: MatrixLoginClient.onAppStart(), checkedSignIn: true })
+  }
+
+  handleChange(data) {
+    this.setState(data);
   }
 
 //   _isSignedInAsync =  () => {
@@ -66,7 +69,10 @@ export default class App extends React.Component {
     const Navigation = createRootNavigator(signedIn);
     return (
         <Block white>
-          <Navigation />
+          <Navigation 
+            signedIn={signedIn} 
+            handleChange={this.handleChange}
+          />
           {
             visible 
             ?

@@ -35,7 +35,6 @@ export default class Login extends Component {
   }
 
   handleLogin = () => {
-    const { navigation } = this.props;
     const { email, password } = this.state;
     const errors = [];
     const homeserverUri = 'https://matrix.moonshard.tech';
@@ -88,40 +87,38 @@ export default class Login extends Component {
   }
 
   componentDidMount() {
-    DeviceEventEmitter.addListener("onNetworkError", event => {
+    const { navigation } = this.props;
+    this.onNetworkErrorEvent = DeviceEventEmitter.addListener('onNetworkError', function(e) {
       console.log('onNetworkError')
-      console.log(event)
-    })
-    DeviceEventEmitter.addListener("onMatrixError", event => {
+      console.log(e)
+    });  
+    this.onMatrixErrorEvent = DeviceEventEmitter.addListener('onMatrixError', function(e) {
       console.log('onMatrixError')
-      console.log(event)
-    }, this.goToHomeScreen)
-    DeviceEventEmitter.addListener("onUnexpectedError", event => {
+      console.log(e)
+    });  
+    this.onUnexpectedErrorEvent = DeviceEventEmitter.addListener('onUnexpectedError', function(e) {
       console.log('onUnexpectedError')
-      console.log(event)
-    })
-    DeviceEventEmitter.addListener("onSuccess", () => {
-      const { navigation } = this.props
-      console.log('onSuccess')
-      Alert.alert(
-            'Success!',
-            'Your login was successful',
-            [
-            {
-                text: 'Continue', onPress: () => {
-                  navigation.navigate('SignedIn');
-                }
-            }
-            ],
-            { cancelable: false }
-      )
-    })
+      console.log(e)
+    });  
+    this.successLogin = DeviceEventEmitter.addListener('onSuccess', function(e) {
+        console.log('onSuccess')
+        console.log(e)
+        Alert.alert(
+          'Success!',
+          'Your login was successful',
+          [
+          {
+              text: 'Continue', onPress: () => {
+                navigation.navigate('SignedIn');
+              }
+          }
+          ],
+          { cancelable: false }
+        )
+    });  
+
   }
 
-  goToHomeScreen = () => {
-    const { navigation } = this.props;
-    navigation.navigate('SignedIn')
-  }
 
   onContentSizeChange = (contentWidth, contentHeight) => {
     this.setState({ screenHeight: contentHeight });

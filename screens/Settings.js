@@ -3,7 +3,7 @@ import { Platform, Dimensions, Alert, ScrollView, Keyboard, KeyboardAvoidingView
 import MatrixLoginClient from '../native/MatrixLoginClient';
 
 import Icon from 'react-native-vector-icons/Ionicons';
-import { Block, Text, Switch } from '../components';
+import { Block, Text, Switch, Button } from '../components';
 import { theme } from '../constants';
 import { Slider } from 'react-native-elements';
 
@@ -33,9 +33,8 @@ export default class Settings extends Component {
   }
 
   handleSignOut = () => {
-    if (Platform.OS === 'android') {
-      MatrixLoginClient.logout()  
-    }
+      MatrixLoginClient.logout()
+      this.props.handleChange({ signedIn: false });
   }
 
   render() {
@@ -72,22 +71,37 @@ export default class Settings extends Component {
             <Text body gray>English</Text>
           </Block>
           <Text headline bold notBlack style={{marginTop: 23, marginBottom: 8}}>Chat settings</Text>
-          <Block 
-            forPress
-            row 
-            space="between" 
-            style={styles.settingsItem}
-            onPress={() => navigation.navigate('ChatBackground')}
-          >
-            <Text body notBlack>Chat Background</Text>
-            <Icon
-              name="ios-arrow-forward" 
-              size={24} 
-              color={theme.colors.gray}
-              style={{paddingHorizontal: 8}}
+          {
+            Platform.OS === 'android' 
+            ?
+            <Button onPress={() => navigation.navigate('ChatBackground')}>
+              <Text body notBlack>Chat Background</Text>
+              <Icon
+                name="ios-arrow-forward" 
+                size={24} 
+                color={theme.colors.gray}
+                style={{paddingHorizontal: 8}}
+                onPress={() => navigation.navigate('ChatBackground')}
+              />
+            </Button>
+            :
+            <Block 
+              forPress
+              row 
+              space="between" 
+              style={styles.settingsItem}
               onPress={() => navigation.navigate('ChatBackground')}
-            />
-          </Block>
+            >
+              <Text body notBlack>Chat Background</Text>
+              <Icon
+                name="ios-arrow-forward" 
+                size={24} 
+                color={theme.colors.gray}
+                style={{paddingHorizontal: 8}}
+                onPress={() => navigation.navigate('ChatBackground')}
+              />
+            </Block>
+          }
           <Text headline bold notBlack style={{marginTop: 23, marginBottom: 8}}>Text size</Text>
           <Block row space="between" style={styles.settingsItem}>
             <Text notBlack style={{fontSize: 11}}>A</Text>
@@ -120,15 +134,23 @@ export default class Settings extends Component {
               style={{paddingHorizontal: 8}}
             />
           </Block>
-          <Block 
-            row 
-            forPress
-            space="between" 
-            style={styles.settingsItem}
-            onPress={this.handleSignOut}
-          >
-            <Text body red>Log Out</Text>
-          </Block>
+          {
+            Platform.OS === 'android' 
+            ?
+            <Button onPress={this.handleSignOut}>
+              <Text body red>Log Out</Text>
+            </Button>
+            :
+            <Block 
+              row 
+              forPress
+              space="between" 
+              style={styles.settingsItem}
+              onPress={this.handleSignOut}
+            >
+              <Text body red>Log Out</Text>
+            </Block>
+          }
         </Block>
         </ScrollView>
       </KeyboardAvoidingView>
