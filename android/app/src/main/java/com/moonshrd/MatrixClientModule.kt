@@ -1,8 +1,6 @@
 package com.moonshrd
 
-import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.bridge.ReactContextBaseJavaModule
-import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.bridge.*
 import com.google.gson.Gson
 import com.moonshrd.model.DirectChatModel
 import java.lang.RuntimeException
@@ -13,13 +11,20 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
     }
 
     @ReactMethod
-    @Throws(RuntimeException::class)
-    fun getDirectChats(): String {
-        if(Globals.currMatrixSession == null) {
-            throw RuntimeException()
+    fun getDirectChats(promise: Promise) {
+        val matrixInstance = Matrix.getInstance(reactApplicationContext)
+        if(matrixInstance.defaultSession == null) {
+            promise.reject(RuntimeException("Session must not be null!"))
         }
-        val directChats = Globals.currMatrixSession.dataHandler.store.rooms.filter {
+        val directChats = matrixInstance.defaultSession.dataHandler.store.rooms.filter {
             it.isDirect
+        }
+
+        for(i in 0 until 15) {
+            if(!Globals.State.isInitialSyncComplete) {
+                Thread.sleep(1000)
+            }
+            break
         }
 
         val chatModels = mutableListOf<DirectChatModel>()
@@ -27,16 +32,16 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             val chat = DirectChatModel()
             chat.name = room.getRoomDisplayName(reactApplicationContext)
             chat.avatarUri = room.avatarUrl ?: ""
-            val roomSummary = Globals.currMatrixSession.dataHandler.store.getSummary(room.roomId)
+            val roomSummary = matrixInstance.defaultSession.dataHandler.store.getSummary(room.roomId)
             val contactID = roomSummary!!.heroes.filter {
-                it != Globals.currMatrixSession.myUserId
+                it != matrixInstance.defaultSession.myUserId
             }[0]
-            val contact = Globals.currMatrixSession.dataHandler.store.getUser(contactID)
+            val contact = matrixInstance.defaultSession.dataHandler.store.getUser(contactID)
             chat.lastSeen = contact.latestPresenceTs
             chat.isActive = contact.isActive
             chatModels.add(DirectChatModel())
         }
         val gson = Gson()
-        return gson.toJson(chatModels)
+        promise.resolve(gson.toJson(chatModels))
     }
 }

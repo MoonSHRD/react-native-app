@@ -1,5 +1,7 @@
 package com.moonshrd;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 
 import com.facebook.react.bridge.Arguments;
@@ -17,7 +19,9 @@ import org.matrix.androidsdk.core.callback.SimpleApiCallback;
 import org.matrix.androidsdk.core.model.MatrixError;
 import org.matrix.androidsdk.rest.model.login.LocalizedFlowDataLoginTerms;
 import org.matrix.androidsdk.rest.model.login.RegistrationFlowResponse;
-import org.matrix.androidsdk.rest.model.pid.ThreePid;
+import org.matrix.androidsdk.rest.model.sync.SyncResponse;
+import org.matrix.androidsdk.sync.DefaultEventsThreadListener;
+import org.matrix.androidsdk.sync.EventsThreadListener;
 
 import java.util.List;
 
@@ -83,7 +87,16 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public boolean onAppStart() {
-        return Matrix.getInstance(getReactApplicationContext()).getLoginStorage().getCredentialsList().size() != 0;
+        Matrix matrixInstance = Matrix.getInstance(getReactApplicationContext());
+        List<HomeServerConnectionConfig> credentialsList = matrixInstance.getLoginStorage().getCredentialsList();
+        if(credentialsList.size() != 0) {
+            SharedPreferences prefs = getReactApplicationContext().getSharedPreferences("other_prefs", Context.MODE_PRIVATE);
+            Globals.State.isInitialSyncComplete = prefs.getBoolean("isInitialSyncComplete", false);
+            Matrix.getInstance(getReactApplicationContext()).createSession(credentialsList.get(0));
+            startListeningEventStream();
+            return true;
+        }
+        return false;
     }
 
     @ReactMethod
@@ -186,5 +199,33 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
                 RNUtilsKt.sendEvent(getReactApplicationContext(), "onResourceLimitExceeded", args);
             }
         });
+    }
+
+    private void startListeningEventStream() {
+        Matrix matrixInstance = Matrix.getInstance(getReactApplicationContext());
+        matrixInstance.getDefaultSession().startEventStream(new EventsThreadListener() {
+            private DefaultEventsThreadListener defaultListener = new DefaultEventsThreadListener(matrixInstance.getDefaultSession().getDataHandler());
+
+            @Override
+            public void onSyncResponse(SyncResponse response, String fromToken, boolean isCatchingUp) {
+                defaultListener.onSyncResponse(response, fromToken, isCatchingUp);
+                SharedPreferences prefs = getReactApplicationContext().getSharedPreferences("other_prefs", Context.MODE_PRIVATE);
+                boolean isInitialSyncComplete = prefs.getBoolean("isInitialSyncComplete", false);
+                if(!isInitialSyncComplete) {
+                    prefs.edit().putBoolean("isInitialSyncComplete", true).apply();
+                    Globals.State.isInitialSyncComplete = true;
+                }
+            }
+
+            @Override
+            public void onSyncError(MatrixError matrixError) {
+                defaultListener.onSyncError(matrixError);
+            }
+
+            @Override
+            public void onConfigurationError(String matrixErrorCode) {
+                defaultListener.onConfigurationError(matrixErrorCode);
+            }
+        }, matrixInstance.getDefaultSession().getNetworkConnectivityReceiver(),null);
     }
 }

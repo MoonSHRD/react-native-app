@@ -55,6 +55,8 @@ import java.util.Set;
  * Singleton to control access to the Matrix SDK and providing point of control for MXSessions.
  */
 public class Matrix {
+    // TODO Refactor
+
     // Set to true to enable local file encryption
     private static final boolean CONFIG_ENABLE_LOCAL_FILE_ENCRYPTION = false;
 
@@ -635,13 +637,8 @@ public class Matrix {
         //final MetricsListener metricsListener = new MetricsListenerProxy(VectorApp.getInstance().getAnalytics());
         final Credentials credentials = hsConfig.getCredentials();
 
-        /*if (true) {*/
         store = new MXFileStore(hsConfig, CONFIG_ENABLE_LOCAL_FILE_ENCRYPTION, context);
         //store.setMetricsListener(metricsListener);
-
-        /*} else {
-            store = new MXMemoryStore(hsConfig.getCredentials(), context);
-        }*/
 
         final MXDataHandler dataHandler = new MXDataHandler(store, credentials);
         store.setDataHandler(dataHandler);
@@ -670,6 +667,8 @@ public class Matrix {
 
             @Override
             public void onSSLCertificateError(UnrecognizedCertificateException unrecCertEx) {
+                LoginStorage loginStorage = Matrix.getInstance(context).getLoginStorage();
+                loginStorage.replaceCredentials(session.getHomeServerConfig());
                 /*if (null != VectorApp.getCurrentActivity()) {
                     final Fingerprint fingerprint = unrecCertEx.getFingerprint();
                     Log.d(LOG_TAG, "## createSession() : Found fingerprint: SHA-256: " + fingerprint.getBytesAsHexString());
@@ -740,39 +739,6 @@ public class Matrix {
 
         return session;
     }
-
-    /*private void registerKeyBackupStateListener(MXSession session) {
-        if (session.getCrypto() != null) {
-            KeysBackup keysBackup = session.getCrypto().getKeysBackup();
-            final String matrixID = session.getMyUserId();
-            if (keyBackupStateListeners.get(matrixID) == null) {
-                KeysBackupStateManager.KeysBackupStateListener keyBackupStateListener = new KeysBackupStateManager.KeysBackupStateListener() {
-                    @Override
-                    public void onStateChange(@NotNull KeysBackupStateManager.KeysBackupState newState) {
-                        if (KeysBackupStateManager.KeysBackupState.WrongBackUpVersion == newState) {
-                            //We should show the popup
-                            Activity activity = VectorApp.getCurrentActivity();
-                            //This is fake multi session :/ i should be able to have current session...
-                            if (activity != null) {
-                                new AlertDialog.Builder(activity)
-                                        .setTitle(R.string.new_recovery_method_popup_title)
-                                        .setMessage(R.string.new_recovery_method_popup_description)
-                                        .setPositiveButton(R.string.open_settings, (dialog, which) -> {
-                                            activity.startActivity(KeysBackupManageActivity.Companion.intent(activity, matrixID));
-                                        })
-                                        .setNegativeButton(R.string.new_recovery_method_popup_was_me, null)
-                                        .show();
-                            }
-                        }
-                    }
-                };
-                keyBackupStateListeners.put(matrixID, keyBackupStateListener);
-            }
-            keysBackup.addListener(keyBackupStateListeners.get(matrixID));
-        } else {
-            Log.e(LOG_TAG, "## Failed to register keybackup state listener");
-        }
-    }*/
 
     /**
      * Reload the matrix sessions.
@@ -935,4 +901,6 @@ public class Matrix {
     public void clearTmpStoresList() {
         mTmpStores = new ArrayList<>();
     }
+
+
 }
