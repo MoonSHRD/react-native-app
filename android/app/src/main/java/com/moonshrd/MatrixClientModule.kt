@@ -1,15 +1,17 @@
 package com.moonshrd
 
-import com.facebook.react.bridge.*
+import com.facebook.react.bridge.Promise
+import com.facebook.react.bridge.ReactApplicationContext
+import com.facebook.react.bridge.ReactContextBaseJavaModule
+import com.facebook.react.bridge.ReactMethod
 import com.google.gson.Gson
 import com.moonshrd.model.DirectChatModel
 import com.moonshrd.model.UserModel
+import java9.util.concurrent.CompletableFuture
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.matrix.androidsdk.core.callback.ApiCallback
 import org.matrix.androidsdk.core.model.MatrixError
-import java.lang.Exception
-import java.lang.RuntimeException
 
 class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
     val gson = Gson() // TODO Optimize it with Dagger
@@ -61,22 +63,61 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     @ReactMethod
     fun getUserById(userID: String, promise: Promise) {
+        var userModel: UserModel? = null
+        val userName: CompletableFuture<String?> = CompletableFuture()
+        var userAvatarUrl: CompletableFuture<String?> = CompletableFuture()
+
         matrixInstance.defaultSession.profileApiClient.displayname(userID, object: ApiCallback<String> {
             override fun onSuccess(info: String?) {
-                promise.resolve(info)
+                userName.complete(info!!)
             }
 
             override fun onUnexpectedError(e: Exception?) {
                 promise.reject(e)
+                userName.complete(null)
             }
 
             override fun onMatrixError(e: MatrixError?) {
                 promise.reject(RuntimeException(e!!.error))
+                userName.complete(null)
             }
 
             override fun onNetworkError(e: Exception?) {
                 promise.reject(e)
+                userName.complete(null)
             }
         })
+
+        matrixInstance.defaultSession.profileApiClient.avatarUrl(userID,  object: ApiCallback<String> {
+            override fun onSuccess(info: String?) {
+                userAvatarUrl.complete(info!!)
+                userAvatarUrl.complete(null)
+            }
+
+            override fun onUnexpectedError(e: Exception?) {
+                promise.reject(e)
+                userAvatarUrl.complete(null)
+            }
+
+            override fun onMatrixError(e: MatrixError?) {
+                //promise.reject(RuntimeException(e!!.error))
+                userAvatarUrl.complete(null)
+            }
+
+            override fun onNetworkError(e: Exception?) {
+                promise.reject(e)
+                userAvatarUrl.complete(null)
+            }
+        })
+
+        GlobalScope.launch {
+            val name = userName.get()
+            val avatarUrl = userAvatarUrl.get()
+            if(name != null) {
+                promise.resolve(gson.toJson(UserModel(name, avatarUrl!!)))
+            }
+        }
     }
+
+
 }
