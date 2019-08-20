@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Platform, Dimensions, Alert, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
 import MatrixLoginClient from '../native/MatrixLoginClient';
+import { connect } from 'react-redux';
+import { logout } from '../store/actions/loginActions';
 
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Block, Text, Switch, Button } from '../components';
@@ -9,7 +11,7 @@ import { Slider } from 'react-native-elements';
 
 const { width, height } = Dimensions.get('window');
 
-export default class Settings extends Component {
+class Settings extends Component {
   static navigationOptions = ({ navigation }) => {
     return {
       headerTitle: (
@@ -34,7 +36,7 @@ export default class Settings extends Component {
 
   handleSignOut = () => {
       MatrixLoginClient.logout()
-      this.props.handleChange({ signedIn: false });
+      this.props.confirmLogout()
   }
 
   render() {
@@ -173,3 +175,20 @@ const styles = StyleSheet.create({
     width: width - 76,
   }
 })
+
+function mapStateToProps (state) {
+  return {
+    login: state.login
+  }
+}
+
+function mapDispatchToProps (dispatch) {
+  return {
+    confirmLogout: () => dispatch(logout())
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Settings)

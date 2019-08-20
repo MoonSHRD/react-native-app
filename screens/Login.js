@@ -4,6 +4,8 @@ import { Platform, View, Dimensions, NetInfo, Alert, ActivityIndicator, ScrollVi
 import { Button, Block, Input, Text } from '../components';
 import { theme } from '../constants';
 import MatrixLoginClient from '../native/MatrixLoginClient';
+import { connect } from 'react-redux';
+import { isSignedIn } from '../store/actions/loginActions';
 
 import Logo from '../assets/images/logo-small.svg';
 import TextLogo from '../assets/images/text-logo.svg';
@@ -13,7 +15,7 @@ import Instagram from '../assets/icons/facebook.svg';
 
 const { width, height } = Dimensions.get('window');
 
-export default class Login extends Component {
+class Login extends Component {
   static navigationOptions = {
     header: null
   }
@@ -91,14 +93,17 @@ export default class Login extends Component {
     this.onNetworkErrorEvent = DeviceEventEmitter.addListener('onNetworkError', function(e) {
       console.log('onNetworkError')
       console.log(e)
+      this.props.confirmLogin(false)
     });  
     this.onMatrixErrorEvent = DeviceEventEmitter.addListener('onMatrixError', function(e) {
       console.log('onMatrixError')
       console.log(e)
+      this.props.confirmLogin(false)
     });  
     this.onUnexpectedErrorEvent = DeviceEventEmitter.addListener('onUnexpectedError', function(e) {
       console.log('onUnexpectedError')
       console.log(e)
+      this.props.confirmLogin(false)
     });  
     this.successLogin = DeviceEventEmitter.addListener('onSuccess', function(e) {
         console.log('onSuccess')
@@ -110,6 +115,7 @@ export default class Login extends Component {
           {
               text: 'Continue', onPress: () => {
                 navigation.navigate('SignedIn');
+                this.props.confirmLogin(true)
               }
           }
           ],
@@ -257,3 +263,20 @@ const styles = StyleSheet.create({
     borderBottomColor: theme.colors.accent,
   }
 })
+
+function mapStateToProps (state) {
+  return {
+    login: state.login
+  }
+}
+
+function mapDispatchToProps (dispatch) {
+  return {
+    confirmLogin: (data) => dispatch(isSignedIn(data))
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Login)

@@ -6,6 +6,7 @@
     "start": "node node_modules/react-native/local-cli/cli.js start --port=8081",
     "android": "react-native --port=8081 run-android",
     "ios": "react-native run-ios --port=8081 --simulator='iPhone 7'",
+    "react-devtools": "react-devtools",
     "test": "jest"
   },
   "dependencies": {
@@ -33,6 +34,7 @@
     "jest": "^24.8.0",
     "mem": ">=4.0.0",
     "metro-react-native-babel-preset": "^0.55.0",
+    "react-devtools": "^3.6.3",
     "react-native-svg-transformer": "^0.13.0",
     "react-test-renderer": "16.8.3",
     "ws": ">=3.3.1"

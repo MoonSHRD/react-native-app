@@ -1,23 +1,22 @@
 import React from 'react';
-import { StyleSheet, AsyncStorage, Dimensions, View, Alert } from 'react-native';
+import { StyleSheet, AsyncStorage, Dimensions, View, Alert, TouchableHighlight } from 'react-native';
 import {connect} from 'react-redux';
-import MatrixLoginClient from './native/MatrixLoginClient';
 
 import { Block, Text, Button } from './components';
 import { Overlay, Avatar } from 'react-native-elements';
 import { theme } from './constants';
 import { createRootNavigator } from "./navigation/router";
+import { initAppWithRealm } from './store/actions/loginActions';
 const { width, height } = Dimensions.get('window');
+
 
 console.disableYellowBox = true;
 
-export default class App extends React.Component {
+class App extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      signedIn: false,
-      checkedSignIn: true,
       isLoadingComplete: false,
       visible: false,
       match: {
@@ -38,32 +37,15 @@ export default class App extends React.Component {
   }
 
   componentDidMount() {
-    this.setState({ signedIn: MatrixLoginClient.onAppStart(), checkedSignIn: true })
+    this.props.initApplication()
   }
-
-  handleChange(data) {
-    this.setState(data);
-  }
-
-//   _isSignedInAsync =  () => {
-//     return new Promise((resolve, reject) => {
-//     this.props.getUserToken()
-//         .then(res => {
-//           if (res !== null) {
-//           resolve(true);
-//           } else {
-//           resolve(false);
-//           }
-//         })
-//         .catch(err => reject(err));
-//     });
-// };
 
   render() {
-    const { checkedSignIn, signedIn, visible, match, loading } = this.state;
+    const { signedIn, checkedSignIn } = this.props.login;
+    const { visible, match, loading } = this.state;
 
     if (!checkedSignIn) {
-      return null;
+      return null
     }
 
     const Navigation = createRootNavigator(signedIn);
@@ -192,6 +174,35 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     overflow: 'hidden'
+  },
+  text: {
+    textAlign: 'center'
+  },
+  button: {
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#0b7eff'
+  },
+  buttonText: {
+    color: 'white'
   }
 
 });
+
+function mapStateToProps (state) {
+  return {
+    login: state.login
+  }
+}
+
+function mapDispatchToProps (dispatch) {
+  return {
+    initApplication: () => dispatch(initAppWithRealm())
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(App)

@@ -4,6 +4,8 @@ import { Platform, View, Dimensions, Alert, ActivityIndicator, ScrollView, Keybo
 import { Button, Block, Input, Text } from '../components';
 import { theme } from '../constants';
 import MatrixLoginClient from '../native/MatrixLoginClient';
+import { connect } from 'react-redux';
+import { isSignedIn } from '../store/actions/loginActions';
 
 import Logo from '../assets/images/logo-small.svg';
 import TextLogo from '../assets/images/text-logo.svg';
@@ -13,7 +15,7 @@ import Instagram from '../assets/icons/facebook.svg';
 
 const { width, height } = Dimensions.get('window');
 
-export default class SignUp extends Component {
+class SignUp extends Component {
   static navigationOptions = {
     header: null
   }
@@ -35,7 +37,7 @@ export default class SignUp extends Component {
   }
 
   handleSignUp = () => {
-    const { navigation } = this.props;
+    const { navigation,  } = this.props;
     const { email, password } = this.state;
     const errors = [];
     const homeserverUri = 'https://matrix.moonshard.tech';
@@ -81,6 +83,7 @@ export default class SignUp extends Component {
             {
                 text: 'Continue', onPress: () => {
                   navigation.navigate('SignedIn');
+                  this.props.confirmLogin(true)
                 }
             }
             ],
@@ -92,7 +95,9 @@ export default class SignUp extends Component {
             'Error occured: ' + error,
             [
             {
-                text: 'OK', onPress: () => {}
+                text: 'OK', onPress: () => {
+                  this.props.confirmLogin(false)
+                }
             }
             ],
             { cancelable: false }
@@ -109,6 +114,7 @@ export default class SignUp extends Component {
     DeviceEventEmitter.addListener("onRegistrationFailed", event => {
       console.log('onRegistrationFailed')
       console.log(event)
+      this.props.confirmLogin(false)
     })
     DeviceEventEmitter.addListener("onWaitingEmailValidation", event => {
       console.log('onWaitingEmailValidation')
@@ -121,10 +127,12 @@ export default class SignUp extends Component {
     DeviceEventEmitter.addListener("onThreePidRequestFailed", event => {
       console.log('onThreePidRequestFailed')
       console.log(event)
+      this.props.confirmLogin(false)
     })
     DeviceEventEmitter.addListener("onResourceLimitExceeded", event => {
       console.log('onResourceLimitExceeded')
       console.log(event)
+      this.props.confirmLogin(false)
     })
   }
 
@@ -265,3 +273,20 @@ const styles = StyleSheet.create({
     borderBottomColor: theme.colors.accent,
   }
 })
+
+function mapStateToProps (state) {
+  return {
+    login: state.login
+  }
+}
+
+function mapDispatchToProps (dispatch) {
+  return {
+    confirmLogin: (data) => dispatch(isSignedIn(data))
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(SignUp)
