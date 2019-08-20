@@ -77,8 +77,8 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             }
 
             override fun onMatrixError(e: MatrixError?) {
-                promise.reject(RuntimeException(e!!.error))
-                userName.complete(null)
+                //promise.reject(RuntimeException(e!!.error))
+                userName.complete("")
             }
 
             override fun onNetworkError(e: Exception?) {
