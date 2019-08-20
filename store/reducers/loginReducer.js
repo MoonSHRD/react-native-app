@@ -61,7 +61,8 @@ export default function loginReducer (state = initialState, action) {
     case INIT_APPLICATION:
         return {
             ...state,
-            checkedSignIn: action.data,
+            signedIn: action.data,
+            checkedSignIn: true,
         }
     default:
       return state
