@@ -63,7 +63,6 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     @ReactMethod
     fun getUserById(userID: String, promise: Promise) {
-        var userModel: UserModel? = null
         val userName: CompletableFuture<String?> = CompletableFuture()
         var userAvatarUrl: CompletableFuture<String?> = CompletableFuture()
 
