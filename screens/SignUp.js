@@ -104,38 +104,6 @@ class SignUp extends Component {
     }
   }
 
-  componentDidMount() {
-    const { confirmLogin } = this.props;
-    DeviceEventEmitter.addListener("onRegistrationSuccess", event => {
-      console.log('onRegistrationSuccess')
-      console.log(event)
-      confirmLogin(true)
-    })
-    DeviceEventEmitter.addListener("onRegistrationFailed", event => {
-      console.log('onRegistrationFailed')
-      console.log(event)
-      confirmLogin(false)
-    })
-    DeviceEventEmitter.addListener("onWaitingEmailValidation", event => {
-      console.log('onWaitingEmailValidation')
-      console.log(event)
-    })
-    DeviceEventEmitter.addListener("onWaitingCaptcha", event => {
-      console.log('onWaitingCaptcha')
-      console.log(event)
-    })
-    DeviceEventEmitter.addListener("onThreePidRequestFailed", event => {
-      console.log('onThreePidRequestFailed')
-      console.log(event)
-      confirmLogin(false)
-    })
-    DeviceEventEmitter.addListener("onResourceLimitExceeded", event => {
-      console.log('onResourceLimitExceeded')
-      console.log(event)
-      confirmLogin(false)
-    })
-  }
-
   onContentSizeChange = (contentWidth, contentHeight) => {
     this.setState({ screenHeight: contentHeight });
   };

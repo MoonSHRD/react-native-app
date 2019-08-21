@@ -93,18 +93,15 @@ class Login extends Component {
     this.onNetworkErrorEvent = DeviceEventEmitter.addListener('onNetworkError', function(e) {
       console.log('onNetworkError')
       console.log(e)
-      loginResult(false)
     });  
-    this.onMatrixErrorEvent = DeviceEventEmitter.addListener('onMatrixError', function(e) {
+    this.onMatrixErrorEvent = DeviceEventEmitter.addListener('onMatrixError', (e) => {
       console.log('onMatrixError')
       console.log(e)
       this.setState({wrongPassword: true})
-      loginResult(false)
     });  
     this.onUnexpectedErrorEvent = DeviceEventEmitter.addListener('onUnexpectedError', function(e) {
       console.log('onUnexpectedError')
       console.log(e)
-      loginResult(false)
     });  
     this.successLogin = DeviceEventEmitter.addListener('onSuccess', function(e) {
         console.log('onSuccess')
