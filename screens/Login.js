@@ -24,7 +24,7 @@ class Login extends Component {
     password: null,
     errors: [],
     loading: false,
-    loginResult: {},
+    wrongPassword: false,
   }
 
   validateEmail(email) {
@@ -98,6 +98,7 @@ class Login extends Component {
     this.onMatrixErrorEvent = DeviceEventEmitter.addListener('onMatrixError', function(e) {
       console.log('onMatrixError')
       console.log(e)
+      this.setState({wrongPassword: true})
       this.props.confirmLogin(false)
     });  
     this.onUnexpectedErrorEvent = DeviceEventEmitter.addListener('onUnexpectedError', function(e) {
@@ -132,7 +133,7 @@ class Login extends Component {
 
   render() {
     const { navigation } = this.props;
-    const { loading, errors } = this.state;
+    const { loading, errors, wrongPassword } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
     const scrollEnabled = this.state.screenHeight > height - 100;
 
@@ -161,11 +162,22 @@ class Login extends Component {
             <Input
               secure
               error={hasErrors('password')}
-              style={[styles.input, hasErrors('password')]}
+              style={wrongPassword ? [styles.wrongInput, hasErrors('password')] : [styles.input, hasErrors('password')]}
               defaultValue={this.state.password}
               placeholder={'Enter password'}
               onChangeText={text => this.setState({ password: text })}
             />
+            {
+              wrongPassword
+              ?
+              <Text
+                red
+                footnote
+                center
+              >Wrong password. Try again.</Text>
+              :
+              null
+            }
             <Button gradient style={styles.confirmButton}               
               onPress={this.handleLogin}
             >
@@ -174,7 +186,20 @@ class Login extends Component {
                 <Text headline bold white center>Confirm</Text>
               }
             </Button>
-            <Button style={styles.textButton} onPress={() => navigation.navigate('ForgotPassword')}>
+            {
+              wrongPassword
+              ?
+              <Text
+                style={{textDecorationLine: 'underline'}}
+                gray
+                footnote
+                center
+                onPress={() => navigation.navigate('ForgotPassword')}>
+                Forgot Password?</Text>
+              :
+              null
+            }
+            <Button style={styles.textButton} onPress={() => navigation.navigate('SignUp')}>
               <Text gray footnote center>
                 Don't have an account? <Text gray footnote style={{ textDecorationLine: 'underline' }}>Register</Text>
               </Text>
@@ -228,6 +253,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     margin: 0,
     color: '#333333',
+  },
+  wrongInput: {
+    borderWidth: 0,
+    backgroundColor: '#EBEBEB',
+    borderRadius: 8,
+    fontSize: 17,
+    textAlign: 'center',
+    margin: 0,
+    color: '#FF6161',
   },
   confirmButton: {
     marginTop: 15,
