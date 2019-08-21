@@ -102,6 +102,8 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void logout() {
+        SharedPreferences prefs = getReactApplicationContext().getSharedPreferences("other_prefs", Context.MODE_PRIVATE);
+        prefs.edit().remove("isInitialSyncComplete").apply();
         Matrix.getInstance(getReactApplicationContext()).getDefaultSession().stopEventStream();
         Matrix.getInstance(getReactApplicationContext()).clearSessions(getReactApplicationContext(), true, null);
         Matrix.getInstance(getReactApplicationContext()).getLoginStorage().clear();
