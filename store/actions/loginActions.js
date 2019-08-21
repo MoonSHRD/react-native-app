@@ -1,7 +1,5 @@
 import { LOGOUT, LOGINING, LOGIN_SUCCESS, LOGIN_FAILURE, IS_SIGNED_IN, INIT_APPLICATION } from './constants'
 import MatrixLoginClient from '../../native/MatrixLoginClient';
-import console = require('console');
-  
 
   export function login() {
     return {
@@ -50,8 +48,13 @@ import console = require('console');
   
   export function initAppWithRealm() {
     return (dispatch) => {
-      const response = MatrixLoginClient.onAppStart()
-      console.log(response)
-      dispatch(initApplication(response))
+      const promise = MatrixLoginClient.onAppStart()
+      promise.then((data) => {
+        dispatch(initApplication(data))
+        },
+        (error) => {
+        console.log(error);
+        }
+      );      
     }
   }

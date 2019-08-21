@@ -18,10 +18,7 @@ export default function loginReducer (state = initialState, action) {
     case LOGINING:
       return {
         ...state,
-        loginInputs: {...state.loginInputs},
         loading: true,
-        signedIn: false,
-        checkedSignIn: true,    
       }
     case HANDLE_INPUT_CHANGE:
       return {
@@ -35,16 +32,12 @@ export default function loginReducer (state = initialState, action) {
         ...state,
         loading: false,
         error: false,
-        signedIn: true,
-        checkedSignIn: true,
       }
     case LOGIN_FAILURE:
         return {
             ...state,
             loading: false,
             errors: true,
-            signedIn: false,
-            checkedSignIn: true,
         }
     case LOGOUT:
         return {
