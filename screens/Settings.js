@@ -32,6 +32,7 @@ class Settings extends Component {
     notifications: true,
     nightTheme: false,
     textSize: 0.3,
+    screenHeight: height,
   }
 
   handleSignOut = () => {
@@ -73,37 +74,22 @@ class Settings extends Component {
             <Text body gray>English</Text>
           </Block>
           <Text headline bold notBlack style={{marginTop: 23, marginBottom: 8}}>Chat settings</Text>
-          {
-            Platform.OS === 'android' 
-            ?
-            <Button onPress={() => navigation.navigate('ChatBackground')}>
-              <Text body notBlack>Chat Background</Text>
-              <Icon
-                name="ios-arrow-forward" 
-                size={24} 
-                color={theme.colors.gray}
-                style={{paddingHorizontal: 8}}
-                onPress={() => navigation.navigate('ChatBackground')}
-              />
-            </Button>
-            :
-            <Block 
-              forPress
-              row 
-              space="between" 
-              style={styles.settingsItem}
+          <Block 
+            forPress
+            row 
+            space="between" 
+            style={styles.settingsItem}
+            onPress={() => navigation.navigate('ChatBackground')}
+          >
+            <Text body notBlack>Chat Background</Text>
+            <Icon
+              name="ios-arrow-forward" 
+              size={24} 
+              color={theme.colors.gray}
+              style={{paddingHorizontal: 8}}
               onPress={() => navigation.navigate('ChatBackground')}
-            >
-              <Text body notBlack>Chat Background</Text>
-              <Icon
-                name="ios-arrow-forward" 
-                size={24} 
-                color={theme.colors.gray}
-                style={{paddingHorizontal: 8}}
-                onPress={() => navigation.navigate('ChatBackground')}
-              />
-            </Block>
-          }
+            />
+          </Block>
           <Text headline bold notBlack style={{marginTop: 23, marginBottom: 8}}>Text size</Text>
           <Block row space="between" style={styles.settingsItem}>
             <Text notBlack style={{fontSize: 11}}>A</Text>

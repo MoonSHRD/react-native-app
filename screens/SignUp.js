@@ -105,15 +105,16 @@ class SignUp extends Component {
   }
 
   componentDidMount() {
+    const { confirmLogin } = this.props;
     DeviceEventEmitter.addListener("onRegistrationSuccess", event => {
       console.log('onRegistrationSuccess')
       console.log(event)
-      this.props.confirmLogin(true)
+      confirmLogin(true)
     })
     DeviceEventEmitter.addListener("onRegistrationFailed", event => {
       console.log('onRegistrationFailed')
       console.log(event)
-      this.props.confirmLogin(false)
+      confirmLogin(false)
     })
     DeviceEventEmitter.addListener("onWaitingEmailValidation", event => {
       console.log('onWaitingEmailValidation')
@@ -126,12 +127,12 @@ class SignUp extends Component {
     DeviceEventEmitter.addListener("onThreePidRequestFailed", event => {
       console.log('onThreePidRequestFailed')
       console.log(event)
-      this.props.confirmLogin(false)
+      confirmLogin(false)
     })
     DeviceEventEmitter.addListener("onResourceLimitExceeded", event => {
       console.log('onResourceLimitExceeded')
       console.log(event)
-      this.props.confirmLogin(false)
+      confirmLogin(false)
     })
   }
 
