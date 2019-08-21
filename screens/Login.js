@@ -89,22 +89,22 @@ class Login extends Component {
   }
 
   componentDidMount() {
-    const { navigation } = this.props;
+    const { navigation, loginResult } = this.props;
     this.onNetworkErrorEvent = DeviceEventEmitter.addListener('onNetworkError', function(e) {
       console.log('onNetworkError')
       console.log(e)
-      this.props.confirmLogin(false)
+      loginResult(false)
     });  
     this.onMatrixErrorEvent = DeviceEventEmitter.addListener('onMatrixError', function(e) {
       console.log('onMatrixError')
       console.log(e)
       this.setState({wrongPassword: true})
-      this.props.confirmLogin(false)
+      loginResult(false)
     });  
     this.onUnexpectedErrorEvent = DeviceEventEmitter.addListener('onUnexpectedError', function(e) {
       console.log('onUnexpectedError')
       console.log(e)
-      this.props.confirmLogin(false)
+      loginResult(false)
     });  
     this.successLogin = DeviceEventEmitter.addListener('onSuccess', function(e) {
         console.log('onSuccess')
@@ -116,7 +116,7 @@ class Login extends Component {
           {
               text: 'Continue', onPress: () => {
                 navigation.navigate('SignedIn');
-                this.props.confirmLogin(true)
+                loginResult(true)
               }
           }
           ],
@@ -306,7 +306,7 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
   return {
-    confirmLogin: (data) => dispatch(isSignedIn(data))
+    loginResult: (data) => dispatch(isSignedIn(data))
   }
 }
 

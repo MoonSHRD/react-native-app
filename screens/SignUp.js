@@ -37,7 +37,6 @@ class SignUp extends Component {
   }
 
   handleSignUp = () => {
-    const { navigation,  } = this.props;
     const { email, password } = this.state;
     const errors = [];
     const homeserverUri = 'https://matrix.moonshard.tech';
@@ -82,7 +81,6 @@ class SignUp extends Component {
             [
             {
                 text: 'Continue', onPress: () => {
-                  navigation.navigate('SignedIn');
                   this.props.confirmLogin(true)
                 }
             }
@@ -110,6 +108,7 @@ class SignUp extends Component {
     DeviceEventEmitter.addListener("onRegistrationSuccess", event => {
       console.log('onRegistrationSuccess')
       console.log(event)
+      this.props.confirmLogin(true)
     })
     DeviceEventEmitter.addListener("onRegistrationFailed", event => {
       console.log('onRegistrationFailed')

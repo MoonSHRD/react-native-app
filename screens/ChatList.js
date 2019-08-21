@@ -157,9 +157,13 @@ export default class ChatList extends Component {
           :
           <SearchBar 
             placeholder="Search"
-            platform="android"
+            platform="ios"
             onChangeText={this.updateSearch}
+            cancelButtonTitle={null}
             value={search}
+            containerStyle={styles.searchBar}
+            inputContainerStyle={styles.searchInputBar}
+            inputStyle={styles.searchInputText}
           />
         }
         <View>

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Platform, View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
 
+import {BoxShadow} from 'react-native-shadow';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { SearchBar, ListItem, ThemeConsumer } from 'react-native-elements';
 import { theme } from '../constants';
@@ -102,6 +103,13 @@ export default class ContactList extends Component {
     const { loading, errors, search, contactList } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
     const scrollEnabled = this.state.screenHeight > height - 100;
+    const shadowOpt = {
+			color:"#b2bcf3",
+			radius:7,
+      opacity:0.2,
+			x:0,
+			y:-2,
+		}
 
     return (
       <KeyboardAvoidingView behavior="padding">
@@ -124,9 +132,13 @@ export default class ContactList extends Component {
           :
           <SearchBar 
             placeholder="Search"
-            platform="android"
+            platform="ios"
             onChangeText={this.updateSearch}
+            cancelButtonTitle={null}
             value={search}
+            containerStyle={styles.searchBar}
+            inputContainerStyle={styles.searchInputBar}
+            inputStyle={styles.searchInputText}
           />
         }
         <View>
@@ -179,6 +191,7 @@ const styles = StyleSheet.create({
     margin: 0,
     borderWidth: 0,
     borderRadius: 16,
+    height: 32,
   },
   searchInputText: {
     fontSize: theme.sizes.caption,
@@ -199,7 +212,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.2,
     shadowRadius: 7,  
-    elevation: 5,
   },
   list: {
     paddingHorizontal: 16,
@@ -209,6 +221,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 16,
     borderTopLeftRadius: 16,
     overflow: 'hidden',
+    elevation: 1.4,
   },  
   title: {
     color: theme.colors.notBlack,
