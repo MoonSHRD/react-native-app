@@ -112,8 +112,8 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         GlobalScope.launch {
             val name = userName.get()
             val avatarUrl = userAvatarUrl.get()
-            if(name != null) {
-                promise.resolve(gson.toJson(UserModel(name, avatarUrl!!)))
+            if(name != null && avatarUrl != null) {
+                promise.resolve(gson.toJson(UserModel(name, avatarUrl)))
             }
         }
     }
