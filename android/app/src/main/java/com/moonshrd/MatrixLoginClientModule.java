@@ -101,7 +101,9 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void logout() {
+        Matrix.getInstance(getReactApplicationContext()).getDefaultSession().stopEventStream();
         Matrix.getInstance(getReactApplicationContext()).clearSessions(getReactApplicationContext(), true, null);
+        Matrix.getInstance(getReactApplicationContext()).getLoginStorage().clear();
     }
 
     private void getRegFlowsAndRegister(HomeServerConnectionConfig hsConfig, RegistrationManager registrationManager) {
