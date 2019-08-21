@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
@@ -86,7 +87,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public boolean onAppStart() {
+    public void onAppStart(Promise promise) {
         Matrix matrixInstance = Matrix.getInstance(getReactApplicationContext());
         List<HomeServerConnectionConfig> credentialsList = matrixInstance.getLoginStorage().getCredentialsList();
         if(credentialsList.size() != 0) {
@@ -94,9 +95,9 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
             Globals.State.isInitialSyncComplete = prefs.getBoolean("isInitialSyncComplete", false);
             Matrix.getInstance(getReactApplicationContext()).createSession(credentialsList.get(0));
             startListeningEventStream();
-            return true;
+            promise.resolve(true);
         }
-        return false;
+        promise.resolve(false);
     }
 
     @ReactMethod
