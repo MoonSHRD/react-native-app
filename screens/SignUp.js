@@ -24,7 +24,8 @@ class SignUp extends Component {
     password: null,
     errors: [],
     loading: false,
-    loginResult: {}
+    loginResult: {},
+    userAlreadyExist: false,
   }
 
   validateEmail(email) {
@@ -37,7 +38,7 @@ class SignUp extends Component {
   }
 
   handleSignUp = () => {
-    const { email, password } = this.state;
+    const { email, password, userAlreadyExist } = this.state;
     const errors = [];
     const homeserverUri = 'https://matrix.moonshard.tech';
     const identityUri = 'https://vector.im'
@@ -74,23 +75,10 @@ class SignUp extends Component {
         )  
       }
       
-      if (error == null) {
-        Alert.alert(
-            'Success!',
-            'Your account has been created',
-            [
-            {
-                text: 'Continue', onPress: () => {
-                  this.props.confirmLogin(true)
-                }
-            }
-            ],
-            { cancelable: false }
-        )
-      } else {
-            Alert.alert(
+      if (userAlreadyExist) {
+          Alert.alert(
             'Error!',
-            'Error occured: ' + error,
+            'User already exist',
             [
             {
                 text: 'OK', onPress: () => {
@@ -103,6 +91,41 @@ class SignUp extends Component {
       }
     }
   }
+
+  componentDidMount() {		
+    const { confirmLogin } = this.props;	
+    this.onRegistrationSuccess = DeviceEventEmitter.addListener('onRegistrationSuccess', function(e) {
+      console.log('onRegistrationSuccess')
+      console.log(e)
+      Alert.alert(
+        'Success!',
+        'Your registration was successful',
+        [
+        {
+            text: 'Continue', onPress: () => {
+              confirmLogin(true)
+            }
+        }
+        ],
+        { cancelable: false }
+      )
+    });  	
+    this.onRegistrationFailed = DeviceEventEmitter.addListener('onRegistrationFailed', (e) => {
+      console.log('onRegistrationFailed')
+      console.log(e)
+      this.setState({userAlreadyExist: true})
+    });  
+    this.onThreePidRequestFailed = DeviceEventEmitter.addListener('onThreePidRequestFailed', function(e) {
+      console.log('onThreePidRequestFailed')
+      console.log(e)
+      console.log(event)		
+    });  
+    this.onResourceLimitExceeded = DeviceEventEmitter.addListener('onResourceLimitExceeded', function(e) {
+      console.log('onResourceLimitExceeded')
+      console.log(e)
+      console.log(event)		
+    });  
+  }		
 
   onContentSizeChange = (contentWidth, contentHeight) => {
     this.setState({ screenHeight: contentHeight });
