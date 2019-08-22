@@ -168,11 +168,13 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
         registrationManager.attemptRegistration(getReactApplicationContext(), new RegistrationManager.RegistrationListener() {
             @Override
             public void onRegistrationSuccess(String warningMessage) {
+                Log.i(LOG_TAG, "# onRegistrationSuccess(warningMessage=" + warningMessage + ")");
                 RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onRegistrationSuccess", "warningMessage", warningMessage);
             }
 
             @Override
             public void onRegistrationFailed(String message) {
+                Log.e(LOG_TAG, "# onRegistrationFailed(message=" + message + ")");
                 RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onRegistrationFailed", "message", message);
             }
 
@@ -204,6 +206,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
                 WritableMap args = Arguments.createMap();
                 args.putString("message", e.error);
                 args.putInt("retryAfter", e.retry_after_ms);
+                Log.d(LOG_TAG, "# onResourceLimitExceeded(e=" + e.error + ")");
                 RNUtilsKt.sendEvent(getReactApplicationContext(), "onResourceLimitExceeded", args);
             }
         });
