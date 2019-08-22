@@ -21,6 +21,8 @@ import org.matrix.androidsdk.core.model.MatrixError;
 import org.matrix.androidsdk.rest.model.login.LocalizedFlowDataLoginTerms;
 import org.matrix.androidsdk.rest.model.login.RegistrationFlowResponse;
 import org.matrix.androidsdk.rest.model.sync.SyncResponse;
+import org.matrix.androidsdk.ssl.CertUtil;
+import org.matrix.androidsdk.ssl.UnrecognizedCertificateException;
 import org.matrix.androidsdk.sync.DefaultEventsThreadListener;
 import org.matrix.androidsdk.sync.EventsThreadListener;
 
@@ -60,8 +62,40 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
         HomeServerConnectionConfig hsConfig = new HomeServerConnectionConfig.Builder()
                 .withHomeServerUri(Uri.parse(homeserverUri))
                 .withIdentityServerUri(Uri.parse(identityUri))
+                .withShouldAcceptTlsExtensions(true)
                 .build();
 
+        LoginHandler loginHandler = new LoginHandler();
+        loginHandler.login(getReactApplicationContext(), hsConfig, email, "", "", password, new ApiCallback<Void>() {
+            @Override
+            public void onNetworkError(Exception e) {
+                UnrecognizedCertificateException uException = CertUtil.getCertificateException(e);
+                if(uException != null) {
+                    hsConfig.getAllowedFingerprints().add(uException.getFingerprint());
+                    login(hsConfig, email, password);
+                }
+                RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onNetworkError", "exceptionText", e.getMessage());
+            }
+
+            @Override
+            public void onMatrixError(MatrixError e) {
+                RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onMatrixError", "exceptionText", e.getMessage());
+            }
+
+            @Override
+            public void onUnexpectedError(Exception e) {
+                RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onUnexpectedError", "exceptionText", e.getMessage());
+            }
+
+            @Override
+            public void onSuccess(Void info) {
+                RNUtilsKt.sendEvent(getReactApplicationContext(), "onSuccess", null);
+                startListeningEventStream();
+            }
+        });
+    }
+
+    private void login(HomeServerConnectionConfig hsConfig, String email, String password) {
         LoginHandler loginHandler = new LoginHandler();
         loginHandler.login(getReactApplicationContext(), hsConfig, email, "", "", password, new ApiCallback<Void>() {
             @Override
@@ -82,6 +116,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
             @Override
             public void onSuccess(Void info) {
                 RNUtilsKt.sendEvent(getReactApplicationContext(), "onSuccess", null);
+                startListeningEventStream();
             }
         });
     }
@@ -170,6 +205,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
             public void onRegistrationSuccess(String warningMessage) {
                 Log.i(LOG_TAG, "# onRegistrationSuccess(warningMessage=" + warningMessage + ")");
                 RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onRegistrationSuccess", "warningMessage", warningMessage);
+                startListeningEventStream();
             }
 
             @Override
