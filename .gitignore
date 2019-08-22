@@ -59,3 +59,4 @@ buck-out/
 
 # dotenv
 .env
+./ios/Index/DataStore/v5/
