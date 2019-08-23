@@ -16,7 +16,8 @@ public class MatrixClientPackage implements ReactPackage {
     @Override
     public List<NativeModule> createNativeModules(@Nonnull ReactApplicationContext reactContext) {
         return Arrays.asList(
-                new MatrixLoginClientModule(reactContext)
+                new MatrixLoginClientModule(reactContext),
+                new MatrixClientModule(reactContext)
         );
     }
 
