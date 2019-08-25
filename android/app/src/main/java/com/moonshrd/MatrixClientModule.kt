@@ -61,8 +61,8 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     @ReactMethod
     fun getUserById(userID: String, promise: Promise) {
-        val userName: CompletableFuture<String?> = CompletableFuture()
-        var userAvatarUrl: CompletableFuture<String?> = CompletableFuture()
+        val userName = CompletableFuture<String?>()
+        var userAvatarUrl = CompletableFuture<String?>()
 
         matrixInstance.defaultSession.profileApiClient.displayname(userID, object: ApiCallback<String> {
             override fun onSuccess(info: String?) {
