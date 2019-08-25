@@ -51,7 +51,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                         room.avatarUrl ?: "",
                         contact.latestPresenceTs,
                         contact.isActive,
-                        matrixInstance.defaultLatestChatMessageCache.getLatestText(reactApplicationContext, roomSummary.roomId)
+                        matrixInstance.defaultLatestChatMessageCache.getLatestText(reactApplicationContext, roomSummary!!.roomId)
                 )
                 chatModels.add(chat)
             }
