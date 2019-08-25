@@ -27,10 +27,6 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             if(matrixInstance.defaultSession == null) {
                 promise.reject(RuntimeException("Session must not be null!"))
             }
-            val directChats = matrixInstance.defaultSession.dataHandler.store.rooms.filter {
-                it.isDirect
-            }
-
             for(i in 0 until 15) {
                 if(!Globals.State.isInitialSyncComplete) {
                     if(i == 14) {
@@ -41,12 +37,14 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                 break
             }
 
+            val directChats = matrixInstance.defaultSession.dataHandler.store.rooms.filter {
+                it.isDirect
+            }
+
             val chatModels = mutableListOf<DirectChatModel>()
             directChats.forEach { room ->
                 val roomSummary = matrixInstance.defaultSession.dataHandler.store.getSummary(room.roomId)
-                val contactID = roomSummary!!.heroes.filter {
-                    it != matrixInstance.defaultSession.myUserId
-                }[0]
+                val contactID = room.getRoomDisplayName(reactApplicationContext)
                 val contact = matrixInstance.defaultSession.dataHandler.store.getUser(contactID)
                 val chat = DirectChatModel(
                         room.getRoomDisplayName(reactApplicationContext),
