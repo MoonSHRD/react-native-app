@@ -69,7 +69,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
         matrixInstance.defaultSession.profileApiClient.displayname(userID, object: ApiCallback<String> {
             override fun onSuccess(info: String?) {
-                userName.complete(info!!)
+                userName.complete(info)
             }
 
             override fun onUnexpectedError(e: Exception?) {
@@ -90,8 +90,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
         matrixInstance.defaultSession.profileApiClient.avatarUrl(userID,  object: ApiCallback<String> {
             override fun onSuccess(info: String?) {
-                userAvatarUrl.complete(info!!)
-                userAvatarUrl.complete(null)
+                userAvatarUrl.complete(info)
             }
 
             override fun onUnexpectedError(e: Exception?) {
@@ -115,6 +114,8 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             val avatarUrl = userAvatarUrl.get()
             if(name != null && avatarUrl != null) {
                 promise.resolve(gson.toJson(UserModel(name, avatarUrl)))
+            } else {
+                promise.resolve(gson.toJson(UserModel(userID, "")))
             }
         }
     }
