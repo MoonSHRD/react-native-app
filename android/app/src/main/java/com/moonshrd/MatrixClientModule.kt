@@ -12,6 +12,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.matrix.androidsdk.core.callback.ApiCallback
 import org.matrix.androidsdk.core.model.MatrixError
+import org.matrix.androidsdk.rest.model.RoomMember
 
 class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
     val gson = Gson() // TODO Optimize it with Dagger
@@ -44,7 +45,9 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             val chatModels = mutableListOf<DirectChatModel>()
             directChats.forEach { room ->
                 val roomSummary = matrixInstance.defaultSession.dataHandler.store.getSummary(room.roomId)
-                val contactID = room.getRoomDisplayName(reactApplicationContext)
+                val contactID = room.state.loadedMembers.filter {
+                    it.userId != matrixInstance.defaultSession.myUserId
+                }[0].userId
                 val contact = matrixInstance.defaultSession.dataHandler.store.getUser(contactID)
                 val chat = DirectChatModel(
                         room.getRoomDisplayName(reactApplicationContext),
