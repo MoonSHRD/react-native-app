@@ -7,7 +7,7 @@ import { theme } from '../constants';
 import { Avatar, ThemeConsumer } from 'react-native-elements';
 
 import {connect} from 'react-redux';
-import { getContactInfo } from '../store/actions/contactsActions';
+import { getContactInfo, deselectContact } from '../store/actions/contactsActions';
 
 const { width, height } = Dimensions.get('window');
 
@@ -31,13 +31,17 @@ class Profile extends Component {
             name="ios-arrow-back" 
             size={24} 
             color={theme.colors.blue}
-            onPress={() => navigation.goBack()}
+            onPress={() => {
+                navigation.goBack('Profile', () => {
+                this.props.deselectContact()})
+            }}
             style={{paddingVertical: 10, paddingHorizontal: 20,}}
         />
       )
     }
   };
   state = {
+      avatarUrl: '',
       name: 'Andrew Shoagase',
       phone: '+1(323)564-34-22',
       tags: [
@@ -98,6 +102,7 @@ class Profile extends Component {
     console.log(userId)
     await this.props.getContactInfo(userId)
     await this.checkName()
+    await this.setState({avatarUrl: this.props.contacts.contact.avatarUrl})
   }
 
   checkName = async () => {
@@ -115,7 +120,7 @@ class Profile extends Component {
   capitalize(props) {
     let text = props.slice(0,1).toUpperCase() + props.slice(1, props.length);
     return text
-  }        
+  }
 
   loadMyProfile = async () => {
     var sign = '@'
@@ -127,11 +132,13 @@ class Profile extends Component {
   }
 
   componentDidMount() {
-      (this.props.contacts.selectedContact != null)
-      ?
-      this.loadProfile()
-      :
-      this.loadMyProfile()
+    this.willFocus = this.props.navigation.addListener('willFocus', () => {
+        (this.props.contacts.selectedContact != null)
+        ?
+        this.loadProfile()
+        :
+        this.loadMyProfile()
+    })  
 }
 
   render() {
@@ -483,6 +490,7 @@ function mapStateToProps (state) {
   function mapDispatchToProps (dispatch) {
     return {
       getContactInfo: (data) => dispatch(getContactInfo(data)),
+      deselectContact: () => dispatch(deselectContact())
     }
   }
   

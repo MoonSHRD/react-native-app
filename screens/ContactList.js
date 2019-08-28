@@ -50,7 +50,6 @@ class ContactList extends Component {
   componentDidMount() {
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
       this.props.loadDirectChats()
-      this.props.deselectContact()
     });
   }
 
@@ -192,8 +191,9 @@ class ContactList extends Component {
                     subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen} interval={60000}/></Text>}
                     subtitleStyle={styles.subtitle}
                     containerStyle={styles.list}
-                    onPress={(navigation) => {
+                    onPress={() => {
                       this.props.selectContact('@'+l.name+':matrix.moonshard.tech')
+                      this.props.navigation.navigate('Profile')
                     }}  
                   />
                   </BoxShadow>
