@@ -6,12 +6,10 @@ import {
 import App from './App';
 import {name as appName} from './app.json';
 import {Provider} from 'react-redux';
-import initStore from './store/store'
-
-const store = initStore();
+import Store from './store/store'
 
 const Root = () => (
-  <Provider store={store}>
+  <Provider store={Store}>
     <App />
   </Provider>
 )

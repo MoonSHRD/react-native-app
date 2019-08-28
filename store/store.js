@@ -11,8 +11,4 @@ import thunk from 'redux-thunk';
 
 // const composedEnhancer = compose(...enhancerList);
 
-
-export default function initStore() {
-    let store = createStore(rootReducer, applyMiddleware(thunk))
-    return store
-  }
+export default Store = createStore(rootReducer, applyMiddleware(thunk))

@@ -3,13 +3,26 @@ import { Platform, View, Dimensions, Alert, ActivityIndicator, ScrollView, Keybo
 
 import {BoxShadow} from 'react-native-shadow';
 import Icon from 'react-native-vector-icons/Ionicons';
+import TimeAgo from 'react-native-timeago';
 import { SearchBar, ListItem, ThemeConsumer } from 'react-native-elements';
 import { theme } from '../constants';
-import { Text } from '../components'
+import { Text, Block } from '../components';
+
+import {connect} from 'react-redux';
+import { getContactList, searchBar, changeContactList, clearSearchBar, selectContact } from '../store/actions/contactsActions';
 
 const { width, height } = Dimensions.get('window');
 
-export default class ContactList extends Component {
+class ContactList extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      searchChanged: false,
+      search: '',
+      screenHeight: height,
+    };
+  }
 
   static navigationOptions = ({ navigation }) => {
     return {
@@ -28,88 +41,54 @@ export default class ContactList extends Component {
     };
   }
 
-  state = {
-    search: '',
-    screenHeight: height,
-    contactList: [
-      {
-        name: 'Amy Farha',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg',
-        subtitle: 'Online'
-      },
-      {
-        name: 'Chris Jackson',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Last seen June 12th 22:30'
-      },
-      {
-        name: 'Secret Friend',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Online'
-      },
-      {
-        name: 'Windrunner',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Last seen June 12th 22:30'
-      },
-      {
-        name: 'Secret Friend',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Online'
-      },
-      {
-        name: 'Secret Friend',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Online'
-      },
-      {
-        name: 'Windrunner',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Last seen June 12th 22:30'
-      },
-      {
-        name: 'Secret Friend',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Online'
-      },
-      {
-        name: 'Secret Friend',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Online'
-      },
-      {
-        name: 'Windrunner',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Last seen June 12th 22:30'
-      },
-      {
-        name: 'Secret Friend',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Online'
-      },
-    ]
-  };
 
   onContentSizeChange = (contentWidth, contentHeight) => {
     this.setState({ screenHeight: contentHeight });
   };
 
-  updateSearch = search => {
-    this.setState({ search });
+  componentDidMount() {
+    this.props.loadDirectChats();
+  }
+
+  updateSearch = async(text) => {
+    await this.setState({ search: text , searchChanged: true});
+    if (this.state.search == '') {
+      if (this.props.contacts.searchChanged) {
+        await this.props.clearSearchBar();
+        await this.props.loadDirectChats();  
+      }
+    }
+
+      const newData = await this.props.contacts.contactList.filter((item)=>{
+        const itemData = item.name.toUpperCase()
+        const textData = text.toUpperCase()
+        return itemData.indexOf(textData)>-1
+      });
+      await this.props.searchBar(text)
+      await this.props.changeContactList(newData) 
   };
   
+  capitalize(props) {
+    let text = props.slice(0,1).toUpperCase() + props.slice(1, props.length);
+    return text
+  }
+
   render() {
     const { navigation } = this.props;
-    const { loading, errors, search, contactList } = this.state;
+    const { loading, errors, searchChanged } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
     const scrollEnabled = this.state.screenHeight > height - 100;
+
     const shadowOpt = {
+      width: width - 16,
+			height: 64,
 			color:"#b2bcf3",
-			radius:7,
-      opacity:0.2,
+			border:7,
+			radius:16,
+			opacity:0.2,
 			x:0,
-			y:-2,
-		}
+			y:0,
+    }
 
     return (
       <KeyboardAvoidingView behavior="padding">
@@ -122,9 +101,9 @@ export default class ContactList extends Component {
           ? 
           <SearchBar 
             placeholder="Search"
-            onChangeText={this.updateSearch}
+            onChangeText={(text) => this.updateSearch(text)}
             platform="ios"
-            value={search}
+            value={this.props.contacts.search}
             containerStyle={styles.searchBar}
             inputContainerStyle={styles.searchInputBar}
             inputStyle={styles.searchInputText}
@@ -133,24 +112,16 @@ export default class ContactList extends Component {
           <SearchBar 
             placeholder="Search"
             platform="ios"
-            onChangeText={this.updateSearch}
+            onChangeText={(text) => this.updateSearch(text)}
             cancelButtonTitle={null}
-            value={search}
+            value={this.props.contacts.search}
             containerStyle={styles.searchBar}
             inputContainerStyle={styles.searchInputBar}
             inputStyle={styles.searchInputText}
           />
         }
         <View>
-          <ListItem 
-            key="newcontact"
-            title="Add contact"
-            titleStyle={styles.title}
-            leftIcon={{name:'person-add'}}
-            containerStyle={styles.listItem}
-          />
-          <ListItem 
-            key="findmatches"
+          <ListItem
             title="Find matches on this place"
             titleStyle={styles.title}
             leftIcon={{name:'near-me'}}
@@ -158,19 +129,74 @@ export default class ContactList extends Component {
             onPress={() => navigation.navigate('MatchesList')}
           />
           {
-            contactList.map((l, i) => (
-              <View style={styles.viewList}>
-                <ListItem
-                  key={i}
-                  leftAvatar={{ source: { uri: l.avatar_url } }}
-                  title={l.name}
-                  titleStyle={styles.title}
-                  subtitle={l.subtitle}
-                  subtitleStyle={styles.subtitle}
-                  containerStyle={styles.list}
-                />
-                </View>
-            ))
+            searchChanged
+            ?
+            <Block>
+            {
+              this.props.contacts.searchList.length > 0
+              ?
+              <Block>
+              {
+                this.props.contacts.searchList.map((l, i) => (
+                  <View style={styles.viewList}>
+                  <BoxShadow setting={shadowOpt}>
+                    <ListItem
+                      key={i}
+                      leftAvatar={
+                        (l.avatarUri == "")
+                        ?
+                        { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
+                        :
+                        { source: { uri: l.avatarUri } }
+                      }
+                      title={this.capitalize(l.name)}
+                      titleStyle={styles.title}
+                      subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>}
+                      subtitleStyle={styles.subtitle}
+                      containerStyle={styles.list}
+                      onPress={(navigation) => {
+                        this.props.selectContact('@'+l.name+':matrix.moonshard.tech')
+                        navigation.navigate('Profile')
+                      }}  
+                    />
+                    </BoxShadow>
+                    </View>
+                ))
+              }  
+              </Block>  
+              :
+              null
+            }
+            </Block>
+            :
+            <Block>
+            {
+              this.props.contacts.contactList.map((l, i) => (
+                <View style={styles.viewList}>
+                <BoxShadow setting={shadowOpt}>
+                  <ListItem
+                    key={i}
+                    leftAvatar={
+                      (l.avatarUri == "")
+                      ?
+                      { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
+                      :
+                      { source: { uri: l.avatarUri } }
+                    }
+                    title={this.capitalize(l.name)}
+                    titleStyle={styles.title}
+                    subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen} interval={60000}/></Text>}
+                    subtitleStyle={styles.subtitle}
+                    containerStyle={styles.list}
+                    onPress={(navigation) => {
+                      this.props.selectContact('@'+l.name+':matrix.moonshard.tech')
+                    }}  
+                  />
+                  </BoxShadow>
+                  </View>
+              ))
+            }  
+            </Block>
           }
         </View>
         </ScrollView>
@@ -204,14 +230,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     paddingHorizontal: 16,
     paddingVertical: 12,
+    zIndex: 10,
   },
   viewList: {
     width: width - 16,
+    marginTop: 2,
     marginHorizontal: 8,
     shadowColor: '#b2bcf3',
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.2,
     shadowRadius: 7,  
+    minHeight: 64,
   },
   list: {
     paddingHorizontal: 16,
@@ -221,7 +250,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 16,
     borderTopLeftRadius: 16,
     overflow: 'hidden',
-    elevation: 1.4,
+    minHeight: 64,
   },  
   title: {
     color: theme.colors.notBlack,
@@ -237,3 +266,25 @@ const styles = StyleSheet.create({
     lineHeight: 16
   }
 })
+
+
+function mapStateToProps (state) {
+  return {
+    contacts: state.contacts
+  }
+}
+
+function mapDispatchToProps (dispatch) {
+  return {
+    loadDirectChats: () => dispatch(getContactList()),
+    searchBar: (data) => dispatch(searchBar(data)),
+    changeContactList: (data) => dispatch(changeContactList(data)),
+    clearSearchBar: () => dispatch(clearSearchBar()),
+    selectContact: (data) => dispatch(selectContact(data)),
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ContactList)

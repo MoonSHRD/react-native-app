@@ -2,13 +2,18 @@ import React, { Component } from 'react';
 import { Platform, View, Dimensions, Image, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
 
 import Icon from 'react-native-vector-icons/Ionicons';
-import { Button, Block, Input, Text } from '../components';
+import {BoxShadow} from 'react-native-shadow';
+import TimeAgo from 'react-native-timeago';
+import { Block, Text } from '../components';
 import { SearchBar, ListItem, ThemeConsumer, CheckBox } from 'react-native-elements';
 import { theme } from '../constants';
 
+import {connect} from 'react-redux';
+import { getContactList, searchBar, changeContactList, clearSearchBar, selectedContacts, selectInContacts } from '../store/actions/contactsActions';
+
 const { width, height } = Dimensions.get('window');
 
-export default class ContactList extends Component {
+class NewGroupChat extends Component {
 
   static navigationOptions = ({ navigation }) => {
     return {
@@ -33,84 +38,8 @@ export default class ContactList extends Component {
 
   state = {
     search: '',
+    searchChanged: false,
     screenHeight: height,
-    contactList: [
-      {
-        name: 'Amy Farha',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg',
-        subtitle: 'Online',
-        isSelected: false,
-      },
-      {
-        name: 'Chris Jackson',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Last seen June 12th 22:30',
-        isSelected: true,
-      },
-      {
-        name: 'Secret Friend',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Online',
-        isSelected: false,
-      },
-      {
-        name: 'Windrunner',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Last seen June 12th 22:30',
-        isSelected: false,
-      },
-      {
-        name: 'Secret Friend',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Online',
-        isSelected: false,
-      },
-      {
-        name: 'Secret Friend',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Online',
-        isSelected: false,
-      },
-      {
-        name: 'Windrunner',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Last seen June 12th 22:30',
-        isSelected: false,
-      },
-      {
-        name: 'Secret Friend',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Online',
-        isSelected: false,
-      },
-      {
-        name: 'Secret Friend',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Online',
-        isSelected: false,
-      },
-      {
-        name: 'Windrunner',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Last seen June 12th 22:30',
-        isSelected: false,
-      },
-      {
-        name: 'Secret Friend',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Online',
-        isSelected: false,
-      },
-    ],
-  };
-
-    handleChange = (e) => {
-      this.setState(prevState => ({
-          contactList: {
-              ...prevState.contactList,
-              [prevState.contactList[1].name]: e.target.value,
-          },
-      }));
   };
   
 
@@ -118,15 +47,56 @@ export default class ContactList extends Component {
     this.setState({ screenHeight: contentHeight });
   };
 
-  updateSearch = search => {
-    this.setState({ search });
+  componentDidMount() {
+    this.props.getDirectChats();
+    this.props.selectedContacts(this.result)
+  }
+  
+  updateSearch = async(text) => {
+    await this.setState({ search: text , searchChanged: true});
+
+    if (this.state.search == '') {
+      if (this.props.contacts.searchChanged) {
+        await this.props.clearSearchBar();
+        await this.props.getDirectChats();  
+      }
+    }
+
+      const newData = await this.props.contacts.contactList.filter((item)=>{
+        const itemData = item.name.toUpperCase()
+        const textData = text.toUpperCase()
+        return itemData.indexOf(textData)>-1
+      });
+      await this.props.updateSearchBar(text)
+      await this.props.updateSearchList(newData) 
   };
+
+  result = this.props.contacts.contactList.map(function(o) {
+    o.isSelected = false;
+    return o;
+  })
+
+  capitalize(props) {
+    let text = props.slice(0,1).toUpperCase() + props.slice(1, props.length);
+    return text
+  }
   
   render() {
     const { navigation } = this.props;
-    const { loading, errors, search, contactList } = this.state;
+    const { loading, errors, searchChanged } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
     const scrollEnabled = this.state.screenHeight > height - 100;
+
+    const shadowOpt = {
+      width: width - 16,
+			height: 64,
+			color:"#b2bcf3",
+			border:7,
+			radius:16,
+			opacity:0.2,
+			x:0,
+			y:0,
+    }
 
     return (
       <KeyboardAvoidingView behavior="padding">
@@ -139,9 +109,9 @@ export default class ContactList extends Component {
           ? 
           <SearchBar 
             placeholder="Search"
-            onChangeText={this.updateSearch}
+            onChangeText={(text) => this.updateSearch(text)}
             platform="ios"
-            value={search}
+            value={this.props.contacts.search}
             containerStyle={styles.searchBar}
             inputContainerStyle={styles.searchInputBar}
             inputStyle={styles.searchInputText}
@@ -150,27 +120,91 @@ export default class ContactList extends Component {
           <SearchBar 
             placeholder="Search"
             platform="ios"
-            onChangeText={this.updateSearch}
+            onChangeText={(text) => this.updateSearch(text)}
             cancelButtonTitle={null}
-            value={search}
+            value={this.props.contacts.search}
             containerStyle={styles.searchBar}
             inputContainerStyle={styles.searchInputBar}
             inputStyle={styles.searchInputText}
           />
         }
         <View>
+
+        {
+          searchChanged
+          ?
+          <Block>
           {
-            contactList.map((l, i) => (
+            this.props.contacts.searchList.length > 0
+            ?
+            <Block>
+            {
+              this.props.contacts.searchList.map((l, i) => (
+                <View style={styles.viewList}>
+                <BoxShadow setting={shadowOpt}>
+                  <ListItem
+                    key={i}
+                    leftAvatar={
+                      (l.avatarUri == "")
+                      ?
+                      { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
+                      :
+                      { source: { uri: l.avatarUri } }
+                    }
+                    title={this.capitalize(l.name)}
+                    titleStyle={styles.title}
+                    subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>}
+                    subtitleStyle={styles.subtitle}
+                    containerStyle={styles.list}
+                    value={l.isSelected}
+                    leftIcon={
+                        l.isSelected
+                        ?
+                        <Icon
+                          name="ios-checkmark-circle" 
+                          size={24} 
+                          color={theme.colors.blue}
+                        />
+                        :
+                        <Icon
+                          name="ios-radio-button-off" 
+                          size={24} 
+                          color={theme.colors.lightGray}
+                        />
+                    }
+                    onPress={() => {
+                      this.props.selectInContacts(i)
+                    }}    
+                  />
+                  </BoxShadow>
+                  </View>
+              ))
+            }  
+            </Block>  
+            :
+            null
+          }
+          </Block>
+          :
+          <Block>
+          {
+            this.props.contacts.selectedContacts.map((l, i) => (
               <View style={styles.viewList}>
+              <BoxShadow setting={shadowOpt}>
                 <ListItem
                   key={i}
-                  leftAvatar={{ source: { uri: l.avatar_url } }}
-                  title={l.name}
+                  leftAvatar={
+                    (l.avatarUri == "")
+                    ?
+                    { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
+                    :
+                    { source: { uri: l.avatarUri } }
+                  }
+                  title={this.capitalize(l.name)}
                   titleStyle={styles.title}
-                  subtitle={l.subtitle}
+                  subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen} interval={60000}/></Text>}
                   subtitleStyle={styles.subtitle}
                   containerStyle={styles.list}
-                  name={l}
                   value={l.isSelected}
                   leftIcon={
                       l.isSelected
@@ -188,17 +222,15 @@ export default class ContactList extends Component {
                       />
                   }
                   onPress={() => {
-                    this.setState(prevState => {
-                      const newContactList = [...prevState.contactList];
-                      newContactList[i].isSelected = !newContactList[i].isSelected;
-                      return {contactList: newContactList};
-                  })
-                  
+                    this.props.selectInContacts(i)
                   }}
                 />
+                </BoxShadow>
                 </View>
             ))
-          }
+          }  
+          </Block>
+        }
         </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -218,6 +250,7 @@ const styles = StyleSheet.create({
     margin: 0,
     borderWidth: 0,
     borderRadius: 16,
+    height: 32,
   },
   searchInputText: {
     fontSize: theme.sizes.caption,
@@ -230,15 +263,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     paddingHorizontal: 16,
     paddingVertical: 12,
+    zIndex: 10,
   },
   viewList: {
     width: width - 16,
+    marginTop: 2,
     marginHorizontal: 8,
     shadowColor: '#b2bcf3',
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.2,
     shadowRadius: 7,  
-    elevation: 5,
+    minHeight: 64,
   },
   list: {
     paddingHorizontal: 16,
@@ -248,6 +283,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 16,
     borderTopLeftRadius: 16,
     overflow: 'hidden',
+    minHeight: 64,
   },  
   title: {
     color: theme.colors.notBlack,
@@ -263,3 +299,25 @@ const styles = StyleSheet.create({
     lineHeight: 16
   }
 })
+
+function mapStateToProps (state) {
+  return {
+    contacts: state.contacts
+  }
+}
+
+function mapDispatchToProps (dispatch) {
+  return {
+    getDirectChats: () => dispatch(getContactList()),
+    updateSearchBar: (data) => dispatch(searchBar(data)),
+    updateSearchList: (data) => dispatch(changeContactList(data)),
+    clearSearchBar: () => dispatch(clearSearchBar()),
+    selectedContacts: (data) => dispatch(selectedContacts(data)),
+    selectInContacts: (id, data) => dispatch(selectInContacts(id, data)),
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(NewGroupChat)

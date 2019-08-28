@@ -50,6 +50,7 @@ import MatrixLoginClient from '../../native/MatrixLoginClient';
     return (dispatch) => {
       const promise = MatrixLoginClient.onAppStart()
       promise.then((data) => {
+        console.log(data)
         dispatch(initApplication(data))
         },
         (error) => {
