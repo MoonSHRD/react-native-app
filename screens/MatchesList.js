@@ -42,7 +42,9 @@ class MatchesList extends Component {
   };
 
   componentDidMount() {
-    this.props.getDirectChats();
+    this.willFocus = this.props.navigation.addListener('willFocus', () => {
+      this.props.getDirectChats();
+    });
   }
   
   updateSearch = async(text) => {

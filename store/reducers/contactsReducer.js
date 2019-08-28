@@ -1,7 +1,9 @@
-import { FETCHING_CONTACTS, FETCHING_CONTACTS_SUCCESS, FETCHING_CONTACTS_FAILURE, ADD_CONTACT, HANDLE_INPUT_CHANGE, DELETE_CONTACT, SEARCH_BAR, SEARCH_LIST, CLEAR_SEARCH_BAR, SELECT_CONTACT, DESELECT_CONTACT, SELECT_CHAT, DESELECT_CHAT, ADD_SELECTOR, SELECTED_CONTACTS,SELECT_IN_CONTACTS } from '../actions/constants'
+import { FETCHING_CONTACTS, FETCHING_CONTACTS_SUCCESS, FETCHING_CONTACTS_FAILURE, ADD_CONTACT, HANDLE_INPUT_CHANGE, DELETE_CONTACT, SEARCH_BAR, SEARCH_LIST, CLEAR_SEARCH_BAR, SELECT_CONTACT, DESELECT_CONTACT, SELECT_CHAT, DESELECT_CHAT, ADD_SELECTOR, SELECTED_CONTACTS, SELECT_IN_CONTACTS, FETCHING_CONTACT, FETCHING_CONTACT_FAILURE, FETCHING_CONTACT_SUCCESS, SAVE_MY_USERNAME } from '../actions/constants'
 
 const initialState = {
+  myUserName: null,
   contactList: [],
+  contact: {},
   searchList: [],
   search:'',
   searchChanged: false,
@@ -35,6 +37,35 @@ export default function contactsReducer (state = initialState, action) {
         isLoading: false,
         contactList: action.data
       }
+    case FETCHING_CONTACTS_FAILURE:
+      return {
+        ...state,
+        isLoading: false,
+        error: true
+      }
+    case FETCHING_CONTACT:
+      return {
+        ...state,
+        contact: {},
+        isLoading: true
+      }
+    case FETCHING_CONTACT_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        contact: action.data
+      } 
+    case FETCHING_CONTACT_FAILURE:
+      return {
+        ...state,
+        isLoading: false,
+        error: true
+      } 
+    case SAVE_MY_USERNAME:
+      return {
+        ...state,
+        myUserName: action.data,
+      }     
     case ADD_SELECTOR: {
       return {
         ...state,
@@ -56,12 +87,6 @@ export default function contactsReducer (state = initialState, action) {
         )
        }
     }
-    case FETCHING_CONTACTS_FAILURE:
-      return {
-        ...state,
-        isLoading: false,
-        error: true
-      }
     case ADD_CONTACT: {
       return {
           ...state,

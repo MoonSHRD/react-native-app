@@ -6,6 +6,7 @@ import { theme } from '../constants';
 import MatrixLoginClient from '../native/MatrixLoginClient';
 import { connect } from 'react-redux';
 import { isSignedIn } from '../store/actions/loginActions';
+import { saveMyUserName } from '../store/actions/contactsActions';
 
 import Logo from '../assets/images/logo-small.svg';
 import TextLogo from '../assets/images/text-logo.svg';
@@ -89,7 +90,7 @@ class Login extends Component {
   }
 
   componentDidMount() {
-    const { navigation, loginResult } = this.props;
+    const { navigation, loginResult, saveMyName } = this.props;
     this.onNetworkErrorEvent = DeviceEventEmitter.addListener('onNetworkError', function(e) {
       console.log('onNetworkError')
       console.log(e)
@@ -103,7 +104,7 @@ class Login extends Component {
       console.log('onUnexpectedError')
       console.log(e)
     });  
-    this.successLogin = DeviceEventEmitter.addListener('onSuccess', function(e) {
+    this.successLogin = DeviceEventEmitter.addListener('onSuccess', (e) => {
         console.log('onSuccess')
         console.log(e)
         Alert.alert(
@@ -114,6 +115,7 @@ class Login extends Component {
               text: 'Continue', onPress: () => {
                 navigation.navigate('SignedIn');
                 loginResult(true)
+                saveMyName(this.state.email)
               }
           }
           ],
@@ -297,13 +299,14 @@ const styles = StyleSheet.create({
 
 function mapStateToProps (state) {
   return {
-    login: state.login
+    login: state.login,
   }
 }
 
 function mapDispatchToProps (dispatch) {
   return {
-    loginResult: (data) => dispatch(isSignedIn(data))
+    loginResult: (data) => dispatch(isSignedIn(data)),
+    saveMyName: (data) => dispatch(saveMyUserName(data))
   }
 }
 

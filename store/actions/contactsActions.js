@@ -1,15 +1,14 @@
-import { FETCHING_CONTACTS, FETCHING_CONTACTS_SUCCESS, FETCHING_CONTACTS_FAILURE, SEARCH_BAR, SEARCH_LIST, CLEAR_SEARCH_BAR, SELECT_CONTACT, DESELECT_CONTACT, SELECT_CHAT, DESELECT_CHAT, ADD_SELECTOR, SELECTED_CONTACTS, SELECT_IN_CONTACTS} from './constants'
+import { FETCHING_CONTACTS, FETCHING_CONTACTS_SUCCESS, FETCHING_CONTACTS_FAILURE, SEARCH_BAR, SEARCH_LIST, CLEAR_SEARCH_BAR, SELECT_CONTACT, DESELECT_CONTACT, SELECT_CHAT, DESELECT_CHAT, ADD_SELECTOR, SELECTED_CONTACTS, SELECT_IN_CONTACTS, FETCHING_CONTACT, FETCHING_CONTACT_SUCCESS, FETCHING_CONTACT_FAILURE, SAVE_MY_USERNAME, } from './constants'
 import MatrixClient from '../../native/MatrixClient';  
 
 export function getContactList() {
   return (dispatch) => {
-    const selector = false
     const promise = MatrixClient.getDirectChats()
     promise.then((data) => {
       const jsonData = JSON.parse(data)
       dispatch(getContacts())
       dispatch(getContactsSuccess(jsonData))
-      console.log('sees')
+      console.log(jsonData)
       },
       (error) => {
       dispatch(getContactsFailure())
@@ -19,9 +18,65 @@ export function getContactList() {
   }
 }
 
+export function getContactInfo(userID) {
+  return (dispatch) => {
+    const promise = MatrixClient.getUserById(userID)
+    promise.then((data) => {
+      const jsonData = JSON.parse(data)
+      dispatch(getContact())
+      dispatch(getContactSuccess(jsonData))
+      console.log(jsonData)
+      },
+      (error) => {
+      dispatch(getContactFailure())
+      console.log(error);
+      }
+    );
+  }
+}
+
   export function getContacts() {
     return {
       type: FETCHING_CONTACTS
+    }
+  }
+
+  export function getContactsSuccess(data) {
+    return {
+      type: FETCHING_CONTACTS_SUCCESS,
+      data,
+    }
+  }
+  
+  export function getContactsFailure() {
+    return {
+      type: FETCHING_CONTACTS_FAILURE
+    }
+  }
+
+  export function getContact() {
+    return {
+      type: FETCHING_CONTACTS
+    }
+  }
+
+  export function getContactSuccess(data) {
+    return {
+      type: FETCHING_CONTACT_SUCCESS,
+      data,
+    }
+  }
+  
+  export function getContactFailure() {
+    return {
+      type: FETCHING_CONTACT_FAILURE
+    }
+  }
+
+  export function saveMyUserName(data) {
+    return {
+      type: SAVE_MY_USERNAME,
+      data
     }
   }
 
@@ -88,19 +143,6 @@ export function getContactList() {
     return {
       type: SELECTED_CONTACTS,
       data
-    }
-  }
-
-  export function getContactsSuccess(data) {
-    return {
-      type: FETCHING_CONTACTS_SUCCESS,
-      data,
-    }
-  }
-  
-  export function getContactsFailure() {
-    return {
-      type: FETCHING_CONTACTS_FAILURE
     }
   }
 

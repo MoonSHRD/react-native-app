@@ -9,7 +9,8 @@ import { theme } from '../constants';
 import { Text, Block } from '../components';
 
 import {connect} from 'react-redux';
-import { getContactList, searchBar, changeContactList, clearSearchBar, selectContact } from '../store/actions/contactsActions';
+import { getContactList, searchBar, changeContactList, clearSearchBar, selectContact, deselectContact } from '../store/actions/contactsActions';
+
 
 const { width, height } = Dimensions.get('window');
 
@@ -47,7 +48,10 @@ class ContactList extends Component {
   };
 
   componentDidMount() {
-    this.props.loadDirectChats();
+    this.willFocus = this.props.navigation.addListener('willFocus', () => {
+      this.props.loadDirectChats()
+      this.props.deselectContact()
+    });
   }
 
   updateSearch = async(text) => {
@@ -281,6 +285,7 @@ function mapDispatchToProps (dispatch) {
     changeContactList: (data) => dispatch(changeContactList(data)),
     clearSearchBar: () => dispatch(clearSearchBar()),
     selectContact: (data) => dispatch(selectContact(data)),
+    deselectContact: () => dispatch(deselectContact()),
   }
 }
 

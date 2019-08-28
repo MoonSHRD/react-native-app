@@ -46,12 +46,14 @@ class NewGroupChat extends Component {
   onContentSizeChange = (contentWidth, contentHeight) => {
     this.setState({ screenHeight: contentHeight });
   };
-
-  componentDidMount() {
-    this.props.getDirectChats();
-    this.props.selectedContacts(this.result)
-  }
   
+  componentDidMount() {
+    this.willFocus = this.props.navigation.addListener('willFocus', () => {
+      this.props.getDirectChats();
+      this.props.selectedContacts(this.result)
+      });
+  }
+
   updateSearch = async(text) => {
     await this.setState({ search: text , searchChanged: true});
 

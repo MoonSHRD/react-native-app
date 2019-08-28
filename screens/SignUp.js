@@ -6,6 +6,8 @@ import { theme } from '../constants';
 import MatrixLoginClient from '../native/MatrixLoginClient';
 import { connect } from 'react-redux';
 import { isSignedIn } from '../store/actions/loginActions';
+import { saveMyUserName } from '../store/actions/contactsActions';
+
 
 import Logo from '../assets/images/logo-small.svg';
 import TextLogo from '../assets/images/text-logo.svg';
@@ -93,7 +95,8 @@ class SignUp extends Component {
   }
 
   componentDidMount() {		
-    const { confirmLogin } = this.props;	
+    const { confirmLogin, saveUserName } = this.props;	
+    const { email } = this.state;
     this.onRegistrationSuccess = DeviceEventEmitter.addListener('onRegistrationSuccess', function(e) {
       console.log('onRegistrationSuccess')
       console.log(e)
@@ -104,6 +107,7 @@ class SignUp extends Component {
         {
             text: 'Continue', onPress: () => {
               confirmLogin(true)
+              saveUserName(email)
             }
         }
         ],
@@ -273,7 +277,8 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
   return {
-    confirmLogin: (data) => dispatch(isSignedIn(data))
+    confirmLogin: (data) => dispatch(isSignedIn(data)),
+    saveUserName: (data) => dispatch(saveMyUserName(data))
   }
 }
 

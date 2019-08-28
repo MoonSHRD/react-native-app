@@ -53,7 +53,9 @@ class ChatList extends Component {
   };
 
   componentDidMount() {
-    this.props.loadDirectChats();
+    this.willFocus = this.props.navigation.addListener('willFocus', () => {
+      this.props.loadDirectChats()
+    });
   }
 
   capitalize(props) {
