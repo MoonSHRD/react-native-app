@@ -94,20 +94,20 @@ def enableSeparateBuildPerCPUArchitecture = false
  * Get Password from keychain to build release apk
  */
 
-/*def getPassword(String currentUser, String keyChain) {
-    def stdout = new ByteArrayOutputStream()
-    def stderr = new ByteArrayOutputStream()
-    exec {
-        commandLine 'security', '-q', 'find-generic-password', '-a', currentUser, '-s', keyChain, '-w'
-        standardOutput = stdout
-        errorOutput = stderr
-        ignoreExitValue true
-    }
-    //noinspection GroovyAssignabilityCheck
-    stdout.toString().trim()
-}
+// def getPassword(String currentUser, String keyChain) {
+//     def stdout = new ByteArrayOutputStream()
+//     def stderr = new ByteArrayOutputStream()
+//     exec {
+//         commandLine 'security', '-q', 'find-generic-password', '-a', currentUser, '-s', keyChain, '-w'
+//         standardOutput = stdout
+//         errorOutput = stderr
+//         ignoreExitValue true
+//     }
+//     //noinspection GroovyAssignabilityCheck
+//     stdout.toString().trim()
+// }
 
-def pass = getPassword("YOUR_USER_NAME","android_keystore")*/
+// def pass = getPassword("YOUR_USER_NAME","android_keystore")
 
 
 /**
