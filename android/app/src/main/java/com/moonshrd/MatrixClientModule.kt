@@ -12,11 +12,16 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.matrix.androidsdk.core.callback.ApiCallback
 import org.matrix.androidsdk.core.model.MatrixError
+import org.matrix.androidsdk.data.Room
+import org.matrix.androidsdk.data.RoomState
+import org.matrix.androidsdk.data.RoomSummary
+import org.matrix.androidsdk.data.timeline.EventTimeline
 import org.matrix.androidsdk.rest.model.Event
 
 class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
-    val gson = Gson() // TODO Optimize it with Dagger
-    val matrixInstance = Matrix.getInstance(reactApplicationContext)
+    private val gson = Gson() // TODO Optimize it with Dagger
+    private val matrixInstance = Matrix.getInstance(reactApplicationContext)
+    private val eventListeners = HashMap<String, NewEventsListener>()
 
     override fun getName(): String {
         return "MatrixClient"
@@ -56,12 +61,12 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             val chatModels = mutableListOf<DirectChatModel>()
             directChats.forEach { room ->
                 val roomSummary = room.roomSummary
-                room.timeline.addEventTimelineListener { event, direction, roomState ->
-                    if(event.type == Event.EVENT_TYPE_MESSAGE) {
-                        matrixInstance.defaultLatestChatMessageCache.updateLatestMessage(reactApplicationContext, room.roomId, event.contentAsJsonObject.get("body").asString)
-                        roomSummary!!.setLatestReceivedEvent(event, roomState)
-                    }
+                // hack for optimization: since we hold the same listener, we will not create a useless instance of this listener (else it will add new object to internal list of listeners and messing up the memory)
+                if(eventListeners[roomSummary!!.roomId] != null) {
+                    eventListeners[roomSummary.roomId] = NewEventsListener(reactApplicationContext, room, roomSummary)
                 }
+                room.timeline.addEventTimelineListener(eventListeners[room.roomId])
+                // hack end
                 val contactID = room.state.loadedMembers.filter {
                     it.userId != matrixInstance.defaultSession.myUserId
                 }[0].userId
@@ -160,5 +165,17 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         }
 
         getUserById(matrixInstance.defaultSession.myUserId, promise)
+    }
+
+    internal class NewEventsListener(private val reactContext: ReactApplicationContext,
+                                     private val room: Room,
+                                     private val roomSummary: RoomSummary): EventTimeline.Listener {
+        private val matrixInstance = Matrix.getInstance(reactContext)
+        override fun onEvent(event: Event?, direction: EventTimeline.Direction?, roomState: RoomState?) {
+            if(event!!.type == Event.EVENT_TYPE_MESSAGE) {
+                matrixInstance.defaultLatestChatMessageCache.updateLatestMessage(reactContext, room.roomId, event.contentAsJsonObject.get("body").asString)
+                roomSummary.setLatestReceivedEvent(event, roomState)
+            }
+        }
     }
 }
