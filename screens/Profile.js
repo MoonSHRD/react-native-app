@@ -133,7 +133,7 @@ class Profile extends Component {
 
   render() {
     const { navigation } = this.props;
-    const { loading, errors, name, phone, tags, newTag, suggestedTags } = this.state;
+    const { loading, errors, newTag, suggestedTags } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
     const scrollEnabled = this.state.screenHeight > height - 100;
     const userName = this.props.navigation.getParam('userName', 'userName')
@@ -298,34 +298,48 @@ class Profile extends Component {
                     }
                     onChangeText={text => this.setState({ name: text })}
                 />
-                <Input
-                    label="Phone Nymber"
-                    labelStyle={[styles.labels, hasErrors('name')]}
-                    error={hasErrors('phone')}
-                    style={[styles.input, hasErrors('phone')]}
-                    defaultValue={phone}
-                    onChangeText={text => this.setState({ phone: text })}
-                />
-                <Text subhead gray style={{marginTop:20}}>My Tags</Text>
-                <Block style={styles.tagContainer}>
                 {
-                    tags.map((l,i) => (
-                            l.matched
-                            ?
-                            <Button
-                                key={i}
-                                style={styles.matchedTag}>
-                                <Text caption white center>{l.name}</Text>
-                            </Button>
-                            :
-                            <Button
-                                key={i}
-                                style={styles.dismatchedTag}>
-                                <Text caption blue center>{l.name}</Text>
-                            </Button>
-                    ))
+                    this.props.contacts.myProfile.phone
+                    ?
+                    <Input
+                        label="Phone Nymber"
+                        labelStyle={[styles.labels, hasErrors('name')]}
+                        error={hasErrors('phone')}
+                        style={[styles.input, hasErrors('phone')]}
+                        defaultValue={this.props.contacts.myProfile.phone}
+                        onChangeText={text => this.setState({ phone: text })}
+                    />
+                    :
+                    null
                 }
-                </Block>
+                {
+                    this.props.contacts.myProfile.tags
+                    ?
+                    <Block>
+                        <Text subhead gray style={{marginTop:20}}>My Tags</Text>
+                        <Block style={styles.tagContainer}>
+                        {
+                            this.props.contacts.myProfile.tags.map((l,i) => (
+                                    l.matched
+                                    ?
+                                    <Button
+                                        key={i}
+                                        style={styles.matchedTag}>
+                                        <Text caption white center>{l.name}</Text>
+                                    </Button>
+                                    :
+                                    <Button
+                                        key={i}
+                                        style={styles.dismatchedTag}>
+                                        <Text caption blue center>{l.name}</Text>
+                                    </Button>
+                            ))
+                        }
+                        </Block>
+                    </Block>    
+                    :
+                    null
+                }
                 <Input
                     error={hasErrors('tags')}
                     style={[styles.input, hasErrors('tags')]}

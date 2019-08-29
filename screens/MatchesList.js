@@ -28,6 +28,15 @@ class MatchesList extends Component {
           style={{paddingVertical: 10, paddingHorizontal: 20,}}
         />
       ),  
+      headerLeft: (
+        <Icon
+            name="ios-arrow-back" 
+            size={24} 
+            color={theme.colors.blue}
+            onPress={() => navigation.goBack()}
+            style={{paddingVertical: 10, paddingHorizontal: 20,}}
+        />
+      )
     }
   };
   

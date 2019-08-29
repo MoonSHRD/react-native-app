@@ -33,6 +33,15 @@ class NewGroupChat extends Component {
             Create
         </Text>
       ),
+      headerLeft: (
+        <Icon
+            name="ios-arrow-back" 
+            size={24} 
+            color={theme.colors.blue}
+            onPress={() => navigation.goBack()}
+            style={{paddingVertical: 10, paddingHorizontal: 20,}}
+        />
+      )
     };
   }
 

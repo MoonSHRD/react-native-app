@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Platform, View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
 
+import Icon from 'react-native-vector-icons/Ionicons';
 import {BoxShadow} from 'react-native-shadow';
 import TimeAgo from 'react-native-timeago';
 import { Block, Text } from '../components';
@@ -19,6 +20,15 @@ class NewChat extends Component {
       headerTitle: (
         <Text notBlack style={{fontSize: 14, fontWeight: '600', letterSpacing: -0.0241176}}>New Chat</Text>
       ),
+      headerLeft: (
+        <Icon
+            name="ios-arrow-back" 
+            size={24} 
+            color={theme.colors.blue}
+            onPress={() => navigation.goBack()}
+            style={{paddingVertical: 10, paddingHorizontal: 20,}}
+        />
+      )
     }
   };
 
