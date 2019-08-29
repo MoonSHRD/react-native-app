@@ -12,6 +12,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.matrix.androidsdk.core.callback.ApiCallback
 import org.matrix.androidsdk.core.model.MatrixError
+import org.matrix.androidsdk.rest.model.Event
 
 class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
     val gson = Gson() // TODO Optimize it with Dagger
@@ -54,7 +55,13 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
             val chatModels = mutableListOf<DirectChatModel>()
             directChats.forEach { room ->
-                val roomSummary = matrixInstance.defaultSession.dataHandler.store.getSummary(room.roomId)
+                val roomSummary = room.roomSummary
+                room.timeline.addEventTimelineListener { event, direction, roomState ->
+                    if(event.type == Event.EVENT_TYPE_MESSAGE) {
+                        matrixInstance.defaultLatestChatMessageCache.updateLatestMessage(reactApplicationContext, room.roomId, event.contentAsJsonObject.get("body").asString)
+                        roomSummary!!.setLatestReceivedEvent(event, roomState)
+                    }
+                }
                 val contactID = room.state.loadedMembers.filter {
                     it.userId != matrixInstance.defaultSession.myUserId
                 }[0].userId
@@ -64,7 +71,10 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                         room.avatarUrl ?: "",
                         contact.latestPresenceTs,
                         contact.isActive,
-                        matrixInstance.defaultLatestChatMessageCache.getLatestText(reactApplicationContext, roomSummary!!.roomId)
+                        matrixInstance.defaultLatestChatMessageCache.getLatestText(reactApplicationContext, roomSummary!!.roomId),
+                        roomSummary.latestReceivedEvent.originServerTs,
+                        roomSummary.latestReceivedEvent.mSentState.name,
+                        roomSummary.mUnreadEventsCount
                 )
                 chatModels.add(chat)
             }
