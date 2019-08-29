@@ -12,7 +12,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.matrix.androidsdk.core.callback.ApiCallback
 import org.matrix.androidsdk.core.model.MatrixError
-import org.matrix.androidsdk.rest.model.RoomMember
 
 class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
     val gson = Gson() // TODO Optimize it with Dagger
@@ -22,8 +21,19 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         return "MatrixClient"
     }
 
+    private fun isSessionExists(promise: Promise): Boolean {
+        if(matrixInstance.defaultSession == null) {
+            promise.reject(RuntimeException("Session must not be null!"))
+            return false
+        }
+        return true
+    }
+
     @ReactMethod
     fun getDirectChats(promise: Promise) {
+        if(!isSessionExists(promise)) {
+            return
+        }
         GlobalScope.launch {
             if(matrixInstance.defaultSession == null) {
                 promise.reject(RuntimeException("Session must not be null!"))
@@ -64,6 +74,10 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     @ReactMethod
     fun getUserById(userID: String, promise: Promise) {
+        if(!isSessionExists(promise)) {
+            return
+        }
+
         val userName = CompletableFuture<String?>()
         var userAvatarUrl = CompletableFuture<String?>()
 
@@ -120,5 +134,21 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         }
     }
 
+    @ReactMethod
+    fun getMyMxId(promise: Promise) {
+        if(!isSessionExists(promise)) {
+            return
+        }
 
+        promise.resolve(matrixInstance.defaultSession.myUserId)
+    }
+
+    @ReactMethod
+    fun getMyProfile(promise: Promise) {
+        if(!isSessionExists(promise)) {
+            return
+        }
+
+        getUserById(matrixInstance.defaultSession.myUserId, promise)
+    }
 }
