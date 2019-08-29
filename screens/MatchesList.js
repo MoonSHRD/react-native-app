@@ -144,9 +144,11 @@ class MatchesList extends Component {
                       subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>}
                       subtitleStyle={styles.subtitle}
                       containerStyle={styles.list}
-                      onPress={(navigation) => {
-                        this.props.selectContact('@'+l.name+':matrix.moonshard.tech')
-                        navigation.navigate('Profile')
+                      onPress={() => {
+                        navigation.navigate('Profile', {
+                          userName: l.name,
+                          userID: '@'+l.name+':matrix.moonshard.tech',
+                        })
                       }}  
                     />
                     </BoxShadow>
@@ -184,8 +186,11 @@ class MatchesList extends Component {
                     }
                     subtitleStyle={styles.subtitle}
                     containerStyle={styles.list}
-                    onPress={(navigation) => {
-                      this.props.selectContact('@'+l.name+':matrix.moonshard.tech')
+                    onPress={() => {
+                      navigation.navigate('Profile', {
+                        userName: l.name,
+                        userID: '@'+l.name+':matrix.moonshard.tech',
+                      })
                     }}  
                   />
                   </BoxShadow>

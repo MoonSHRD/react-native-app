@@ -106,7 +106,7 @@ class Login extends Component {
     });  
     this.successLogin = DeviceEventEmitter.addListener('onSuccess', (e) => {
         console.log('onSuccess')
-        console.log(e)
+        // console.log(e)
         Alert.alert(
           'Success!',
           'Your login was successful',

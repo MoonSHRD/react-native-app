@@ -7,7 +7,7 @@ import { theme } from '../constants';
 import { Avatar, ThemeConsumer } from 'react-native-elements';
 
 import {connect} from 'react-redux';
-import { getContactInfo, deselectContact } from '../store/actions/contactsActions';
+import { getContactInfo, deselectContact, getMyUserProfile } from '../store/actions/contactsActions';
 
 const { width, height } = Dimensions.get('window');
 
@@ -31,16 +31,14 @@ class Profile extends Component {
             name="ios-arrow-back" 
             size={24} 
             color={theme.colors.blue}
-            onPress={() => {
-                navigation.goBack('Profile', () => {
-                this.props.deselectContact()})
-            }}
+            onPress={() => navigation.goBack()}
             style={{paddingVertical: 10, paddingHorizontal: 20,}}
         />
       )
     }
   };
   state = {
+      userName:'',
       avatarUrl: '',
       name: 'Andrew Shoagase',
       phone: '+1(323)564-34-22',
@@ -98,22 +96,18 @@ class Profile extends Component {
   };
 
   loadProfile = async () => {
-    var userId = this.props.contacts.selectedContact.toLowerCase()
-    console.log(userId)
-    await this.props.getContactInfo(userId)
+    const userID = await this.props.navigation.getParam('userID', 'userID');
+    await console.log(userID)
+    await this.props.getContactInfo(userID.toLowerCase())
     await this.checkName()
-    await this.setState({avatarUrl: this.props.contacts.contact.avatarUrl})
   }
 
   checkName = async () => {
-    if (this.props.contacts.contact.name == null) {
-        var userName = await this.props.contacts.selectedContact.substring(0, this.props.contacts.selectedContact.indexOf(":matrix.moonshard.tech"));       
-        var parsedName = userName.substring(1,)
-        var result = this.capitalize(parsedName)
-        this.setState({name: result})
-    } else {
-        var result = await this.props.contacts.contact.name
-        this.setState({name: result})
+    await console.log('wwwww');
+    const userName = await this.props.navigation.getParam('userName', 'userName');
+    if (userName != 'userName') {
+        var result = await this.capitalize(userName)
+        await this.setState({name: result})
     }
   }
   
@@ -123,17 +117,13 @@ class Profile extends Component {
   }
 
   loadMyProfile = async () => {
-    var sign = '@'
-    var serverInfo = ':matrix.moonshard.tech'
-    var userId = sign + this.props.contacts.myUserName.toLowerCase() + serverInfo
-    await this.props.getContactInfo(userId)
-    var result = await this.capitalize(this.props.contacts.myUserName)
-    this.setState({name: result})
+    await this.props.getMyUserProfile()
   }
 
   componentDidMount() {
-    this.willFocus = this.props.navigation.addListener('willFocus', () => {
-        (this.props.contacts.selectedContact != null)
+    this.willFocus = this.props.navigation.addListener('willFocus', async () => {
+        const userName = await this.props.navigation.getParam('userName', 'userName')
+        await (userName != 'userName')
         ?
         this.loadProfile()
         :
@@ -146,6 +136,7 @@ class Profile extends Component {
     const { loading, errors, name, phone, tags, newTag, suggestedTags } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
     const scrollEnabled = this.state.screenHeight > height - 100;
+    const userName = this.props.navigation.getParam('userName', 'userName')
 
     return (
       <KeyboardAvoidingView behavior="padding" >
@@ -155,7 +146,7 @@ class Profile extends Component {
             onContentSizeChange={this.onContentSizeChange}
         >
         {
-            (this.props.contacts.selectedContact != null)
+            (userName != 'userName')
             ?
             <Block style={styles.container}>
             <Image 
@@ -178,9 +169,9 @@ class Profile extends Component {
                     title={
                         this.props.contacts.contact.name != ''
                         ?
-                        this.props.contacts.contact.name
+                        this.capitalize(this.props.contacts.contact.name[1])
                         :
-                        this.capitalize(this.props.contacts.selectedContact[1])
+                        this.capitalize(userName[0])
                     }
                     containerStyle={styles.avatar}
                     avatarStyle={styles.avatarImage}
@@ -269,11 +260,11 @@ class Profile extends Component {
             />
             <Block style={styles.avatarContainer}>
             {
-                this.props.contacts.contact.avatarUrl != ''
+                this.props.contacts.myProfile.avatarUrl != ''
                 ?
                 <Avatar 
                     rounded
-                    source={this.props.contacts.contact.avatarUrl}
+                    source={this.props.contacts.myProfile.avatarUrl}
                     containerStyle={styles.avatar}
                     avatarStyle={styles.avatarImage}
                 />
@@ -281,9 +272,9 @@ class Profile extends Component {
                 <Avatar 
                     rounded
                     title={
-                        this.props.contacts.contact.name != ''
+                        this.props.contacts.myProfile.name != ''
                         ?
-                        this.props.contacts.contact.name
+                        this.props.contacts.myProfile.name
                         :
                         this.capitalize(this.props.contacts.myUserName[0])
                     }
@@ -490,7 +481,8 @@ function mapStateToProps (state) {
   function mapDispatchToProps (dispatch) {
     return {
       getContactInfo: (data) => dispatch(getContactInfo(data)),
-      deselectContact: () => dispatch(deselectContact())
+      deselectContact: () => dispatch(deselectContact()),
+      getMyUserProfile: () => dispatch(getMyUserProfile())
     }
   }
   

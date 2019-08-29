@@ -1,4 +1,4 @@
-import { FETCHING_CONTACTS, FETCHING_CONTACTS_SUCCESS, FETCHING_CONTACTS_FAILURE, SEARCH_BAR, SEARCH_LIST, CLEAR_SEARCH_BAR, SELECT_CONTACT, DESELECT_CONTACT, SELECT_CHAT, DESELECT_CHAT, ADD_SELECTOR, SELECTED_CONTACTS, SELECT_IN_CONTACTS, FETCHING_CONTACT, FETCHING_CONTACT_SUCCESS, FETCHING_CONTACT_FAILURE, SAVE_MY_USERNAME, } from './constants'
+import { FETCHING_CONTACTS, FETCHING_CONTACTS_SUCCESS, FETCHING_CONTACTS_FAILURE, SEARCH_BAR, SEARCH_LIST, CLEAR_SEARCH_BAR, SELECT_CONTACT, DESELECT_CONTACT, SELECT_CHAT, DESELECT_CHAT, ADD_SELECTOR, SELECTED_CONTACTS, SELECT_IN_CONTACTS, FETCHING_CONTACT, FETCHING_CONTACT_SUCCESS, FETCHING_CONTACT_FAILURE, SAVE_MY_USERNAME, SAVE_MY_USER_ID, SET_MY_PROFILE,  } from './constants'
 import MatrixClient from '../../native/MatrixClient';  
 
 export function getContactList() {
@@ -28,12 +28,44 @@ export function getContactInfo(userID) {
       console.log(jsonData)
       },
       (error) => {
-      dispatch(getContactFailure())
       console.log(error);
       }
     );
   }
 }
+
+export function getMyUserId() {
+  return (dispatch) => {
+    const promise = MatrixClient.getMyMxId()
+    promise.then((data) => {
+      var userName = data.substring(0, data.indexOf(":matrix.moonshard.tech"));       
+      var parsedName = userName.substring(1,)
+      dispatch(saveMyUserID(data))
+      dispatch(saveMyUserName(parsedName))
+      console.log(data)
+      },
+      (error) => {
+      console.log(error);
+      }
+    );
+  }
+}
+
+export function getMyUserProfile() {
+  return (dispatch) => {
+    console.log('asd')
+    const promise = MatrixClient.getMyProfile()
+    promise.then((data) => {
+      const jsonData = JSON.parse(data)
+      dispatch(saveMyProfile(jsonData))
+      console.log(jsonData)
+      },
+      (error) => {
+      console.log(error);
+      });
+  }
+}
+
 
   export function getContacts() {
     return {
@@ -76,6 +108,20 @@ export function getContactInfo(userID) {
   export function saveMyUserName(data) {
     return {
       type: SAVE_MY_USERNAME,
+      data
+    }
+  }
+
+  export function saveMyUserID(data) {
+    return {
+      type: SAVE_MY_USER_ID,
+      data
+    }
+  }
+
+  export function saveMyProfile(data) {
+    return {
+      type: SET_MY_PROFILE,
       data
     }
   }

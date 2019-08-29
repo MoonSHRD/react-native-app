@@ -9,7 +9,7 @@ import { theme } from '../constants';
 import { Text, Block } from '../components';
 
 import {connect} from 'react-redux';
-import { getContactList, searchBar, changeContactList, clearSearchBar, selectContact, deselectContact } from '../store/actions/contactsActions';
+import { getContactList, searchBar, changeContactList, clearSearchBar, selectContact, deselectContact, getMyUserId, getMyUserProfile } from '../store/actions/contactsActions';
 
 
 const { width, height } = Dimensions.get('window');
@@ -50,6 +50,7 @@ class ContactList extends Component {
   componentDidMount() {
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
       this.props.loadDirectChats()
+      this.props.getMyUserId()
     });
   }
 
@@ -158,8 +159,10 @@ class ContactList extends Component {
                       subtitleStyle={styles.subtitle}
                       containerStyle={styles.list}
                       onPress={(navigation) => {
-                        this.props.selectContact('@'+l.name+':matrix.moonshard.tech')
-                        navigation.navigate('Profile')
+                        navigation.navigate('Profile', {
+                          userName: l.name,
+                          userID: '@'+l.name+':matrix.moonshard.tech',
+                        })
                       }}  
                     />
                     </BoxShadow>
@@ -192,9 +195,11 @@ class ContactList extends Component {
                     subtitleStyle={styles.subtitle}
                     containerStyle={styles.list}
                     onPress={() => {
-                      this.props.selectContact('@'+l.name+':matrix.moonshard.tech')
-                      this.props.navigation.navigate('Profile')
-                    }}  
+                      navigation.navigate('Profile', {
+                        userName: l.name,
+                        userID: '@'+l.name+':matrix.moonshard.tech',
+                      })
+                  }}  
                   />
                   </BoxShadow>
                   </View>
@@ -286,6 +291,7 @@ function mapDispatchToProps (dispatch) {
     clearSearchBar: () => dispatch(clearSearchBar()),
     selectContact: (data) => dispatch(selectContact(data)),
     deselectContact: () => dispatch(deselectContact()),
+    getMyUserId: () => dispatch(getMyUserId()),
   }
 }
 

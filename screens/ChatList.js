@@ -174,10 +174,10 @@ class ChatList extends Component {
                   containerStyle={styles.list}
                   />
                   {
-                    l.unreadMessages > 0 
+                    l.unreadMessagesCount > 0 
                     ?
                     <Badge 
-                      value={l.unreadMessages} 
+                      value={l.unreadMessagesCount} 
                       status="error" 
                       badgeStyle={{ width: 24, height: 24, borderRadius: 50, overflow: 'hidden'}}
                       containerStyle={{ position: 'absolute', top: 36, right: 16}}
@@ -238,10 +238,10 @@ class ChatList extends Component {
                 containerStyle={styles.list}
                 />
                 {
-                  l.lastMessage.length > 0 
+                  l.unreadMessagesCount > 0 
                   ?
                   <Badge 
-                    value={l.unreadMessages} 
+                    value={l.unreadMessagesCount} 
                     status="error" 
                     badgeStyle={{ width: 24, height: 24, borderRadius: 50, overflow: 'hidden'}}
                     containerStyle={{ position: 'absolute', top: 36, right: 16}}

@@ -1,9 +1,11 @@
-import { FETCHING_CONTACTS, FETCHING_CONTACTS_SUCCESS, FETCHING_CONTACTS_FAILURE, ADD_CONTACT, HANDLE_INPUT_CHANGE, DELETE_CONTACT, SEARCH_BAR, SEARCH_LIST, CLEAR_SEARCH_BAR, SELECT_CONTACT, DESELECT_CONTACT, SELECT_CHAT, DESELECT_CHAT, ADD_SELECTOR, SELECTED_CONTACTS, SELECT_IN_CONTACTS, FETCHING_CONTACT, FETCHING_CONTACT_FAILURE, FETCHING_CONTACT_SUCCESS, SAVE_MY_USERNAME } from '../actions/constants'
+import { FETCHING_CONTACTS, FETCHING_CONTACTS_SUCCESS, FETCHING_CONTACTS_FAILURE, ADD_CONTACT, HANDLE_INPUT_CHANGE, DELETE_CONTACT, SEARCH_BAR, SEARCH_LIST, CLEAR_SEARCH_BAR, SELECT_CONTACT, DESELECT_CONTACT, SELECT_CHAT, DESELECT_CHAT, ADD_SELECTOR, SELECTED_CONTACTS, SELECT_IN_CONTACTS, FETCHING_CONTACT, FETCHING_CONTACT_FAILURE, FETCHING_CONTACT_SUCCESS, SAVE_MY_USERNAME, SAVE_MY_USER_ID, SET_MY_PROFILE } from '../actions/constants'
 
 const initialState = {
   myUserName: null,
+  myUserID: null,
   contactList: [],
   contact: {},
+  myProfile: {},
   searchList: [],
   search:'',
   searchChanged: false,
@@ -65,8 +67,18 @@ export default function contactsReducer (state = initialState, action) {
       return {
         ...state,
         myUserName: action.data,
-      }     
-    case ADD_SELECTOR: {
+      }  
+    case SAVE_MY_USER_ID:
+      return {
+        ...state,
+        myUserID: action.data,
+      }          
+    case SET_MY_PROFILE:
+      return {
+        ...state,
+        myProfile: action.data
+      }   
+      case ADD_SELECTOR: {
       return {
         ...state,
         contactList: [...state.contactList, state.contactList.filter((data, i) => data.isSelected = 's')]
