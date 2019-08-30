@@ -48,5 +48,8 @@ allprojects {
         maven {
             url "https://github.com/jitsi/jitsi-maven-repository/raw/master/releases"
         }
+        maven {
+            url "https://github.com/MoonSHRD/maven-repo/raw/master/releases"
+        }
     }
 }
