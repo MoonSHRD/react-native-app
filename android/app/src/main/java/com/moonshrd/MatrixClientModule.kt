@@ -29,7 +29,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     private fun isSessionExists(promise: Promise): Boolean {
         if(matrixInstance.defaultSession == null) {
-            promise.reject(RuntimeException("Session must not be null!"))
+            promise.reject("NullSession", "Session must not be null!")
             return false
         }
         return true
@@ -165,6 +165,30 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         }
 
         getUserById(matrixInstance.defaultSession.myUserId, promise)
+    }
+
+    @ReactMethod
+    fun createDirectChat(participantUserId: String, promise: Promise) {
+        if(!isSessionExists(promise)) {
+            return
+        }
+        matrixInstance.defaultSession.createDirectMessageRoom(participantUserId, object : ApiCallback<String> {
+            override fun onSuccess(info: String?) {
+                promise.resolve(true)
+            }
+
+            override fun onUnexpectedError(e: java.lang.Exception?) {
+                promise.reject("onUnexpectedError", e)
+            }
+
+            override fun onMatrixError(e: MatrixError?) {
+                promise.reject("onMatrixError", e!!.message)
+            }
+
+            override fun onNetworkError(e: java.lang.Exception?) {
+                promise.reject("onNetworkError", e)
+            }
+        })
     }
 
     internal class NewEventsListener(private val reactContext: ReactApplicationContext,
