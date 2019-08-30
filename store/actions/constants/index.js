@@ -1,3 +1,5 @@
+// Contacts actions and reducer constants
+
 export const FETCHING_CONTACTS = 'FETCHING_CONTACTS'
 export const FETCHING_CONTACTS_SUCCESS = 'FETCHING_CONTACTS_SUCCESS'
 export const FETCHING_CONTACTS_FAILURE = 'FETCHING_CONTACTS_FAILURE'
@@ -17,12 +19,11 @@ export const SELECT_IN_CONTACTS = 'SELECT_IN_CONTACTS';
 export const SAVE_MY_USERNAME = 'SAVE_MY_USERNAME';
 export const SAVE_MY_USER_ID = 'SAVE_MY_USER_ID';
 export const SET_MY_PROFILE = 'SET_MY_PROFILE';
-
-
 export const FETCHING_CONTACT = 'FETCHING_CONTACT'
 export const FETCHING_CONTACT_SUCCESS = 'FETCHING_CONTACT_SUCCESS'
 export const FETCHING_CONTACT_FAILURE = 'FETCHING_CONTACT_FAILURE'
 
+// Login actions and reducer constants
 
 export const LOGINING = 'LOGINING';
 export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
@@ -31,5 +32,14 @@ export const LOGOUT = 'LOGOUT';
 export const IS_SIGNED_IN = 'IS_SIGNED_IN';
 export const INIT_APPLICATION = 'INIT_APPLICATION';
 
+// Overlay actions and reducer constants
+
 export const OVERLAY_VISIBLE = 'OVERLAY_VISIBLE';
 
+// AppState actions and reducer constants
+
+export const SET_NIGHT_THEME = 'SET_NIGHT_THEME';
+export const SET_LIGHT_THEME = 'SET_LIGHT_THEME';
+export const NOTIFICATIONS = 'NOTIFICATIONS';
+export const CHAT_BACKGROUND = 'CHAT_BACKGROUND';
+export const TEXT_SIZE = 'TEXT_SIZE';

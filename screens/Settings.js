@@ -3,6 +3,7 @@ import { Platform, Dimensions, Alert, ScrollView, Keyboard, KeyboardAvoidingView
 import MatrixLoginClient from '../native/MatrixLoginClient';
 import { connect } from 'react-redux';
 import { logout } from '../store/actions/loginActions';
+import { setNotifications, setNightTheme, setTextSize } from '../store/actions/appStateActions';
 
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Block, Text, Switch, Button } from '../components';
@@ -42,7 +43,7 @@ class Settings extends Component {
 
   render() {
     const { navigation } = this.props;
-    const { loading, errors, notifications, nightTheme, textSize } = this.state;
+    const { loading, errors } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
     const scrollEnabled = this.state.screenHeight > height - 100;
 
@@ -58,15 +59,15 @@ class Settings extends Component {
           <Block row space="between" style={styles.settingsItem}>
             <Text body notBlack>Notifications</Text>
             <Switch
-              value={notifications}
-              onValueChange={value => this.setState({ notifications: value })}
+              value={this.props.appState.notifications}
+              onValueChange={() => this.props.setNotifications(!this.props.appState.notifications)}
             />
           </Block>
           <Block row space="between" style={styles.settingsItem}>
             <Text body notBlack>Night theme</Text>
             <Switch
-              value={nightTheme}
-              onValueChange={value => this.setState({ nightTheme: value })}
+              value={this.props.appState.nightTheme}
+              onValueChange={value => this.props.setNightTheme(value)}
             />
           </Block>
           <Block row space="between" style={styles.settingsItem}>
@@ -94,7 +95,7 @@ class Settings extends Component {
           <Block row space="between" style={styles.settingsItem}>
             <Text notBlack style={{fontSize: 11}}>A</Text>
             <Slider
-              value={textSize}
+              value={this.props.appState.textSize}
               maximumValue={1}
               minimumValue={0}
               step={0.1}
@@ -102,7 +103,7 @@ class Settings extends Component {
               thumbTintColor={theme.colors.notBlack}
               thumbTouchSize={{width:16, height: 16}}
               trackStyle={{borderColor: theme.colors.blue}}
-              onValueChange={value => this.setState({ textSize: value })}
+              onValueChange={value => this.props.setTextSize(value)}
             />
             <Text notBlack style={{fontSize: 20}}>A</Text>
           </Block>
@@ -164,13 +165,17 @@ const styles = StyleSheet.create({
 
 function mapStateToProps (state) {
   return {
-    login: state.login
+    login: state.login,
+    appState: state.appState,
   }
 }
 
 function mapDispatchToProps (dispatch) {
   return {
-    confirmLogout: () => dispatch(logout())
+    confirmLogout: () => dispatch(logout()),
+    setNotifications: (data) => dispatch(setNotifications(data)),
+    setNightTheme: (data) => dispatch(setNightTheme(data)),
+    setTextSize: (data) => dispatch(setTextSize(data)),
   }
 }
 
