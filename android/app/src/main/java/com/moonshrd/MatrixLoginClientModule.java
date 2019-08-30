@@ -31,6 +31,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
+    // TODO: make sending result to the UI via promises instead of ReactNative events
     private static String LOG_TAG = MatrixLoginClientModule.class.getSimpleName();
 
     public MatrixLoginClientModule(@Nonnull ReactApplicationContext reactContext) {
