@@ -41,13 +41,10 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             return
         }
         GlobalScope.launch {
-            if(matrixInstance.defaultSession == null) {
-                promise.reject(RuntimeException("Session must not be null!"))
-            }
             for(i in 0 until 15) {
                 if(!Globals.State.isInitialSyncComplete) {
                     if(i == 14) {
-                        promise.reject(RuntimeException("Sync waiting timeout!"))
+                        promise.reject("onUnexpectedError", "Sync waiting timeout!")
                     }
                     Thread.sleep(1000)
                 }
@@ -173,8 +170,8 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             return
         }
         matrixInstance.defaultSession.createDirectMessageRoom(participantUserId, object : ApiCallback<String> {
-            override fun onSuccess(info: String?) {
-                promise.resolve(true)
+            override fun onSuccess(roomId: String?) {
+                promise.resolve(roomId)
             }
 
             override fun onUnexpectedError(e: java.lang.Exception?) {
