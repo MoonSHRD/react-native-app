@@ -3,10 +3,29 @@ import { View, Alert, Platform, Dimensions, ActivityIndicator, ScrollView, Keybo
 
 import { Block, Text } from '../components';
 import { theme } from '../constants';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const { width, height } = Dimensions.get('window');
+import {connect} from 'react-redux';
+import { setChatBackground } from '../store/actions/appStateActions';
 
-export default class Settings extends Component {
+class ChatBackground extends Component {
+  static navigationOptions = ({ navigation }) => {
+    return {
+      headerTitle: (
+        <Text style={styles.headerText}>Chat Background</Text>
+      ),
+      headerLeft: (
+        <Icon
+            name="ios-arrow-back" 
+            size={24} 
+            color={theme.colors.blue}
+            onPress={() => navigation.goBack()}
+            style={{paddingVertical: 10, paddingHorizontal: 20,}}
+        />
+      )
+    }
+  };
   state = {
     chatBackground: null,
     dataSource: [
@@ -66,15 +85,19 @@ export default class Settings extends Component {
           scrollEnabled={scrollEnabled}
           onContentSizeChange={this.onContentSizeChange}
         >
-        <Block style={styles.settings}>
+        <Block style={this.props.appState.nightTheme ? styles.darkSettings : styles.settings}>
           <Block 
             forPress
             row 
             space="between" 
-            style={styles.settingsItem}
+            style={this.props.appState.nightTheme ? styles.darkSettingsItem: styles.settingsItem}
             onPress={() => { Alert.alert('Gallery callback') }}
             >
-            <Text body notBlack>Choose from gallery</Text>
+            <Text 
+              body 
+              style={this.props.appState.nightTheme ? styles.whiteText : styles.notBlackText}
+            >
+            Choose from gallery</Text>
           </Block>
           <View style={styles.imageContainer}>
             {
@@ -84,7 +107,7 @@ export default class Settings extends Component {
                         style={styles.backgroundBlock}
                     >
                     <Image 
-                        source={{url: l.picture_url}}
+                        source={{uri: l.picture_url}}
                         style={styles.backgroundPicture}
                     />
                     </Block>
@@ -95,10 +118,13 @@ export default class Settings extends Component {
                 forPress
                 row 
                 space="between" 
-                style={styles.lastItem}
+                style={this.props.appState.nightTheme ? styles.darkLastItem : styles.lastItem}
                 onPress={() => navigation.navigate('Settings')}
                 >
-                <Text body notBlack>Disable background settings</Text>
+                <Text 
+                  body 
+                  style={this.props.appState.nightTheme ? styles.whiteText : styles.notBlackText}
+                >Disable background settings</Text>
             </Block>
         </Block>
         </ScrollView>
@@ -110,21 +136,51 @@ export default class Settings extends Component {
 const styles = StyleSheet.create({
   settings: {
     width: width,
-    paddingHorizontal: 16,
     marginTop: 20,
+  },
+  darkSettings: {
+    width: width,
+    backgroundColor: theme.colors.black,
+  },
+  headerText: {
+    fontSize: 14, 
+    fontWeight: '600', 
+    letterSpacing: -0.0241176,
+    color: theme.colors.notBlack,
   },
   settingsItem: {
     paddingVertical: 10,
+    paddingHorizontal: 16,
     borderBottomColor: theme.colors.lightGray,
     borderBottomWidth: 1,
     alignItems: 'center',
+    marginTop: 20,
+  },
+  darkSettingsItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderBottomColor: theme.colors.black,
+    borderBottomWidth: 1,
+    alignItems: 'center',
+    backgroundColor: theme.colors.notBlack,
+    marginTop: 20,
   },
   lastItem: {
     paddingVertical: 10,
+    paddingHorizontal: 16,
     borderBottomColor: theme.colors.lightGray,
     borderBottomWidth: 1,
     alignItems: 'center',
     marginBottom: 15,
+  },
+  darkLastItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderBottomColor: theme.colors.black,
+    borderBottomWidth: 1,
+    alignItems: 'center',
+    marginBottom: 15,
+    backgroundColor: theme.colors.notBlack,
   },
   imageContainer: {
       flexDirection: 'row',
@@ -132,6 +188,7 @@ const styles = StyleSheet.create({
       justifyContent: 'space-between',
       marginTop: 7,
       marginBottom: 22,
+      paddingHorizontal: 16,
   },
   backgroundBlock: {
     marginVertical: 8,
@@ -140,4 +197,27 @@ const styles = StyleSheet.create({
       width: (width / 3) - 15,
       height: 201,
   },
+  notBlackText: {
+    color: theme.colors.notBlack,
+  },
+  whiteText: {
+    color: theme.colors.white,
+  }
 })
+
+function mapStateToProps (state) {
+  return {
+    appState: state.appState,
+  }
+}
+
+function mapDispatchToProps (dispatch) {
+  return {
+    setChatBackground: (data) => dispatch(setChatBackground(data)),
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ChatBackground)

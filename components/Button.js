@@ -67,7 +67,7 @@ Button.defaultProps = {
   end: { x: 1, y: 1 },
   locations: [0.1, 0.9],
   opacity: 0.8,
-  color: theme.colors.white,
+  // color: theme.colors.white,
 }
 
 

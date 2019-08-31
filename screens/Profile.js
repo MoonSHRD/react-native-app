@@ -86,7 +86,7 @@ class Profile extends Component {
         },
         {
             name: 'Costumes',
-            matched: false,
+            matched: true,
         },
       ]
   }
@@ -144,11 +144,12 @@ class Profile extends Component {
             showsVerticalScrollIndicator={false}
             scrollEnabled={scrollEnabled}
             onContentSizeChange={this.onContentSizeChange}
+            style={this.props.appState.nightTheme ? styles.darkBackground : styles.background}
         >
         {
             (userName != 'userName')
             ?
-            <Block style={styles.container}>
+            <Block style={this.props.appState.nightTheme ? styles.darkContainer : styles.container}>
             <Image 
                 source={require('../assets/images/backgroundImage.png')} 
                 style={styles.backgroundImage}
@@ -160,7 +161,7 @@ class Profile extends Component {
                 <Avatar 
                     rounded
                     source={this.props.contacts.contact.avatarUrl}
-                    containerStyle={styles.avatar}
+                    containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
                     avatarStyle={styles.avatarImage}
                 />
                 :
@@ -173,7 +174,7 @@ class Profile extends Component {
                         :
                         this.capitalize(userName[0])
                     }
-                    containerStyle={styles.avatar}
+                    containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
                     avatarStyle={styles.avatarImage}
                 />
             }
@@ -184,7 +185,7 @@ class Profile extends Component {
                     label="Name"
                     labelStyle={[styles.labels, hasErrors('name')]}
                     error={hasErrors('name')}
-                    style={[styles.input, hasErrors('name')]}
+                    style={this.props.appState.nightTheme ? [styles.darkInput, hasErrors('name')] : [styles.input, hasErrors('name')]}
                     defaultValue={
                         this.props.contacts.contact.name != ''
                         ?
@@ -201,7 +202,7 @@ class Profile extends Component {
                         label="Phone Nymber"
                         labelStyle={[styles.labels, hasErrors('name')]}
                         error={hasErrors('phone')}
-                        style={[styles.input, hasErrors('phone')]}
+                        style={this.props.appState.nightTheme ? [styles.darkInput, hasErrors('phone')] : [styles.input, hasErrors('phone')]}
                         defaultValue={this.props.contacts.contact.phone}
                     />
                     :
@@ -216,7 +217,7 @@ class Profile extends Component {
                         label="Email"
                         labelStyle={[styles.labels, hasErrors('email')]}
                         error={hasErrors('email')}
-                        style={[styles.input, hasErrors('email')]}
+                        style={this.props.appState.nightTheme ? [styles.darkInput, hasErrors('email')] : [styles.input, hasErrors('email')]}
                         defaultValue={this.props.contacts.contact.email}
                     />
                     :
@@ -250,6 +251,11 @@ class Profile extends Component {
                     :
                     null
                 }
+                <Button gradient style={styles.confirmButton}               
+                    onPress={() => {Alert.alert('send message')}}
+                >
+                    <Text headline bold white center>Send Message</Text>
+                </Button>       
             </Block>
             </Block>
             :
@@ -265,7 +271,7 @@ class Profile extends Component {
                 <Avatar 
                     rounded
                     source={this.props.contacts.myProfile.avatarUrl}
-                    containerStyle={styles.avatar}
+                    containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
                     avatarStyle={styles.avatarImage}
                 />
                 :
@@ -278,8 +284,8 @@ class Profile extends Component {
                         :
                         this.capitalize(this.props.contacts.myUserName[0])
                     }
-                    containerStyle={styles.avatar}
-                    avatarStyle={styles.avatarImage}
+                    containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
+s                    avatarStyle={styles.avatarImage}
                 />
             }
             </Block>
@@ -288,7 +294,7 @@ class Profile extends Component {
                     label="Name"
                     labelStyle={[styles.labels, hasErrors('name')]}
                     error={hasErrors('name')}
-                    style={[styles.input, hasErrors('name')]}
+                    style={this.props.appState.nightTheme ? [styles.darkInput, hasErrors('name')] : [styles.input, hasErrors('name')]}
                     defaultValue={
                         this.props.contacts.myUserName
                         ?
@@ -305,7 +311,7 @@ class Profile extends Component {
                         label="Phone Nymber"
                         labelStyle={[styles.labels, hasErrors('name')]}
                         error={hasErrors('phone')}
-                        style={[styles.input, hasErrors('phone')]}
+                        style={this.props.appState.nightTheme ? [styles.darkInput, hasErrors('phone')] : [styles.input, hasErrors('phone')]}
                         defaultValue={this.props.contacts.myProfile.phone}
                         onChangeText={text => this.setState({ phone: text })}
                     />
@@ -342,15 +348,16 @@ class Profile extends Component {
                 }
                 <Input
                     error={hasErrors('tags')}
-                    style={[styles.input, hasErrors('tags')]}
+                    style={this.props.appState.nightTheme ? [styles.darkInput, hasErrors('tags')] : [styles.input, hasErrors('tags')]}
                     placeholder={'Enter New Tag'}
+                    placeholderTextColor={theme.colors.gray}
                     defaultValue={newTag}
                     onChangeText={text => this.setState({ newTag: text })}
                 />
                 {
                     newTag !== null 
                     ?
-                    <Block style={styles.newTagContainer}>
+                    <Block style={this.props.appState.nightTheme ? styles.darkNewTagContainer : styles.newTagContainer}>
                         <Text caption2 gray style={styles.suggestedTagsText}>Suggested tags</Text>
                         <Block style={styles.newTagList}>
                             {
@@ -359,14 +366,14 @@ class Profile extends Component {
                                     ?
                                     <Button
                                         key={i}
-                                        style={styles.matchedTag}>
-                                        <Text caption white center>{l.name}</Text>
+                                        style={this.props.appState.nightTheme ? styles.darkMatchedTag : styles.matchedTag}>
+                                        <Text caption style={this.props.appState.nightTheme ? {color: theme.colors.black}: {color: theme.colors.white}} center>{l.name}</Text>
                                     </Button>
                                     :
                                     <Button
                                         key={i}
-                                        style={styles.dismatchedTag}>
-                                        <Text caption blue center>{l.name}</Text>
+                                        style={this.props.appState.nightTheme ? styles.darkDismatchedTag : styles.dismatchedTag}>
+                                        <Text caption style={this.props.appState.nightTheme ? {color: theme.colors.white}: {color: theme.colors.blue}} center>{l.name}</Text>
                                     </Button>
                                 ))
                             }
@@ -378,10 +385,7 @@ class Profile extends Component {
                 <Button gradient style={styles.confirmButton}               
                     onPress={() => {Alert.alert('save profile')}}
                 >
-                    {loading ?
-                    <ActivityIndicator size="small" color="white" /> :
                     <Text headline bold white center>Save</Text>
-                    }
                 </Button>       
             </Block>
         </Block>
@@ -393,11 +397,26 @@ class Profile extends Component {
 }
 
 const styles = StyleSheet.create({
+    background: {
+        backgroundColor: theme.colors.white,
+        height: height,
+      },
+      darkBackground: {
+        backgroundColor: theme.colors.black,
+        height: height,
+      },    
     container: {
         flex: 1,
         padding: 0,
         margin: 0,
         marginBottom: 15,
+    },
+    darkContainer: {
+        flex: 1,
+        padding: 0,
+        margin: 0,
+        marginBottom: 15,
+        backgroundColor: theme.colors.black,
     },
     backgroundImage: {
         width: width,
@@ -416,7 +435,16 @@ const styles = StyleSheet.create({
         height: 100,
         borderRadius: 50,
         overflow: 'hidden',
-        borderColor: 'white',
+        borderColor: theme.colors.white,
+        borderStyle: 'solid',
+        borderWidth: 3,
+    },
+    darkAvatar: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        overflow: 'hidden',
+        borderColor: theme.colors.black,
         borderStyle: 'solid',
         borderWidth: 3,
     },
@@ -431,9 +459,20 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         fontSize: theme.sizes.body,
         marginTop: 8,
+        fontWeight: 'normal',
         padding: 12,
         color: theme.colors.notBlack,
     }, 
+    darkInput: {
+        borderWidth: 0,
+        backgroundColor: theme.colors.notBlack,
+        borderRadius: 8,
+        fontSize: theme.sizes.body,
+        fontWeight: 'normal',
+        marginTop: 8,
+        padding: 12,
+        color: theme.colors.white,
+    },
     labels: {
         fontSize: theme.sizes.subhead,
         color: theme.colors.gray,
@@ -456,6 +495,15 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         marginHorizontal: 2,
     },
+    darkMatchedTag: {
+        backgroundColor: theme.colors.white,
+        borderRadius: 16,
+        overflow: 'hidden',
+        height: 24,
+        paddingVertical: 4,
+        paddingHorizontal: 16,
+        marginHorizontal: 2,
+    },
     dismatchedTag: {
         backgroundColor: theme.colors.white,
         borderRadius: 16,
@@ -467,10 +515,28 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: theme.colors.blue,
     },
+    darkDismatchedTag: {
+        backgroundColor: theme.colors.notBlack,
+        borderRadius: 16,
+        overflow: 'hidden',
+        height: 24,
+        paddingVertical: 4,
+        paddingHorizontal: 16,
+        marginHorizontal: 2,
+        borderWidth: 1,
+        borderColor: theme.colors.white,
+    },
     newTagContainer: {
         backgroundColor: '#FAFAFA',
         paddingHorizontal: 8,
         marginTop: 20,
+        borderColor: 8,
+    },
+    darkNewTagContainer: {
+        backgroundColor: theme.colors.notBlack,
+        paddingHorizontal: 8,
+        marginTop: 20,
+        borderColor: 8,
     },
     suggestedTagsText: {
         paddingTop: 8,
@@ -488,7 +554,8 @@ const styles = StyleSheet.create({
 
 function mapStateToProps (state) {
     return {
-      contacts: state.contacts
+      contacts: state.contacts,
+      appState: state.appState,
     }
   }
   

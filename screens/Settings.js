@@ -16,7 +16,7 @@ class Settings extends Component {
   static navigationOptions = ({ navigation }) => {
     return {
       headerTitle: (
-        <Text notBlack style={{fontSize: 14, fontWeight: '600', letterSpacing: -0.0241176}}>Settings</Text>
+        <Text style={styles.headerText}>Settings</Text>
       ),
       headerRight: (
         <Icon
@@ -41,6 +41,16 @@ class Settings extends Component {
       this.props.confirmLogout()
   }
 
+  setHeaderParams = () => {
+    const nightTheme = this.props.appState.nightTheme ? true : false;
+    this.props.navigation.setParams({nightTheme: nightTheme});
+    console.log('blah blah blah')
+  }
+
+  componentDidMount = () => {
+    this.setHeaderParams()
+  }
+
   render() {
     const { navigation } = this.props;
     const { loading, errors } = this.state;
@@ -54,35 +64,38 @@ class Settings extends Component {
           scrollEnabled={scrollEnabled}
           onContentSizeChange={this.onContentSizeChange}
         >
-        <Block style={styles.settings}>
-          <Text headline bold notBlack style={{marginTop: 20, marginBottom: 8}}>General settings</Text>
-          <Block row space="between" style={styles.settingsItem}>
-            <Text body notBlack>Notifications</Text>
+        <Block style={this.props.appState.nightTheme ? styles.darkSettings : styles.settings}>
+          <Text headline bold style={this.props.appState.nightTheme ? styles.whiteTextMargin : styles.notBlackTextMargin}>General settings</Text>
+          <Block row space="between" style={this.props.appState.nightTheme ? styles.darkSettingsItem: styles.settingsItem}>
+            <Text body style={this.props.appState.nightTheme ? styles.whiteText : styles.notBlackText}>Notifications</Text>
             <Switch
               value={this.props.appState.notifications}
               onValueChange={() => this.props.setNotifications(!this.props.appState.notifications)}
             />
           </Block>
-          <Block row space="between" style={styles.settingsItem}>
-            <Text body notBlack>Night theme</Text>
+          <Block row space="between" style={this.props.appState.nightTheme ? styles.darkSettingsItem: styles.settingsItem}>
+            <Text body style={this.props.appState.nightTheme ? styles.whiteText : styles.notBlackText}>Night theme</Text>
             <Switch
               value={this.props.appState.nightTheme}
-              onValueChange={value => this.props.setNightTheme(value)}
+              onValueChange={value => {
+                this.props.setNightTheme(value)
+                this.setHeaderParams()
+              }}
             />
           </Block>
-          <Block row space="between" style={styles.settingsItem}>
-            <Text body notBlack>Language</Text>
+          <Block row space="between" style={this.props.appState.nightTheme ? styles.darkSettingsItem: styles.settingsItem}>
+            <Text body style={this.props.appState.nightTheme ? styles.whiteText : styles.notBlackText}>Language</Text>
             <Text body gray>English</Text>
           </Block>
-          <Text headline bold notBlack style={{marginTop: 23, marginBottom: 8}}>Chat settings</Text>
+          <Text headline bold style={this.props.appState.nightTheme ? styles.itemDarkText : styles.itemText}>Chat settings</Text>
           <Block 
             forPress
             row 
             space="between" 
-            style={styles.settingsItem}
+            style={this.props.appState.nightTheme ? styles.darkSettingsItem: styles.settingsItem}
             onPress={() => navigation.navigate('ChatBackground')}
           >
-            <Text body notBlack>Chat Background</Text>
+            <Text body style={this.props.appState.nightTheme ? styles.whiteText : styles.notBlackText}>Chat Background</Text>
             <Icon
               name="ios-arrow-forward" 
               size={24} 
@@ -91,30 +104,30 @@ class Settings extends Component {
               onPress={() => navigation.navigate('ChatBackground')}
             />
           </Block>
-          <Text headline bold notBlack style={{marginTop: 23, marginBottom: 8}}>Text size</Text>
-          <Block row space="between" style={styles.settingsItem}>
-            <Text notBlack style={{fontSize: 11}}>A</Text>
+          <Text headline bold style={this.props.appState.nightTheme ? styles.itemDarkText : styles.itemText}>Text size</Text>
+          <Block row space="between" style={this.props.appState.nightTheme ? styles.darkSettingsItem: styles.settingsItem}>
+            <Text style={this.props.appState.nightTheme ? styles.grayText : styles.notBlackText} style={{fontSize: 11}}>A</Text>
             <Slider
               value={this.props.appState.textSize}
               maximumValue={1}
               minimumValue={0}
               step={0.1}
               style={styles.slider}
-              thumbTintColor={theme.colors.notBlack}
+              thumbTintColor={this.props.appState.nightTheme ? theme.colors.white : theme.colors.notBlack}
               thumbTouchSize={{width:16, height: 16}}
               trackStyle={{borderColor: theme.colors.blue}}
               onValueChange={value => this.props.setTextSize(value)}
             />
-            <Text notBlack style={{fontSize: 20}}>A</Text>
+            <Text style={this.props.appState.nightTheme ? styles.grayText : styles.notBlackText} style={{fontSize: 20}}>A</Text>
           </Block>
-          <Text headline bold notBlack style={{marginTop: 23, marginBottom: 8}}>Other</Text>
+          <Text headline bold style={this.props.appState.nightTheme ? styles.itemDarkText : styles.itemText}>Other</Text>
           <Block 
             forPress
             row 
             space="between" 
-            style={styles.settingsItem}
+            style={this.props.appState.nightTheme ? styles.darkSettingsItem: styles.settingsItem}
           >
-            <Text body notBlack>FAQ</Text>
+            <Text body style={this.props.appState.nightTheme ? styles.whiteText : styles.notBlackText}>FAQ</Text>
             <Icon
               name="ios-arrow-forward" 
               size={24} 
@@ -126,7 +139,7 @@ class Settings extends Component {
           {
             Platform.OS === 'android' 
             ?
-            <Button onPress={this.handleSignOut}>
+            <Button onPress={this.handleSignOut} style={this.props.appState.nightTheme ? styles.darkSettingsButton: styles.settingsButton}>
               <Text body red>Log Out</Text>
             </Button>
             :
@@ -134,7 +147,7 @@ class Settings extends Component {
               row 
               forPress
               space="between" 
-              style={styles.settingsItem}
+              style={this.props.appState.nightTheme ? styles.darkSettingsItem: styles.settingsItem}
               onPress={this.handleSignOut}
             >
               <Text body red>Log Out</Text>
@@ -150,13 +163,85 @@ class Settings extends Component {
 const styles = StyleSheet.create({
   settings: {
     width: width,
-    paddingHorizontal: 16,
+  },
+  darkSettings: {
+    width: width,
+    backgroundColor: theme.colors.black,
+  },
+  headerText: {
+    fontSize: 14, 
+    fontWeight: '600', 
+    letterSpacing: -0.0241176,
+    color: theme.colors.notBlack,
+  },
+  darkHeaderText: {
+    fontSize: 14, 
+    fontWeight: '600', 
+    letterSpacing: -0.0241176,
+    color: theme.colors.white,
   },
   settingsItem: {
     paddingVertical: 10,
+    paddingHorizontal: 16,
     borderBottomColor: theme.colors.lightGray,
     borderBottomWidth: 1,
     alignItems: 'center',
+  },
+  darkSettingsItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderBottomColor: theme.colors.black,
+    borderBottomWidth: 1,
+    alignItems: 'center',
+    backgroundColor: theme.colors.notBlack,
+  },
+  settingsButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderBottomColor: theme.colors.lightGray,
+    borderBottomWidth: 1,
+    marginVertical: 0,
+  },
+  darkSettingsButton: {
+    marginVertical: 0,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderBottomColor: theme.colors.black,
+    borderBottomWidth: 1,
+    backgroundColor: theme.colors.notBlack,
+  },
+  notBlackText: {
+    color: theme.colors.notBlack,
+  },
+  notBlackTextMargin: {
+    marginTop: 20, 
+    marginBottom: 8,
+    color: theme.colors.notBlack,
+    paddingHorizontal: 16,
+  },
+  grayText: {
+    color: theme.colors.gray,
+  },
+  whiteText: {
+    color: theme.colors.white,
+  },
+  whiteTextMargin: {
+    marginTop: 20, 
+    marginBottom: 8,
+    color: theme.colors.white,
+    paddingHorizontal: 16,
+  },
+  itemText: {
+    marginTop: 23, 
+    marginBottom: 8,
+    color: theme.colors.notBlack,
+    paddingHorizontal: 16,
+  },
+  itemDarkText: {
+    marginTop: 23, 
+    marginBottom: 8,
+    color: theme.colors.white,
+    paddingHorizontal: 16,
   },
   slider: {
     width: width - 76,

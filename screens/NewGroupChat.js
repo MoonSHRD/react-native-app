@@ -109,12 +109,24 @@ class NewGroupChat extends Component {
 			y:0,
     }
 
+    const darkShadowOpt = {
+      color: '#1F1F1F',
+      width: width - 16,
+      height: 64,
+      border:7,
+			radius:16,
+			opacity:1,
+			x:0,
+			y:0,
+    }
+
     return (
       <KeyboardAvoidingView behavior="padding">
         <ScrollView
           showsVerticalScrollIndicator={false}
           scrollEnabled={scrollEnabled}
           onContentSizeChange={this.onContentSizeChange}
+          style={this.props.appState.nightTheme ? styles.darkBackground : styles.background}
         >
         { Platform.OS === 'ios'
           ? 
@@ -123,9 +135,9 @@ class NewGroupChat extends Component {
             onChangeText={(text) => this.updateSearch(text)}
             platform="ios"
             value={this.props.contacts.search}
-            containerStyle={styles.searchBar}
-            inputContainerStyle={styles.searchInputBar}
-            inputStyle={styles.searchInputText}
+            containerStyle={this.props.appState.nightTheme ? styles.darkSearchBar: styles.searchBar}
+            inputContainerStyle={this.props.appState.nightTheme ? styles.darkSearchInputBar : styles.searchInputBar}
+            inputStyle={this.props.appState.nightTheme ? styles.darkSearchInputText : styles.searchInputText}
           />
           :
           <SearchBar 
@@ -134,13 +146,12 @@ class NewGroupChat extends Component {
             onChangeText={(text) => this.updateSearch(text)}
             cancelButtonTitle={null}
             value={this.props.contacts.search}
-            containerStyle={styles.searchBar}
-            inputContainerStyle={styles.searchInputBar}
-            inputStyle={styles.searchInputText}
+            containerStyle={this.props.appState.nightTheme ? styles.darkSearchBar: styles.searchBar}
+            inputContainerStyle={this.props.appState.nightTheme ? styles.darkSearchInputBar : styles.searchInputBar}
+            inputStyle={this.props.appState.nightTheme ? styles.darkSearchInputText : styles.searchInputText}
           />
         }
-        <View>
-
+        <View style={{marginTop: 5}}>
         {
           searchChanged
           ?
@@ -151,8 +162,8 @@ class NewGroupChat extends Component {
             <Block>
             {
               this.props.contacts.searchList.map((l, i) => (
-                <View style={styles.viewList}>
-                <BoxShadow setting={shadowOpt}>
+                <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
+                <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
                   <ListItem
                     key={i}
                     leftAvatar={
@@ -163,10 +174,10 @@ class NewGroupChat extends Component {
                       { source: { uri: l.avatarUri } }
                     }
                     title={this.capitalize(l.name)}
-                    titleStyle={styles.title}
+                    titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
                     subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>}
                     subtitleStyle={styles.subtitle}
-                    containerStyle={styles.list}
+                    containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
                     value={l.isSelected}
                     leftIcon={
                         l.isSelected
@@ -200,8 +211,8 @@ class NewGroupChat extends Component {
           <Block>
           {
             this.props.contacts.selectedContacts.map((l, i) => (
-              <View style={styles.viewList}>
-              <BoxShadow setting={shadowOpt}>
+              <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
+              <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
                 <ListItem
                   key={i}
                   leftAvatar={
@@ -212,10 +223,10 @@ class NewGroupChat extends Component {
                     { source: { uri: l.avatarUri } }
                   }
                   title={this.capitalize(l.name)}
-                  titleStyle={styles.title}
+                  titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
                   subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen} interval={60000}/></Text>}
                   subtitleStyle={styles.subtitle}
-                  containerStyle={styles.list}
+                  containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
                   value={l.isSelected}
                   leftIcon={
                       l.isSelected
@@ -250,6 +261,14 @@ class NewGroupChat extends Component {
 }
 
 const styles = StyleSheet.create({
+  background: {
+    backgroundColor: theme.colors.white,
+    height: height,
+  },
+  darkBackground: {
+    backgroundColor: theme.colors.black,
+    height: height,
+  },
   searchBar: {
     backgroundColor: theme.colors.white,
     paddingHorizontal: 16,
@@ -267,6 +286,23 @@ const styles = StyleSheet.create({
     fontSize: theme.sizes.caption,
     color: theme.colors.gray
   },
+  darkSearchBar: {
+    backgroundColor: theme.colors.notBlack,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    margin: 0
+  },
+  darkSearchInputBar: {
+    backgroundColor: theme.colors.darkGrey,
+    margin: 0,
+    borderWidth: 0,
+    borderRadius: 16,
+    height: 32,
+  },
+  darkSearchInputText: {
+    fontSize: theme.sizes.caption,
+    color: theme.colors.gray
+  },
   listItem: {
     width: width - 16,
     marginHorizontal: 8,
@@ -275,6 +311,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     zIndex: 10,
+  },
+  darklistItem: {
+    width: width - 16,
+    marginHorizontal: 8,
+    borderBottomColor: theme.colors.notBlack,
+    borderBottomWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    zIndex: 10,
+    backgroundColor: theme.colors.black,
   },
   viewList: {
     width: width - 16,
@@ -286,6 +332,17 @@ const styles = StyleSheet.create({
     shadowRadius: 7,  
     minHeight: 64,
   },
+  darkViewList: {
+    width: width - 16,
+    marginTop: 2,
+    marginHorizontal: 8,
+    shadowColor: '#b2bcf3',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 7,  
+    minHeight: 64,
+    backgroundColor: theme.colors.black,
+  },
   list: {
     paddingHorizontal: 16,
     paddingVertical: 9,
@@ -296,8 +353,26 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     minHeight: 64,
   },  
+  darkList: {
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    borderTopRightRadius: 16,
+    borderTopLeftRadius: 16,
+    overflow: 'hidden',
+    minHeight: 64,
+    backgroundColor: theme.colors.black,
+  },
   title: {
     color: theme.colors.notBlack,
+    fontSize: theme.sizes.headline,
+    fontWeight: "600",
+    letterSpacing: -0.0241176,
+    lineHeight: 24,
+  },
+  darkTitle: {
+    color: theme.colors.white,
     fontSize: theme.sizes.headline,
     fontWeight: "600",
     letterSpacing: -0.0241176,
@@ -313,7 +388,8 @@ const styles = StyleSheet.create({
 
 function mapStateToProps (state) {
   return {
-    contacts: state.contacts
+    contacts: state.contacts,
+    appState: state.appState,
   }
 }
 
