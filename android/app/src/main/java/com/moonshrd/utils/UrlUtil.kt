@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.moonshrd.util
+package com.moonshrd.utils
 
 /**
  * Schemes

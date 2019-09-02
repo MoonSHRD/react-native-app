@@ -1,4 +1,4 @@
-package com.moonshrd;
+package com.moonshrd.matrixUtils;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -6,7 +6,8 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.text.TextUtils;
 
-import com.moonshrd.util.UrlUtilKt;
+import com.moonshrd.R;
+import com.moonshrd.utils.UrlUtilKt;
 
 import org.matrix.androidsdk.HomeServerConnectionConfig;
 import org.matrix.androidsdk.MXSession;

@@ -3,6 +3,7 @@ package com.moonshrd;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.moonshrd.matrixUtils.Matrix;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.horcrux.svg.SvgPackage;
 import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;

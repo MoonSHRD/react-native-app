@@ -1,6 +1,5 @@
-package com.moonshrd.util
+package com.moonshrd.utils
 
-import android.support.annotation.Nullable
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.facebook.react.bridge.WritableMap

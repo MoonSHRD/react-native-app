@@ -1,4 +1,4 @@
-package com.moonshrd;
+package com.moonshrd.matrixUtils;
 
 /*
  * Copyright 2016 OpenMarket Ltd
@@ -23,6 +23,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+
+import com.moonshrd.MainApplication;
 
 import org.matrix.androidsdk.HomeServerConnectionConfig;
 import org.matrix.androidsdk.MXDataHandler;

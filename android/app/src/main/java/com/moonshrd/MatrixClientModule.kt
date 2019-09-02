@@ -5,6 +5,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.google.gson.Gson
+import com.moonshrd.matrixUtils.Matrix
 import com.moonshrd.model.UserModel
 import java9.util.concurrent.CompletableFuture
 import kotlinx.coroutines.GlobalScope

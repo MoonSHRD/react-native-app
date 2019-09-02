@@ -1,17 +1,16 @@
-package com.moonshrd;
+package com.moonshrd.matrixUtils;
 
 import android.app.Activity;
 import android.widget.Toast;
+
+import com.moonshrd.R;
 
 import org.matrix.androidsdk.MXSession;
 import org.matrix.androidsdk.core.Log;
 import org.matrix.androidsdk.core.callback.ApiFailureCallback;
 import org.matrix.androidsdk.core.model.MatrixError;
-import org.matrix.androidsdk.ssl.CertUtil;
 import org.matrix.androidsdk.ssl.Fingerprint;
 import org.matrix.androidsdk.ssl.UnrecognizedCertificateException;
-
-import java.util.Arrays;
 
 /**
  * Listen to error threw by the Matrix client when querying the API

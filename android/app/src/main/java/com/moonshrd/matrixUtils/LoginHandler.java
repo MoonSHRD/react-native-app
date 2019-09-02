@@ -1,7 +1,9 @@
-package com.moonshrd;
+package com.moonshrd.matrixUtils;
 
 import android.content.Context;
 import android.text.TextUtils;
+
+import com.moonshrd.R;
 
 import org.matrix.androidsdk.HomeServerConnectionConfig;
 import org.matrix.androidsdk.MXSession;

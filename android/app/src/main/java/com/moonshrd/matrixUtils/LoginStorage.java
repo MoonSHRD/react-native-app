@@ -1,4 +1,4 @@
-package com.moonshrd;
+package com.moonshrd.matrixUtils;
 
 
 import android.content.Context;
