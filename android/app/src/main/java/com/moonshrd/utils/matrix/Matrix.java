@@ -1,4 +1,4 @@
-package com.moonshrd.matrixUtils;
+package com.moonshrd.utils.matrix;
 
 /*
  * Copyright 2016 OpenMarket Ltd

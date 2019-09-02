@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.moonshrd.matrixUtils;
+package com.moonshrd.utils.matrix;
 
 import android.content.Context;
 import android.content.SharedPreferences;

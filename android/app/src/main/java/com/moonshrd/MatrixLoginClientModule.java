@@ -10,10 +10,10 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
-import com.moonshrd.matrixUtils.LoginHandler;
-import com.moonshrd.matrixUtils.Matrix;
-import com.moonshrd.matrixUtils.RegistrationManager;
 import com.moonshrd.utils.RNUtilsKt;
+import com.moonshrd.utils.matrix.LoginHandler;
+import com.moonshrd.utils.matrix.Matrix;
+import com.moonshrd.utils.matrix.RegistrationManager;
 
 import org.matrix.androidsdk.HomeServerConnectionConfig;
 import org.matrix.androidsdk.core.JsonUtils;
