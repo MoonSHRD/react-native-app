@@ -93,7 +93,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         }
 
         val userName = CompletableFuture<String?>()
-        var userAvatarUrl = CompletableFuture<String?>()
+        val userAvatarUrl = CompletableFuture<String?>()
 
         matrixInstance.defaultSession.profileApiClient.displayname(userID, object: ApiCallback<String> {
             override fun onSuccess(info: String?) {
@@ -190,6 +190,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         })
     }
 
+    @ReactMethod
     fun searchUserById(userName: String, limit: Int?, promise: Promise) {
         if(!isSessionExists(promise)) {
             return
@@ -209,6 +210,31 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                     users.add(UserModel(it.user_id, it.displayname, it.avatarUrl))
                 }
                 promise.resolve(gson.toJson(users))
+            }
+
+            override fun onUnexpectedError(e: java.lang.Exception?) {
+                promise.reject("onUnexpectedError", e!!.message)
+            }
+
+            override fun onMatrixError(e: MatrixError?) {
+                promise.reject("onMatrixError", e!!.message)
+            }
+
+            override fun onNetworkError(e: java.lang.Exception?) {
+                promise.reject("onNetworkError", e!!.message)
+            }
+        })
+    }
+
+    @ReactMethod
+    fun updateDisplayName(newDisplayName: String, promise: Promise) {
+        if(!isSessionExists(promise)) {
+            return
+        }
+
+        matrixInstance.defaultSession.profileApiClient.updateDisplayname(newDisplayName, object : ApiCallback<Void> {
+            override fun onSuccess(info: Void?) {
+                promise.resolve(true)
             }
 
             override fun onUnexpectedError(e: java.lang.Exception?) {
