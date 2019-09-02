@@ -5,7 +5,6 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.google.gson.Gson
-import com.moonshrd.model.DirectChatModel
 import com.moonshrd.model.UserModel
 import java9.util.concurrent.CompletableFuture
 import kotlinx.coroutines.GlobalScope
@@ -17,6 +16,7 @@ import org.matrix.androidsdk.data.RoomState
 import org.matrix.androidsdk.data.RoomSummary
 import org.matrix.androidsdk.data.timeline.EventTimeline
 import org.matrix.androidsdk.rest.model.Event
+import org.matrix.androidsdk.rest.model.search.SearchUsersResponse
 
 class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
     private val gson = Gson() // TODO Optimize it with Dagger
@@ -55,7 +55,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                 it.isDirect
             }
 
-            val chatModels = mutableListOf<DirectChatModel>()
+            val chatModels = mutableListOf<UserModel>()
             directChats.forEach { room ->
                 val roomSummary = room.roomSummary
                 // hack for optimization: since we hold the same listener, we will not create a useless instance of this listener (else it will add new object to internal list of listeners and messing up the memory)
@@ -68,12 +68,13 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                     it.userId != matrixInstance.defaultSession.myUserId
                 }[0].userId
                 val contact = matrixInstance.defaultSession.dataHandler.store.getUser(contactID)
-                val chat = DirectChatModel(
+                val chat = UserModel(
+                        contactID,
                         room.getRoomDisplayName(reactApplicationContext),
                         room.avatarUrl ?: "",
                         contact.latestPresenceTs,
                         contact.isActive,
-                        matrixInstance.defaultLatestChatMessageCache.getLatestText(reactApplicationContext, roomSummary!!.roomId),
+                        matrixInstance.defaultLatestChatMessageCache.getLatestText(reactApplicationContext, roomSummary.roomId),
                         roomSummary.latestReceivedEvent.originServerTs,
                         roomSummary.latestReceivedEvent.mSentState.name,
                         roomSummary.mUnreadEventsCount
@@ -139,9 +140,9 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             val name = userName.get()
             val avatarUrl = userAvatarUrl.get()
             if(name != null && avatarUrl != null) {
-                promise.resolve(gson.toJson(UserModel(name, avatarUrl)))
+                promise.resolve(gson.toJson(UserModel(userID, name, avatarUrl)))
             } else {
-                promise.resolve(gson.toJson(UserModel("", "")))
+                promise.resolve(gson.toJson(UserModel("", "", "")))
             }
         }
     }
@@ -184,6 +185,41 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
             override fun onNetworkError(e: java.lang.Exception?) {
                 promise.reject("onNetworkError", e)
+            }
+        })
+    }
+
+    fun searchUserById(userName: String, limit: Int?, promise: Promise) {
+        if(!isSessionExists(promise)) {
+            return
+        }
+
+        val tempLimit: Int?
+        if(limit == 0) {
+            tempLimit = null
+        } else {
+            tempLimit = limit
+        }
+
+        val users = ArrayList<UserModel>()
+        matrixInstance.defaultSession.searchUsers(userName, tempLimit, null, object: ApiCallback<SearchUsersResponse> {
+            override fun onSuccess(info: SearchUsersResponse?) {
+                info!!.results.forEach {
+                    users.add(UserModel(it.user_id, it.displayname, it.avatarUrl))
+                }
+                promise.resolve(gson.toJson(users))
+            }
+
+            override fun onUnexpectedError(e: java.lang.Exception?) {
+                promise.reject("onUnexpectedError", e!!.message)
+            }
+
+            override fun onMatrixError(e: MatrixError?) {
+                promise.reject("onMatrixError", e!!.message)
+            }
+
+            override fun onNetworkError(e: java.lang.Exception?) {
+                promise.reject("onNetworkError", e!!.message)
             }
         })
     }
