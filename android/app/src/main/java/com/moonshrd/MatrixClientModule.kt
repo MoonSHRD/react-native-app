@@ -1,5 +1,6 @@
 package com.moonshrd
 
+import android.util.Base64
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
@@ -16,8 +17,12 @@ import org.matrix.androidsdk.data.Room
 import org.matrix.androidsdk.data.RoomState
 import org.matrix.androidsdk.data.RoomSummary
 import org.matrix.androidsdk.data.timeline.EventTimeline
+import org.matrix.androidsdk.listeners.IMXMediaUploadListener
 import org.matrix.androidsdk.rest.model.Event
 import org.matrix.androidsdk.rest.model.search.SearchUsersResponse
+import java.io.ByteArrayInputStream
+import java.net.URLConnection.guessContentTypeFromStream
+
 
 class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
     private val gson = Gson() // TODO Optimize it with Dagger
@@ -249,6 +254,65 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                 promise.reject("onNetworkError", e!!.message)
             }
         })
+    }
+
+    @ReactMethod
+    fun updateAvatar(base64Avatar: String, promise: Promise) {
+        val future = uploadImage(base64Avatar)
+        future.thenAccept {
+            matrixInstance.defaultSession.profileApiClient.updateDisplayname(it, object : ApiCallback<Void> {
+                override fun onSuccess(info: Void?) {
+                    promise.resolve(true)
+                }
+
+                override fun onUnexpectedError(e: java.lang.Exception?) {
+                    promise.reject("onUnexpectedError", e!!.message)
+                }
+
+                override fun onMatrixError(e: MatrixError?) {
+                    promise.reject("onMatrixError", e!!.message)
+                }
+
+                override fun onNetworkError(e: java.lang.Exception?) {
+                    promise.reject("onNetworkError", e!!.message)
+                }
+            })
+        }
+        future.exceptionally {
+            promise.reject(it)
+            ""
+        }
+    }
+
+    private fun uploadImage(base64Image: String): CompletableFuture<String> {
+        val imageByteArray = Base64.decode(base64Image, Base64.DEFAULT)
+        val imageInputStream = ByteArrayInputStream(imageByteArray)
+
+        val future = CompletableFuture<String>()
+
+        matrixInstance.defaultSession.mediaCache.uploadContent(imageInputStream, null, guessContentTypeFromStream(imageInputStream), null, object: IMXMediaUploadListener {
+            override fun onUploadProgress(uploadId: String?, uploadStats: IMXMediaUploadListener.UploadStats?) {
+                //
+            }
+
+            override fun onUploadCancel(uploadId: String?) {
+                future.completeExceptionally(RuntimeException("onUploadCancel, uploadId=$uploadId"))
+            }
+
+            override fun onUploadStart(uploadId: String?) {
+                //
+            }
+
+            override fun onUploadComplete(uploadId: String?, contentUri: String?) {
+                future.complete(contentUri)
+            }
+
+            override fun onUploadError(uploadId: String?, serverResponseCode: Int, serverErrorMessage: String?) {
+                future.completeExceptionally(RuntimeException("Error occurred! Response code=$serverResponseCode, error message=$serverErrorMessage"))
+            }
+        })
+
+        return future
     }
 
     internal class NewEventsListener(private val reactContext: ReactApplicationContext,
