@@ -5,10 +5,12 @@ import { Button, Block, Input, Text } from '../components';
 import { theme } from '../constants';
 import Logo from '../assets/images/logo-small.svg';
 import TextLogo from '../assets/images/text-logo.svg';
+import DarkTextLogo from '../assets/images/dark-text-logo.svg';
+import { connect } from 'react-redux';
 
 const { width, height } = Dimensions.get('window');
 
-export default class ForgotPassword extends Component {
+class ForgotPassword extends Component {
   static navigationOptions = {
     header: null
   }
@@ -25,24 +27,31 @@ export default class ForgotPassword extends Component {
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
 
     return (
-      <KeyboardAvoidingView style={styles.container} behavior="padding">
+      <KeyboardAvoidingView style={this.props.appState.nightTheme ? styles.darkContainer : styles.container} behavior="padding">
         <ScrollView
           showsVerticalScrollIndicator={false}
         >
         <Block padding={[height / 10, theme.sizes.base * 2]}>
           <View style={styles.imageContainer}>
             <Logo width={width / 6.7} height={height / 6.7} />
-            <TextLogo style={styles.textLogo}/>
+            {
+              this.props.appState.nightTheme 
+              ?
+              <DarkTextLogo style={styles.textLogo}/>
+              :
+              <TextLogo style={styles.textLogo}/>
+            }
           </View>
-          <Text headline semibold center>Password recovery</Text>
+          <Text headline semibold center style={this.props.appState.nightTheme ? {color: theme.colors.white} : {color:  theme.colors.notBlack}}>Password recovery</Text>
           <Text gray footnote center style={{marginTop: 14}}>We just need your registered email address to send you password reset link</Text>
           <Block middle style={styles.formContainer}>
             <Input
               email
               error={hasErrors('email')}
-              style={[styles.input, hasErrors('email')]}
+              style={this.props.appState.nightTheme ? [styles.darkInput, hasErrors('email')] : [styles.input, hasErrors('email')]}
               defaultValue={this.state.email}
               placeholder={'Enter your email'}
+              placeholderTextColor={this.props.appState.nightTheme ? theme.colors.lightGray : theme.colors.gray}
               onChangeText={text => this.setState({ email: text })}
             />
             <Button gradient style={styles.confirmButton} onPress={() => navigation.navigate('ResetPassword')}>
@@ -64,6 +73,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     backgroundColor: theme.colors.blueBackground,
+  },
+  darkContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: theme.colors.notBlack,
   },
   imageContainer: {
     alignItems: 'center',
@@ -90,6 +104,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     margin: 0,
     color: '#333333',
+  },
+  darkInput: {
+    borderWidth: 0,
+    backgroundColor: theme.colors.gray,
+    borderRadius: 8,
+    fontSize: 17,
+    textAlign: 'center',
+    fontWeight: 'normal',
+    margin: 0,
+    color: theme.colors.white,
   },
   confirmButton: {
     marginTop: 15,
@@ -125,3 +149,14 @@ const styles = StyleSheet.create({
     borderBottomColor: theme.colors.accent,
   }
 })
+
+
+function mapStateToProps (state) {
+  return {
+    appState: state.appState,
+  }
+}
+
+export default connect(
+  mapStateToProps,
+)(ForgotPassword)

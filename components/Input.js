@@ -6,8 +6,9 @@ import Text from './Text';
 import Block from './Block';
 import Button from './Button';
 import { theme } from '../constants';
+import { connect } from 'react-redux';
 
-export default class Input extends Component {
+class Input extends Component {
   state = {
     toggleSecure: false,
   }
@@ -38,13 +39,13 @@ export default class Input extends Component {
 
     return (
       <Button
-        style={styles.toggle}
+        style={this.props.appState.nightTheme ? styles.darkToggle : styles.toggle}
         onPress={() => this.setState({ toggleSecure: !toggleSecure })}
       >
       {
         rightLabel ? rightLabel :
           <Icon
-            color={theme.colors.gray}
+            color={this.props.appState.nightTheme ? theme.colors.lightGray: theme.colors.gray}
             size={theme.sizes.font * 2}
             name={!toggleSecure ? "md-eye-off" : "md-eye"}
         />
@@ -134,5 +135,25 @@ const styles = StyleSheet.create({
     // top: theme.sizes.base,
     backgroundColor: theme.colors.lightGray,
     right: 15,
+  },
+  darkToggle: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    width: theme.sizes.base * 2,
+    height: theme.sizes.base * 2,
+    // top: theme.sizes.base,
+    backgroundColor: theme.colors.gray,
+    right: 15,
   }
 });
+
+function mapStateToProps (state) {
+  return {
+    appState: state.appState,
+  }
+}
+
+export default connect(
+  mapStateToProps,
+)(Input)

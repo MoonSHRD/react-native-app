@@ -20,13 +20,27 @@ class ChatList extends Component {
   static navigationOptions = ({ navigation }) => {
     return {
       headerTitle: (
-        <Text notBlack style={{fontSize: 14, fontWeight: '600', letterSpacing: -0.0241176}}>Chatlist</Text>
+        <Text style={
+          navigation.getParam('nightTheme') 
+          ?
+          styles.darkHeaderText
+          :
+          styles.headerText
+        }
+        >
+        Chatlist</Text>
       ),
       headerLeft: (
         <Icon
           name="ios-create" 
           size={24} 
-          color={theme.colors.blue}
+          color={
+            navigation.getParam('nightTheme') 
+            ?
+            theme.colors.white
+            :
+            theme.colors.blue
+          }
           onPress={() => navigation.navigate('NewChat')}
           style={{paddingVertical: 10, paddingHorizontal: 20,}}
         />
@@ -35,11 +49,20 @@ class ChatList extends Component {
         <Icon
           name="ios-person" 
           size={24} 
-          color={theme.colors.blue}
+          color={
+            navigation.getParam('nightTheme') 
+            ?
+            theme.colors.white
+            :
+            theme.colors.blue
+          }
           onPress={() => navigation.navigate('Profile')}
           style={{paddingVertical: 10, paddingHorizontal: 20,}}
         />
       ),  
+      headerStyle:  {
+        backgroundColor: navigation.getParam('nightTheme') ? theme.colors.notBlack : theme.colors.white
+      }
     }
   };
   state = {
@@ -52,10 +75,21 @@ class ChatList extends Component {
     this.setState({ screenHeight: contentHeight });
   };
 
+  setHeaderParams = () => {
+    this.props.navigation.setParams({nightTheme: this.props.appState.nightTheme});  
+  }
+
   componentDidMount() {
+    this.setHeaderParams()
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
       this.props.loadDirectChats()
     });
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.appState.nightTheme !== this.props.appState.nightTheme) {
+      this.setHeaderParams()
+    }  
   }
 
   capitalize(props) {
@@ -169,23 +203,24 @@ class ChatList extends Component {
                     { title: l.name[0], titleStyle:{textTransform: 'capitalize'}, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
                     :
                     { source: { uri: l.avatarUri }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
-                  }
-                  title={this.capitalize(l.name)}
-                  titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
-                  rightTitle={
-                    <Moment element={Text} calendar={calendarStrings} style={styles.dateTag}>{new Date(l.lastSeen)}</Moment>
-                  }
-                  rightTitleStyle={styles.dateTag}
-                  subtitle={
-                    l.lastMessage == "" 
-                    ?
-                    l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen} interval={60000}/></Text>
-                    :
-                    l.lastMessage
-                  }
-                  subtitleStyle={styles.subtitle}
-                  containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
-                  />
+                    }
+                    title={this.capitalize(l.name)}
+                    titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                    rightTitle={
+                      <Moment element={Text} calendar={calendarStrings} style={styles.dateTag}>{new Date(l.lastSeen)}</Moment>
+                    }
+                    rightTitleStyle={styles.dateTag}
+                    subtitle={
+                      l.lastMessage == "" 
+                      ?
+                      l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen} interval={60000}/></Text>
+                      :
+                      l.lastMessage
+                    }
+                    subtitleStyle={styles.subtitle}
+                    containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                    onPress={() => navigation.navigate('Chat')}
+                    />
                   {
                     l.unreadMessagesCount > 0 
                     ?
@@ -233,23 +268,24 @@ class ChatList extends Component {
                   { title: l.name[0], titleStyle:{textTransform: 'capitalize'}, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
                   :
                   { source: { uri: l.avatarUri }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
-                }
-                title={this.capitalize(l.name)}
-                titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
-                rightTitle={
-                  <Moment element={Text} calendar={calendarStrings} style={styles.dateTag}>{new Date(l.lastSeen)}</Moment>
-                }
-                rightTitleStyle={styles.dateTag}
-                subtitle={
-                  l.lastMessage == "" 
-                  ?
-                  l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>
-                  :
-                  l.lastMessage
-                }
-                subtitleStyle={styles.subtitle}
-                containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
-                />
+                  }
+                  title={this.capitalize(l.name)}
+                  titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                  rightTitle={
+                    <Moment element={Text} calendar={calendarStrings} style={styles.dateTag}>{new Date(l.lastSeen)}</Moment>
+                  }
+                  rightTitleStyle={styles.dateTag}
+                  subtitle={
+                    l.lastMessage == "" 
+                    ?
+                    l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>
+                    :
+                    l.lastMessage
+                  }
+                  subtitleStyle={styles.subtitle}
+                  containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                  onPress={() => navigation.navigate('Chat')}
+                  />
                 {
                   l.unreadMessagesCount > 0 
                   ?
@@ -295,6 +331,18 @@ const styles = StyleSheet.create({
   darkBackground: {
     backgroundColor: theme.colors.black,
     height: height,
+  },
+  headerText: {
+    fontSize: 14, 
+    fontWeight: '600', 
+    letterSpacing: -0.0241176,
+    color: theme.colors.notBlack,
+  },
+  darkHeaderText: {
+      fontSize: 14, 
+      fontWeight: '600', 
+      letterSpacing: -0.0241176,
+      color: theme.colors.white,
   },
   searchBar: {
     backgroundColor: theme.colors.white,

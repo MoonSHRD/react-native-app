@@ -15,13 +15,27 @@ class Profile extends Component {
   static navigationOptions = ({ navigation }) => {
     return {
         headerTitle: (
-            <Text notBlack style={{fontSize: 14, fontWeight: '600', letterSpacing: -0.0241176}}>Profile</Text>
+            <Text style={
+                navigation.getParam('nightTheme') 
+                ?
+                styles.darkHeaderText
+                :
+                styles.headerText
+              }
+              >
+              Profile</Text>
         ),      
       headerRight: (
         <Icon
           name="ios-more" 
           size={24} 
-          color={theme.colors.blue}
+          color={
+            navigation.getParam('nightTheme') 
+            ?
+            theme.colors.white
+            :
+            theme.colors.blue
+          }
           onPress={() => navigation.navigate('Profile')}
           style={{paddingVertical: 10, paddingHorizontal: 20,}}
         />
@@ -30,11 +44,20 @@ class Profile extends Component {
         <Icon
             name="ios-arrow-back" 
             size={24} 
-            color={theme.colors.blue}
-            onPress={() => navigation.goBack()}
+            color={
+                navigation.getParam('nightTheme') 
+                ?
+                theme.colors.white
+                :
+                theme.colors.blue
+              }
+                onPress={() => navigation.goBack()}
             style={{paddingVertical: 10, paddingHorizontal: 20,}}
         />
-      )
+      ),
+      headerStyle:  {
+        backgroundColor: navigation.getParam('nightTheme') ? theme.colors.notBlack : theme.colors.white
+      }
     }
   };
   state = {
@@ -120,7 +143,12 @@ class Profile extends Component {
     await this.props.getMyUserProfile()
   }
 
+  setHeaderParams = () => {
+    this.props.navigation.setParams({nightTheme: this.props.appState.nightTheme});  
+  }
+
   componentDidMount() {
+    this.setHeaderParams()
     this.willFocus = this.props.navigation.addListener('willFocus', async () => {
         const userName = await this.props.navigation.getParam('userName', 'userName')
         await (userName != 'userName')
@@ -130,6 +158,14 @@ class Profile extends Component {
         this.loadMyProfile()
     })  
 }
+
+componentDidUpdate(prevProps) {
+    if (prevProps.appState.nightTheme !== this.props.appState.nightTheme) {
+      this.setHeaderParams()
+    }  
+  }
+
+
 
   render() {
     const { navigation } = this.props;
@@ -285,7 +321,7 @@ class Profile extends Component {
                         this.capitalize(this.props.contacts.myUserName[0])
                     }
                     containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
-s                    avatarStyle={styles.avatarImage}
+                    avatarStyle={styles.avatarImage}
                 />
             }
             </Block>
@@ -400,11 +436,23 @@ const styles = StyleSheet.create({
     background: {
         backgroundColor: theme.colors.white,
         height: height,
-      },
-      darkBackground: {
+    },
+    darkBackground: {
         backgroundColor: theme.colors.black,
         height: height,
-      },    
+    },    
+    headerText: {
+        fontSize: 14, 
+        fontWeight: '600', 
+        letterSpacing: -0.0241176,
+        color: theme.colors.notBlack,
+    },
+    darkHeaderText: {
+        fontSize: 14, 
+        fontWeight: '600', 
+        letterSpacing: -0.0241176,
+        color: theme.colors.white,
+    },    
     container: {
         flex: 1,
         padding: 0,

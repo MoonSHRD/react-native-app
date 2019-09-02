@@ -13,64 +13,94 @@ class ChatBackground extends Component {
   static navigationOptions = ({ navigation }) => {
     return {
       headerTitle: (
-        <Text style={styles.headerText}>Chat Background</Text>
+        <Text style={
+          navigation.getParam('nightTheme') 
+          ?
+          styles.darkHeaderText
+          :
+          styles.headerText
+        }>
+        Chat Background</Text>
       ),
       headerLeft: (
         <Icon
             name="ios-arrow-back" 
             size={24} 
-            color={theme.colors.blue}
-            onPress={() => navigation.goBack()}
+            color={
+              navigation.getParam('nightTheme') 
+              ?
+              theme.colors.white
+              :
+              theme.colors.blue
+            }
+              onPress={() => navigation.goBack()}
             style={{paddingVertical: 10, paddingHorizontal: 20,}}
         />
-      )
+      ),
+      headerStyle:  {
+        backgroundColor: navigation.getParam('nightTheme') ? theme.colors.notBlack : theme.colors.white
+      }
     }
   };
   state = {
     chatBackground: null,
     dataSource: [
         {
-            picture_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg',
+            picture_url: require('../assets/backgrounds/photo-1501436513145-30f24e19fcc8.png'),
         },
         {
-            picture_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
+            picture_url: require('../assets/backgrounds/photo-1561616177-3444f0cd052f.png'),
         },
         {
-            picture_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
+            picture_url: require('../assets/backgrounds/photo-1561571994-3c61c554181a.png'),
         },
         {
-            picture_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',  
+            picture_url: require('../assets/backgrounds/photo-1561454260-8559bd155736.png'),  
         },
         {
-            picture_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
+            picture_url: require('../assets/backgrounds/photo-1561445136-7f9e628bd189.png'),
         },
         {
-            picture_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',  
+            picture_url: require('../assets/backgrounds/photo-1560940742-43a23e56f1b4.png'),  
         },
         {
-            picture_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
+            picture_url: require('../assets/backgrounds/photo-1560983073-c29bff7438ef.png'),
         },
         {
-            picture_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
+            picture_url: require('../assets/backgrounds/photo-1561056532-2d709f79aa7b.png'),
         },
         {
-            picture_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
+            picture_url: require('../assets/backgrounds/photo-1560528836-2c73fd9c4cfe.png'),
         },
         {
-            picture_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',  
+            picture_url: require('../assets/backgrounds/photo-1560451090-1f3881d8f9e3.png'),  
         },
         {
-            picture_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
+            picture_url: require('../assets/backgrounds/photo-1560178783-75a464fbdf6b.png'),
         },
         {
-            picture_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',  
-        },
+          picture_url: require('../assets/backgrounds/photo-1565450443120-ea90b0ca5117.png'),
+        }
     ],
   }
 
   onContentSizeChange = (contentWidth, contentHeight) => {
     this.setState({ screenHeight: contentHeight });
   };
+
+  setHeaderParams = () => {
+    this.props.navigation.setParams({nightTheme: this.props.appState.nightTheme});  
+  }
+
+  componentDidMount = () => {
+    this.setHeaderParams()
+    }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.appState.nightTheme !== this.props.appState.nightTheme) {
+      this.setHeaderParams()
+    }  
+  }
 
   render() {
     const { navigation } = this.props;
@@ -107,7 +137,7 @@ class ChatBackground extends Component {
                         style={styles.backgroundBlock}
                     >
                     <Image 
-                        source={{uri: l.picture_url}}
+                        source={l.picture_url}
                         style={styles.backgroundPicture}
                     />
                     </Block>
@@ -148,7 +178,13 @@ const styles = StyleSheet.create({
     letterSpacing: -0.0241176,
     color: theme.colors.notBlack,
   },
-  settingsItem: {
+  darkHeaderText: {
+      fontSize: 14, 
+      fontWeight: '600', 
+      letterSpacing: -0.0241176,
+      color: theme.colors.white,
+  },    
+settingsItem: {
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderBottomColor: theme.colors.lightGray,

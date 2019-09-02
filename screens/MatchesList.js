@@ -17,14 +17,28 @@ class MatchesList extends Component {
   static navigationOptions = ({ navigation }) => {
     return {
       headerTitle: (
-        <Text notBlack style={{fontSize: 14, fontWeight: '600', letterSpacing: -0.0241176}}>Matches</Text>
+        <Text style={
+          navigation.getParam('nightTheme') 
+          ?
+          styles.darkHeaderText
+          :
+          styles.headerText
+        }
+        >  
+        Matches</Text>
       ),
       headerRight: (
         <Icon
           name="ios-person" 
           size={24} 
-          color={theme.colors.blue}
-          onPress={() => navigation.navigate('Profile')}
+          color={
+            navigation.getParam('nightTheme') 
+            ?
+            theme.colors.white
+            :
+            theme.colors.blue
+          }
+        onPress={() => navigation.navigate('Profile')}
           style={{paddingVertical: 10, paddingHorizontal: 20,}}
         />
       ),  
@@ -32,11 +46,20 @@ class MatchesList extends Component {
         <Icon
             name="ios-arrow-back" 
             size={24} 
-            color={theme.colors.blue}
+            color={
+              navigation.getParam('nightTheme') 
+              ?
+              theme.colors.white
+              :
+              theme.colors.blue
+            }
             onPress={() => navigation.goBack()}
             style={{paddingVertical: 10, paddingHorizontal: 20,}}
         />
-      )
+      ),
+      headerStyle:  {
+        backgroundColor: navigation.getParam('nightTheme') ? theme.colors.notBlack : theme.colors.white
+      }
     }
   };
   
@@ -50,10 +73,21 @@ class MatchesList extends Component {
     this.setState({ screenHeight: contentHeight });
   };
 
+  setHeaderParams = () => {
+    this.props.navigation.setParams({nightTheme: this.props.appState.nightTheme});  
+  }
+
   componentDidMount() {
+    this.setHeaderParams()
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
       this.props.getDirectChats();
     });
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.appState.nightTheme !== this.props.appState.nightTheme) {
+      this.setHeaderParams()
+    }  
   }
   
   updateSearch = async(text) => {
@@ -170,7 +204,7 @@ class MatchesList extends Component {
                       onPress={() => {
                         navigation.navigate('Profile', {
                           userName: l.name,
-                          userID: '@'+l.name+':matrix.moonshard.tech',
+                          userID: l.userId,
                         })
                       }}  
                     />
@@ -212,7 +246,7 @@ class MatchesList extends Component {
                     onPress={() => {
                       navigation.navigate('Profile', {
                         userName: l.name,
-                        userID: '@'+l.name+':matrix.moonshard.tech',
+                        userID: l.userId,
                       })
                     }}  
                   />
@@ -238,6 +272,18 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.black,
     height: height,
   },
+  headerText: {
+    fontSize: 14, 
+    fontWeight: '600', 
+    letterSpacing: -0.0241176,
+    color: theme.colors.notBlack,
+  },
+  darkHeaderText: {
+      fontSize: 14, 
+      fontWeight: '600', 
+      letterSpacing: -0.0241176,
+      color: theme.colors.white,
+  },    
   searchBar: {
     backgroundColor: theme.colors.white,
     paddingHorizontal: 16,

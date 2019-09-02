@@ -12,6 +12,7 @@ import EmailConfirm from '../screens/EmailConfirm';
 
 import ContactList from "../screens/ContactList";
 import ChatList from "../screens/ChatList";
+import Chat from "../screens/Chat";
 import Settings from "../screens/Settings";
 import MatchesList from "../screens/MatchesList";
 import NewChat from "../screens/NewChat";
@@ -63,27 +64,61 @@ export const SignedOut = createStackNavigator({
 
 });
 
-export const SignedIn = createBottomTabNavigator({
+// const ContactsNavigator = createStackNavigator({
+//   ContactList: ContactList,
+//   MatchesList: MatchesList,
+//   Profile: Profile,
+// });
+
+// const ChatListNavigator = createStackNavigator({
+//   ChatList: ChatList,
+//   NewChat: NewChat,
+//   NewGroupChat: NewGroupChat,
+//   Profile: Profile,
+// });
+
+// const SettingsNavigator = createStackNavigator({
+//   Settings: Settings,
+//   Profile: Profile,
+//   ChatBackground: ChatBackground,
+// });
+
+// const TabNavigator = createBottomTabNavigator({
+//   Contacts: ContactsNavigator,
+//   ChatList: ChatListNavigator,
+//   Settings: SettingsNavigator,
+// });
+
+// TabNavigator.navigationOptions = (navigation) => {
+//   return {
+//       tabBarOptions: {
+//       showLabel: false,
+//       showIcon: true,
+//       style: {
+//         // paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0
+//       }
+//     }
+//   }
+// }
+
+export const TabNavigator = createBottomTabNavigator({
   Contacts:{
       screen: createStackNavigator({
           ContactList: {
               screen: ContactList,
               navigationOptions: {
-                  headerStyle,
                   headerTitleStyle: theme.headerTitle,
               }
           },
           MatchesList: {
             screen: MatchesList,
             navigationOptions: {
-                headerStyle,
                 headerTitleStyle: theme.headerTitle,
             }
           },
           Profile: {
             screen: Profile,
             navigationOptions: {
-                headerStyle,
                 headerTitleStyle: theme.headerTitle,
             }
           }
@@ -100,28 +135,24 @@ export const SignedIn = createBottomTabNavigator({
         ChatList: {
             screen: ChatList,
             navigationOptions: {
-                headerStyle,
                 headerTitleStyle: theme.headerTitle,
             }
         },
         NewChat: {
           screen: NewChat,
           navigationOptions: {
-              headerStyle,
               headerTitleStyle: theme.headerTitle,
           }
         },
         NewGroupChat: {
           screen: NewGroupChat,
           navigationOptions: {
-              headerStyle,
               headerTitleStyle: theme.headerTitle,
           }
         },
         Profile: {
           screen: Profile,
           navigationOptions: {
-              headerStyle,
               headerTitleStyle: theme.headerTitle,
           }
         }
@@ -138,30 +169,28 @@ export const SignedIn = createBottomTabNavigator({
         Settings: {
             screen: Settings,
             navigationOptions: {
-                headerStyle,
                 headerTitleStyle: theme.headerTitle,
             }
         },
         Profile: {
           screen: Profile,
           navigationOptions: {
-              headerStyle,
               headerTitleStyle: theme.headerTitle,
           }
         },
         ChatBackground: {
           screen: ChatBackground,
           navigationOptions: {
-            headerStyle,
             headerTitleStyle: theme.headerTitle,
           }
         }
     }, { headerLayoutPreset: 'center' }),
     navigationOptions: {
+        header: () => null,
         title: 'Settings',            
         tabBarIcon: ({ tintColor }) => (
             <Icon name="ios-settings" size={24} color={tintColor} />
-        )
+        ),
     }
   },
   },
@@ -176,6 +205,18 @@ export const SignedIn = createBottomTabNavigator({
   }
 );
 
+const SignedIn = createStackNavigator({
+  Tabs: TabNavigator,
+  Chat: Chat,
+}, 
+{
+  // headerMode: 'none',
+  navigationOptions: {
+      headerVisible: false,
+  }
+});
+
+
 export const createRootNavigator = (signedIn = false) => {
   return createAppContainer(createSwitchNavigator(
     {
@@ -184,6 +225,9 @@ export const createRootNavigator = (signedIn = false) => {
       },
       SignedOut: {
         screen: SignedOut
+      },
+      Chat: {
+        screen: Chat
       }
     },
     {

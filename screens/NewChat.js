@@ -18,17 +18,34 @@ class NewChat extends Component {
   static navigationOptions = ({ navigation }) => {
     return {
       headerTitle: (
-        <Text notBlack style={{fontSize: 14, fontWeight: '600', letterSpacing: -0.0241176}}>New Chat</Text>
+        <Text style={
+          navigation.getParam('nightTheme') 
+          ?
+          styles.darkHeaderText
+          :
+          styles.headerText
+        }
+        >
+        New Chat</Text>
       ),
       headerLeft: (
         <Icon
             name="ios-arrow-back" 
             size={24} 
-            color={theme.colors.blue}
-            onPress={() => navigation.goBack()}
+            color={
+              navigation.getParam('nightTheme') 
+              ?
+              theme.colors.white
+              :
+              theme.colors.blue
+            }
+              onPress={() => navigation.goBack()}
             style={{paddingVertical: 10, paddingHorizontal: 20,}}
         />
-      )
+      ),
+      headerStyle:  {
+        backgroundColor: navigation.getParam('nightTheme') ? theme.colors.notBlack : theme.colors.white
+      }
     }
   };
 
@@ -42,12 +59,16 @@ class NewChat extends Component {
     this.setState({ screenHeight: contentHeight });
   };
 
+  setHeaderParams = () => {
+    this.props.navigation.setParams({nightTheme: this.props.appState.nightTheme});  
+  }
+
   componentDidMount() {
+    this.setHeaderParams()
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
       this.props.getDirectChats();
     });
   }
-
   
   updateSearch = async(text) => {
     await this.setState({ search: text , searchChanged: true});
@@ -67,6 +88,12 @@ class NewChat extends Component {
       await this.props.updateSearchBar(text)
       await this.props.updateSearchList(newData) 
   };
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.appState.nightTheme !== this.props.appState.nightTheme) {
+      this.setHeaderParams()
+    }  
+  }
 
   capitalize(props) {
     let text = props.slice(0,1).toUpperCase() + props.slice(1, props.length);
@@ -226,6 +253,18 @@ const styles = StyleSheet.create({
   darkBackground: {
     backgroundColor: theme.colors.black,
     height: height,
+  },
+  headerText: {
+    fontSize: 14, 
+    fontWeight: '600', 
+    letterSpacing: -0.0241176,
+    color: theme.colors.notBlack,
+  },
+  darkHeaderText: {
+      fontSize: 14, 
+      fontWeight: '600', 
+      letterSpacing: -0.0241176,
+      color: theme.colors.white,
   },
   searchBar: {
     backgroundColor: theme.colors.white,

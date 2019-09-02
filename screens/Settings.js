@@ -16,17 +16,34 @@ class Settings extends Component {
   static navigationOptions = ({ navigation }) => {
     return {
       headerTitle: (
-        <Text style={styles.headerText}>Settings</Text>
+        <Text style={
+          navigation.getParam('nightTheme') 
+          ?
+          styles.darkHeaderText
+          :
+          styles.headerText
+        }
+        >
+          Settings</Text>
       ),
       headerRight: (
         <Icon
           name="ios-person" 
           size={24} 
-          color={theme.colors.blue}
+          color={
+            navigation.getParam('nightTheme') 
+            ?
+            theme.colors.white
+            :
+            theme.colors.blue
+          }
           onPress={() => navigation.navigate('Profile')}
           style={{paddingVertical: 10, paddingHorizontal: 20,}}
         />
       ),  
+      headerStyle:  {
+        backgroundColor: navigation.getParam('nightTheme') ? theme.colors.notBlack : theme.colors.white
+      }
     }
   };
   state = {
@@ -42,13 +59,17 @@ class Settings extends Component {
   }
 
   setHeaderParams = () => {
-    const nightTheme = this.props.appState.nightTheme ? true : false;
-    this.props.navigation.setParams({nightTheme: nightTheme});
-    console.log('blah blah blah')
+    this.props.navigation.setParams({nightTheme: this.props.appState.nightTheme});  
   }
 
   componentDidMount = () => {
     this.setHeaderParams()
+    }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.appState.nightTheme !== this.props.appState.nightTheme) {
+      this.setHeaderParams()
+    }  
   }
 
   render() {
@@ -69,17 +90,18 @@ class Settings extends Component {
           <Block row space="between" style={this.props.appState.nightTheme ? styles.darkSettingsItem: styles.settingsItem}>
             <Text body style={this.props.appState.nightTheme ? styles.whiteText : styles.notBlackText}>Notifications</Text>
             <Switch
-              value={this.props.appState.notifications}
-              onValueChange={() => this.props.setNotifications(!this.props.appState.notifications)}
+              value={this.state.notifications}
+              onValueChange={(value) => {
+                this.setState({notifications: value})
+              }}
             />
           </Block>
           <Block row space="between" style={this.props.appState.nightTheme ? styles.darkSettingsItem: styles.settingsItem}>
             <Text body style={this.props.appState.nightTheme ? styles.whiteText : styles.notBlackText}>Night theme</Text>
             <Switch
-              value={this.props.appState.nightTheme}
-              onValueChange={value => {
-                this.props.setNightTheme(value)
-                this.setHeaderParams()
+              value={this.state.nightTheme}
+              onValueChange={(value) => {
+                this.setState({nightTheme: value})
               }}
             />
           </Block>

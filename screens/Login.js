@@ -10,9 +10,13 @@ import { saveMyUserName } from '../store/actions/contactsActions';
 
 import Logo from '../assets/images/logo-small.svg';
 import TextLogo from '../assets/images/text-logo.svg';
+import DarkTextLogo from '../assets/images/dark-text-logo.svg';
 import Twitter from '../assets/icons/twitter.svg';
 import Facebook from '../assets/icons/instagram.svg';
 import Instagram from '../assets/icons/facebook.svg';
+import TwitterDark from '../assets/icons/twitter-dark.svg';
+import FacebookDark from '../assets/icons/facebook-dark.svg';
+import InstagramDark from '../assets/icons/instagram-dark.svg';
 
 const { width, height } = Dimensions.get('window');
 
@@ -137,7 +141,7 @@ class Login extends Component {
     const scrollEnabled = this.state.screenHeight > height - 100;
 
     return (
-      <KeyboardAvoidingView style={styles.login} behavior="padding">
+      <KeyboardAvoidingView style={this.props.appState.nightTheme ? styles.darkLogin : styles.login} behavior="padding">
       <ScrollView
           showsVerticalScrollIndicator={false}
           scrollEnabled={scrollEnabled}
@@ -146,26 +150,49 @@ class Login extends Component {
       <Block padding={[height / 10, theme.sizes.base * 2]}>
           <View style={styles.imageContainer}>
             <Logo width={width / 6.7} height={height / 6.7} />
-            <TextLogo style={styles.textLogo}/>
+            {
+              this.props.appState.nightTheme 
+              ?
+              <DarkTextLogo style={styles.textLogo}/>
+              :
+              <TextLogo style={styles.textLogo}/>
+            }
           </View>
-          <Text headline semibold center>Login</Text>
+          <Text headline semibold center style={this.props.appState.nightTheme ? {color: theme.colors.white} : {color:  theme.colors.notBlack}}>Login</Text>
           <Block middle style={styles.formContainer}>
             <Input
               email
               error={hasErrors('email')}
-              style={[styles.input, hasErrors('email')]}
+              style={this.props.appState.nightTheme ? [styles.darkInput, hasErrors('email')] : [styles.input, hasErrors('email')]}
               defaultValue={this.state.email}
               placeholder={'Enter your username'} // FIXME
+              placeholderTextColor={this.props.appState.nightTheme ? theme.colors.lightGray : theme.colors.gray}
               onChangeText={text => this.setState({ email: text })}
             />
-            <Input
+            {
+              wrongPassword 
+              ?
+              <Input
+                secure
+                error={hasErrors('password')}
+                style={this.props.appState.nightTheme ? [styles.darkWrongInput, hasErrors('password')] : [styles.wrongInput, hasErrors('password')]}
+                defaultValue={this.state.password}
+                placeholder={'Enter password'}
+                placeholderTextColor={this.props.appState.nightTheme ? theme.colors.lightGray : theme.colors.gray}
+
+                onChangeText={text => this.setState({ password: text })}
+              />
+              :
+              <Input
               secure
               error={hasErrors('password')}
-              style={wrongPassword ? [styles.wrongInput, hasErrors('password')] : [styles.input, hasErrors('password')]}
+              style={this.props.appState.nightTheme ? [styles.darkInput, hasErrors('password')] : [styles.input, hasErrors('password')]}
               defaultValue={this.state.password}
               placeholder={'Enter password'}
+              placeholderTextColor={this.props.appState.nightTheme ? theme.colors.lightGray : theme.colors.gray}
               onChangeText={text => this.setState({ password: text })}
             />
+            }
             {
               wrongPassword
               ?
@@ -198,7 +225,7 @@ class Login extends Component {
               :
               null
             }
-            <Button style={styles.textButton} onPress={() => navigation.navigate('SignUp')}>
+            <Button style={this.props.appState.nightTheme ? styles.darkTextButton : styles.textButton} onPress={() => navigation.navigate('SignUp')}>
               <Text gray footnote center>
                 Don't have an account? <Text gray footnote style={{ textDecorationLine: 'underline' }}>Register</Text>
               </Text>
@@ -209,9 +236,27 @@ class Login extends Component {
               <View style = {styles.lineStyle} />
             </View>
             <View style={styles.socialMedia}>
+            {
+              this.props.appState.nightTheme 
+              ?
+              <TwitterDark width={48} height={48} />
+              :
               <Twitter width={48} height={48} />
+            }
+            {
+              this.props.appState.nightTheme 
+              ?
+              <FacebookDark width={48} height={48} style={styles.centeredIcon}/>
+              :
               <Facebook width={48} height={48} style={styles.centeredIcon}/>
+            }
+            {
+              this.props.appState.nightTheme 
+              ?
+              <InstagramDark width={48} height={48} />
+              :
               <Instagram width={48} height={48} />
+            }
             </View>
           </Block>
         </Block>
@@ -226,6 +271,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     backgroundColor: theme.colors.blueBackground,
+  },
+  darkLogin: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: theme.colors.notBlack,
   },
   imageContainer: {
     alignItems: 'center',
@@ -246,16 +296,36 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 0,
-    backgroundColor: '#EBEBEB',
+    backgroundColor: theme.colors.lightGray,
+    borderRadius: 8,
+    fontSize: 17,
+    textAlign: 'center',
+    fontWeight: 'normal',
+    margin: 0,
+    color: theme.colors.notBlack,
+  },
+  darkInput: {
+    borderWidth: 0,
+    backgroundColor: theme.colors.gray,
+    borderRadius: 8,
+    fontSize: 17,
+    textAlign: 'center',
+    fontWeight: 'normal',
+    margin: 0,
+    color: theme.colors.white,
+  },
+  wrongInput: {
+    borderWidth: 0,
+    backgroundColor: theme.colors.lightGray,
     borderRadius: 8,
     fontSize: 17,
     textAlign: 'center',
     margin: 0,
-    color: '#333333',
+    color: '#FF6161',
   },
-  wrongInput: {
+  darkWrongInput: {
     borderWidth: 0,
-    backgroundColor: '#EBEBEB',
+    backgroundColor: theme.colors.gray,
     borderRadius: 8,
     fontSize: 17,
     textAlign: 'center',
@@ -268,6 +338,10 @@ const styles = StyleSheet.create({
   textButton: {
     marginTop: 36,
     backgroundColor: theme.colors.blueBackground,
+  },
+  darkTextButton: {
+    marginTop: 36,
+    backgroundColor: theme.colors.notBlack,
   },
   divider: {
     flex: 0,
@@ -300,6 +374,7 @@ const styles = StyleSheet.create({
 function mapStateToProps (state) {
   return {
     login: state.login,
+    appState: state.appState,
   }
 }
 

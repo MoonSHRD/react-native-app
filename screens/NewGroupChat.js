@@ -18,17 +18,36 @@ class NewGroupChat extends Component {
   static navigationOptions = ({ navigation }) => {
     return {
       headerTitle: (
-        <Text notBlack style={{fontSize: 14, fontWeight: '600', letterSpacing: -0.0241176}}>New Group Chat</Text>
+        <Text style={
+          navigation.getParam('nightTheme') 
+          ?
+          styles.darkHeaderText
+          :
+          styles.headerText
+        }
+        >
+        New Group Chat</Text>
       ),
       headerRight: (
         <Text
             onPress={() => alert('This is a button!')}
-            style={{
+            style={
+              navigation.getParam('nightTheme') 
+              ?
+              {
+                paddingVertical: 10, 
+                paddingHorizontal: 20, 
+                color: theme.colors.white,
+                fontSize: theme.sizes.subhead,
+              }
+              :
+              {
                 paddingVertical: 10, 
                 paddingHorizontal: 20, 
                 color: theme.colors.blue,
                 fontSize: theme.sizes.subhead,
-            }}  
+              }
+          }  
         >
             Create
         </Text>
@@ -37,11 +56,20 @@ class NewGroupChat extends Component {
         <Icon
             name="ios-arrow-back" 
             size={24} 
-            color={theme.colors.blue}
+            color={
+              navigation.getParam('nightTheme') 
+              ?
+              theme.colors.white
+              :
+              theme.colors.blue
+            }
             onPress={() => navigation.goBack()}
             style={{paddingVertical: 10, paddingHorizontal: 20,}}
         />
-      )
+      ),
+      headerStyle:  {
+        backgroundColor: navigation.getParam('nightTheme') ? theme.colors.notBlack : theme.colors.white
+      }
     };
   }
 
@@ -55,8 +83,13 @@ class NewGroupChat extends Component {
   onContentSizeChange = (contentWidth, contentHeight) => {
     this.setState({ screenHeight: contentHeight });
   };
+
+  setHeaderParams = () => {
+    this.props.navigation.setParams({nightTheme: this.props.appState.nightTheme});  
+  }
   
   componentDidMount() {
+    this.setHeaderParams()
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
       this.props.getDirectChats();
       this.props.selectedContacts(this.result)
@@ -90,6 +123,12 @@ class NewGroupChat extends Component {
   capitalize(props) {
     let text = props.slice(0,1).toUpperCase() + props.slice(1, props.length);
     return text
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.appState.nightTheme !== this.props.appState.nightTheme) {
+      this.setHeaderParams()
+    }  
   }
   
   render() {
@@ -268,6 +307,18 @@ const styles = StyleSheet.create({
   darkBackground: {
     backgroundColor: theme.colors.black,
     height: height,
+  },
+  headerText: {
+    fontSize: 14, 
+    fontWeight: '600', 
+    letterSpacing: -0.0241176,
+    color: theme.colors.notBlack,
+  },
+  darkHeaderText: {
+      fontSize: 14, 
+      fontWeight: '600', 
+      letterSpacing: -0.0241176,
+      color: theme.colors.white,
   },
   searchBar: {
     backgroundColor: theme.colors.white,
