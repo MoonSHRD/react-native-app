@@ -57,38 +57,43 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                 break
             }
 
-            val directChats = matrixInstance.defaultSession.dataHandler.store.rooms.filter {
-                it.isDirect
-            }
-
-            val chatModels = mutableListOf<UserModel>()
-            directChats.forEach { room ->
-                val roomSummary = room.roomSummary
-                // hack for optimization: since we hold the same listener, we will not create a useless instance of this listener (else it will add new object to internal list of listeners and messing up the memory)
-                if(eventListeners[roomSummary!!.roomId] != null) {
-                    eventListeners[roomSummary.roomId] = NewEventsListener(reactApplicationContext, room, roomSummary)
-                }
-                room.timeline.addEventTimelineListener(eventListeners[room.roomId])
-                // hack end
-                val contactID = room.state.loadedMembers.filter {
-                    it.userId != matrixInstance.defaultSession.myUserId
-                }[0].userId
-                val contact = matrixInstance.defaultSession.dataHandler.store.getUser(contactID)
-                val chat = UserModel(
-                        contactID,
-                        room.getRoomDisplayName(reactApplicationContext),
-                        room.avatarUrl ?: "",
-                        contact.latestPresenceTs,
-                        contact.isActive,
-                        matrixInstance.defaultLatestChatMessageCache.getLatestText(reactApplicationContext, roomSummary.roomId),
-                        roomSummary.latestReceivedEvent.originServerTs,
-                        roomSummary.latestReceivedEvent.mSentState.name,
-                        roomSummary.mUnreadEventsCount
-                )
-                chatModels.add(chat)
-            }
-            promise.resolve(gson.toJson(chatModels))
+            promise.resolve(gson.toJson(getDirectChatsInternal()))
         }
+    }
+
+    private fun getDirectChatsInternal(): List<UserModel> {
+        val directChats = matrixInstance.defaultSession.dataHandler.store.rooms.filter {
+            it.isDirect
+        }
+
+        val chatModels = mutableListOf<UserModel>()
+        directChats.forEach { room ->
+            val roomSummary = room.roomSummary
+            // hack for optimization: since we hold the same listener, we will not create a useless instance of this listener (else it will add new object to internal list of listeners and messing up the memory)
+            if(eventListeners[roomSummary!!.roomId] != null) {
+                eventListeners[roomSummary.roomId] = NewEventsListener(reactApplicationContext, room, roomSummary)
+            }
+            room.timeline.addEventTimelineListener(eventListeners[room.roomId])
+            // hack end
+            val contactID = room.state.loadedMembers.filter {
+                it.userId != matrixInstance.defaultSession.myUserId
+            }[0].userId
+            val contact = matrixInstance.defaultSession.dataHandler.store.getUser(contactID)
+            val chat = UserModel(
+                    contactID,
+                    room.getRoomDisplayName(reactApplicationContext),
+                    room.avatarUrl ?: "",
+                    contact.latestPresenceTs,
+                    contact.isActive,
+                    matrixInstance.defaultLatestChatMessageCache.getLatestText(reactApplicationContext, roomSummary.roomId),
+                    roomSummary.latestReceivedEvent.originServerTs,
+                    roomSummary.latestReceivedEvent.mSentState.name,
+                    roomSummary.mUnreadEventsCount
+            )
+            chatModels.add(chat)
+        }
+
+        return chatModels
     }
 
     @ReactMethod
@@ -176,6 +181,10 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         if(!isSessionExists(promise)) {
             return
         }
+        if(isDirectChatExists(participantUserId)) {
+            promise.reject("directChatExists", "Direct chat with $participantUserId exists.")
+            return
+        }
         matrixInstance.defaultSession.createDirectMessageRoom(participantUserId, object : ApiCallback<String> {
             override fun onSuccess(roomId: String?) {
                 promise.resolve(roomId)
@@ -193,6 +202,18 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                 promise.reject("onNetworkError", e)
             }
         })
+    }
+
+    private fun isDirectChatExists(participantUserId: String): Boolean {
+        val directChats = getDirectChatsInternal()
+        var exists = false
+        directChats.forEach {
+            if(it.userId == participantUserId) {
+                exists = true
+            }
+        }
+
+        return exists
     }
 
     @ReactMethod
