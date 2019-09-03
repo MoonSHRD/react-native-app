@@ -184,9 +184,8 @@ export const TabNavigator = createBottomTabNavigator({
             headerTitleStyle: theme.headerTitle,
           }
         }
-    }, { headerLayoutPreset: 'center' }),
+    }, { headerLayoutPreset: 'center'}),
     navigationOptions: {
-        header: () => null,
         title: 'Settings',            
         tabBarIcon: ({ tintColor }) => (
             <Icon name="ios-settings" size={24} color={tintColor} />
@@ -206,14 +205,25 @@ export const TabNavigator = createBottomTabNavigator({
 );
 
 const SignedIn = createStackNavigator({
-  Tabs: TabNavigator,
-  Chat: Chat,
+  Tabs: {
+    screen: TabNavigator,
+    navigationOptions: {
+      headerStyle: {
+        display: 'none',
+      },
+      headerVisible: false,
+    },
+  },
+  Chat: {
+    screen: Chat,
+    navigationOptions: {
+      visible: false,
+      headerVisible: true,
+    }
+  },
 }, 
 {
-  // headerMode: 'none',
-  navigationOptions: {
-      headerVisible: false,
-  }
+  mode: 'modal', 
 });
 
 
@@ -226,9 +236,6 @@ export const createRootNavigator = (signedIn = false) => {
       SignedOut: {
         screen: SignedOut
       },
-      Chat: {
-        screen: Chat
-      }
     },
     {
       initialRouteName: signedIn ? "SignedIn" : "SignedOut"
