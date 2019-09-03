@@ -7,7 +7,7 @@ import { theme } from '../constants';
 import { Avatar, ThemeConsumer } from 'react-native-elements';
 
 import {connect} from 'react-redux';
-import { getContactInfo, deselectContact, getMyUserProfile } from '../store/actions/contactsActions';
+import { getContactInfo, deselectContact, getMyUserProfile, createDirectChat } from '../store/actions/contactsActions';
 
 const { width, height } = Dimensions.get('window');
 
@@ -37,7 +37,13 @@ class Profile extends Component {
             theme.colors.blue
           }
           onPress={() => navigation.navigate('Profile')}
-          style={{paddingVertical: 10, paddingHorizontal: 20,}}
+          style={
+            Platform.OS === 'ios'
+            ?
+            {paddingVertical: 10, paddingHorizontal: 20}
+            :
+            {paddingVertical: 10, paddingHorizontal: 20, transform: [{ rotate: '90deg' }]}
+            }
         />
       ),  
       headerLeft: (
@@ -119,9 +125,9 @@ class Profile extends Component {
   };
 
   loadProfile = async () => {
-    const userID = await this.props.navigation.getParam('userID', 'userID');
-    await console.log(userID)
-    await this.props.getContactInfo(userID.toLowerCase())
+    const userId = await this.props.navigation.getParam('userId', 'userId');
+    await console.log(userId)
+    await this.props.getContactInfo(userId.toLowerCase())
     await this.checkName()
   }
 
@@ -173,6 +179,7 @@ componentDidUpdate(prevProps) {
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
     const scrollEnabled = this.state.screenHeight > height - 100;
     const userName = this.props.navigation.getParam('userName', 'userName')
+    const userId = this.props.navigation.getParam('userId', 'userId')
 
     return (
       <KeyboardAvoidingView behavior="padding" >
@@ -288,7 +295,10 @@ componentDidUpdate(prevProps) {
                     null
                 }
                 <Button gradient style={styles.confirmButton}               
-                    onPress={() => {Alert.alert('send message')}}
+                    onPress={() => {
+                        Alert.alert('Send Message action')
+                        // this.props.createDirectChat(userId)
+                    }}
                 >
                     <Text headline bold white center>Send Message</Text>
                 </Button>       
@@ -442,12 +452,16 @@ const styles = StyleSheet.create({
         height: height,
     },    
     headerText: {
+        marginLeft: "auto", 
+        marginRight: "auto",
         fontSize: 14, 
         fontWeight: '600', 
         letterSpacing: -0.0241176,
         color: theme.colors.notBlack,
     },
     darkHeaderText: {
+        marginLeft: "auto", 
+        marginRight: "auto",
         fontSize: 14, 
         fontWeight: '600', 
         letterSpacing: -0.0241176,
@@ -611,7 +625,8 @@ function mapStateToProps (state) {
     return {
       getContactInfo: (data) => dispatch(getContactInfo(data)),
       deselectContact: () => dispatch(deselectContact()),
-      getMyUserProfile: () => dispatch(getMyUserProfile())
+      getMyUserProfile: () => dispatch(getMyUserProfile()),
+      createDirectChat: (data) => dispatch(createDirectChat(data)),
     }
   }
   

@@ -1,32 +1,57 @@
 import React, { Component } from 'react';
-import { Text, KeyboardAvoidingView, StyleSheet } from 'react-native';
+import { Text, KeyboardAvoidingView, StyleSheet, Platform, View } from 'react-native';
 
 import { Block } from '../components';
 import { Avatar, Badge } from 'react-native-elements';
-import { GiftedChat } from 'react-native-gifted-chat';
+import { GiftedChat, Actions, SystemMessage, Send } from 'react-native-gifted-chat';
 import {connect} from 'react-redux';
+import TimeAgo from 'react-native-timeago';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { theme } from '../constants';  
 
 class Chat extends React.Component {
     static navigationOptions = ({ navigation }) => {
+        const userName = navigation.getParam('userName', 'userName')
+        const userId = navigation.getParam('userId', 'userId')
+        const isActive = navigation.getParam('isActive')
+        const lastSeen = navigation.getParam('lastSeen')
+        const avatar = navigation.getParam('avatar')
         return {
             headerTitle: (
                 <Block style={styles.userContainer}>
-                    <Avatar 
-                        containerStyle={styles.avatar}
-                        avatarStyle={styles.avatarImage}
-                        titleStyle={{fontSize: 12}}
-                        title="MD" />
+                    {
+                        avatar != ''
+                        ? 
+                        <Avatar 
+                            source={avatar}
+                            containerStyle={styles.avatar}
+                            avatarStyle={styles.avatarImage}
+                        />
+                        :
+                        <Avatar 
+                            containerStyle={styles.avatar}
+                            avatarStyle={styles.avatarImage}
+                            titleStyle={{fontSize: 12}}
+                            title={userName[0]}
+                         />
+                    }
                     <Block style={styles.nameContainer}>
-                        <Text style={styles.userNameText}>Name</Text>
+                        <Text style={styles.userNameText}>{userName}</Text>
                         <Block styles={styles.statusContainer}>
-                            <Badge 
-                                containerStyle={styles.userBadge}
-                                badgeStyle={{height: 8, width: 8}}
-                                status="primary"
-                                />
-                            <Text style={styles.statusText}>Online</Text>
+                            {
+                                isActive == true
+                                ?
+                                <Block>
+                                <Badge 
+                                    containerStyle={styles.userBadge}
+                                    badgeStyle={{height: 8, width: 8}}
+                                    status="primary"
+                                    />
+                                <Text style={styles.onlineStatusText}>Online</Text>
+                                </Block>
+                                :
+                                <Text style={styles.statusText}>Last seen <TimeAgo time={lastSeen} interval={60000}/></Text>
+                            }
                         </Block>
                     </Block>
                 </Block>
@@ -48,17 +73,28 @@ class Chat extends React.Component {
               ),
             headerRight: (
                 <Icon
-                name="ios-more" 
-                size={24} 
-                color={
-                    navigation.getParam('nightTheme') 
-                    ?
-                    theme.colors.white
-                    :
-                    theme.colors.blue
-                }
-                // onPress={() => navigation.navigate('Profile')}
-                style={{paddingVertical: 10, paddingHorizontal: 20,}}
+                    name="ios-more" 
+                    size={24} 
+                    color={
+                        navigation.getParam('nightTheme') 
+                        ?
+                        theme.colors.white
+                        :
+                        theme.colors.blue
+                    }
+                    onPress={() => {
+                        navigation.navigate('Profile', {
+                            userName: userName,
+                            userId: userId,
+                        })
+                    }}  
+                    style={
+                        Platform.OS === 'ios'
+                        ?
+                        {paddingVertical: 10, paddingHorizontal: 20}
+                        :
+                        {paddingVertical: 10, paddingHorizontal: 20, transform: [{ rotate: '90deg' }]}
+                    }
                 />
             ),
             headerStyle:  {
@@ -69,6 +105,16 @@ class Chat extends React.Component {
   state = {
     messages: []
   };
+
+  componentDidMount = () => {
+      console.log(this.props.navigation.getParam('userName', 'userName'))
+  }
+
+  capitalize(props) {
+    let text = props.slice(0,1).toUpperCase() + props.slice(1, props.length);
+    return text
+  }
+
 
   componentWillMount() {
     this.setState({
@@ -93,11 +139,41 @@ class Chat extends React.Component {
     }))
   }
 
+  renderSend(props) {
+    return (
+        <Send
+            {...props}
+        >
+                <Icon
+                    name="ios-arrow-dropup-circle" 
+                    size={32} 
+                    color={theme.colors.blue}
+                    style={{marginRight: 10, marginBottom: 5}}
+                />
+        </Send>
+    );
+}
+
+renderActions() {
+    return (
+        <Icon
+            name="ios-attach" 
+            size={24} 
+            color={theme.colors.blue}
+            style={{marginLeft: 16, marginTop: 12, transform: [{ rotate: '45deg' }]}}
+        />
+    );
+}
+
   render() {
     return (
       <GiftedChat
         messages={this.state.messages}
         onSend={messages => this.onSend(messages)}
+        placeholder={'Type Message Here'}
+        renderSend={this.renderSend}
+        renderActions={this.renderActions}
+        alwaysShowSend={true}
         user={{
           _id: 1,
         }}
@@ -123,7 +199,7 @@ const styles = StyleSheet.create({
         letterSpacing: -0.0241176,
         color: theme.colors.white,
     },
-    statusText: {
+    onlineStatusText: {
         fontSize: 9,
         lineHeight: 16,
         letterSpacing: -0.00615385,
@@ -131,6 +207,15 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 13,
         left: 18,
+    },
+    statusText: {
+        fontSize: 9,
+        lineHeight: 16,
+        letterSpacing: -0.00615385,
+        fontWeight: 'normal',
+        position: 'absolute',
+        top: 13,
+        left: 8,
     },
     userContainer: {
         display: 'flex',

@@ -64,43 +64,6 @@ export const SignedOut = createStackNavigator({
 
 });
 
-// const ContactsNavigator = createStackNavigator({
-//   ContactList: ContactList,
-//   MatchesList: MatchesList,
-//   Profile: Profile,
-// });
-
-// const ChatListNavigator = createStackNavigator({
-//   ChatList: ChatList,
-//   NewChat: NewChat,
-//   NewGroupChat: NewGroupChat,
-//   Profile: Profile,
-// });
-
-// const SettingsNavigator = createStackNavigator({
-//   Settings: Settings,
-//   Profile: Profile,
-//   ChatBackground: ChatBackground,
-// });
-
-// const TabNavigator = createBottomTabNavigator({
-//   Contacts: ContactsNavigator,
-//   ChatList: ChatListNavigator,
-//   Settings: SettingsNavigator,
-// });
-
-// TabNavigator.navigationOptions = (navigation) => {
-//   return {
-//       tabBarOptions: {
-//       showLabel: false,
-//       showIcon: true,
-//       style: {
-//         // paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0
-//       }
-//     }
-//   }
-// }
-
 export const TabNavigator = createBottomTabNavigator({
   Contacts:{
       screen: createStackNavigator({
@@ -116,12 +79,6 @@ export const TabNavigator = createBottomTabNavigator({
                 headerTitleStyle: theme.headerTitle,
             }
           },
-          Profile: {
-            screen: Profile,
-            navigationOptions: {
-                headerTitleStyle: theme.headerTitle,
-            }
-          }
       }, { headerLayoutPreset: 'center' }),
       navigationOptions: {
           title: 'Contacts',            
@@ -150,12 +107,6 @@ export const TabNavigator = createBottomTabNavigator({
               headerTitleStyle: theme.headerTitle,
           }
         },
-        Profile: {
-          screen: Profile,
-          navigationOptions: {
-              headerTitleStyle: theme.headerTitle,
-          }
-        }
     }, { headerLayoutPreset: 'center' }),
     navigationOptions: {
         title: 'Chatlist',            
@@ -171,12 +122,6 @@ export const TabNavigator = createBottomTabNavigator({
             navigationOptions: {
                 headerTitleStyle: theme.headerTitle,
             }
-        },
-        Profile: {
-          screen: Profile,
-          navigationOptions: {
-              headerTitleStyle: theme.headerTitle,
-          }
         },
         ChatBackground: {
           screen: ChatBackground,
@@ -216,6 +161,13 @@ const SignedIn = createStackNavigator({
   },
   Chat: {
     screen: Chat,
+    navigationOptions: {
+      visible: false,
+      headerVisible: true,
+    }
+  },
+  Profile: {
+    screen: Profile,
     navigationOptions: {
       visible: false,
       headerVisible: true,

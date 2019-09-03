@@ -198,11 +198,11 @@ class ChatList extends Component {
                   <ListItem
                     key={i}
                     leftAvatar={
-                    (l.avatarUri == "")
+                    (l.avatarUrl == "")
                     ?
                     { title: l.name[0], titleStyle:{textTransform: 'capitalize'}, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
                     :
-                    { source: { uri: l.avatarUri }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
+                    { source: { uri: l.avatarUrl }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
                     }
                     title={this.capitalize(l.name)}
                     titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
@@ -219,7 +219,15 @@ class ChatList extends Component {
                     }
                     subtitleStyle={styles.subtitle}
                     containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
-                    onPress={() => navigation.navigate('Chat')}
+                    onPress={(navigation) => {
+                      this.props.navigation.navigate('Chat', {
+                        userName: this.capitalize(l.name),
+                        userId: l.userId,
+                        avatar: l.avatarUrl,
+                        isActive: l.isActive,
+                        lastSeen: l.lastSeen,
+                      })
+                    }}  
                     />
                   {
                     l.unreadMessagesCount > 0 
@@ -263,11 +271,11 @@ class ChatList extends Component {
                 <ListItem
                   key={i}
                   leftAvatar={
-                  (l.avatarUri == "")
+                  (l.avatarUrl == "")
                   ?
                   { title: l.name[0], titleStyle:{textTransform: 'capitalize'}, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
                   :
-                  { source: { uri: l.avatarUri }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
+                  { source: { uri: l.avatarUrl }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
                   }
                   title={this.capitalize(l.name)}
                   titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
@@ -284,8 +292,16 @@ class ChatList extends Component {
                   }
                   subtitleStyle={styles.subtitle}
                   containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
-                  onPress={() => navigation.navigate('Chat')}
-                  />
+                  onPress={(navigation) => {
+                    this.props.navigation.navigate('Chat', {
+                      userName: this.capitalize(l.name),
+                      userId: l.userId,
+                      avatar: l.avatarUrl,
+                      isActive: l.isActive,
+                      lastSeen: l.lastSeen,
+                    })
+                  }}  
+                />
                 {
                   l.unreadMessagesCount > 0 
                   ?

@@ -67,6 +67,32 @@ export function getMyUserProfile() {
 }
 
 
+export function searchUserById(data) {
+  return (dispatch) => {
+    const promise = MatrixClient.searchUserById(data, 1)
+    promise.then((data) => {
+      console.log(data)
+      },
+      (error) => {
+      console.log(error);
+      }
+    );
+  }
+}
+
+export function createDirectChat(userId) {
+  return () => {
+    const promise = MatrixClient.createDirectChat(userId)
+    promise.then((data) => {
+      console.log(data)
+      },
+      (error) => {
+      console.log(error);
+      }
+    );
+  }
+}
+
   export function getContacts() {
     return {
       type: FETCHING_CONTACTS

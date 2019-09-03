@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Platform, View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
+import { Platform, View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet, DeviceEventEmitter } from 'react-native';
 
 import {BoxShadow} from 'react-native-shadow';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -9,7 +9,7 @@ import { theme } from '../constants';
 import { Text, Block } from '../components';
 
 import {connect} from 'react-redux';
-import { getContactList, searchBar, changeContactList, clearSearchBar, selectContact, deselectContact, getMyUserId, getMyUserProfile } from '../store/actions/contactsActions';
+import { getContactList, searchBar, changeContactList, clearSearchBar, selectContact, deselectContact, getMyUserId, getMyUserProfile, searchUserById } from '../store/actions/contactsActions';
 
 
 const { width, height } = Dimensions.get('window');
@@ -74,6 +74,23 @@ class ContactList extends Component {
       this.props.loadDirectChats()
       this.props.getMyUserId()
     });
+
+    this.onNetworkErrorEvent = DeviceEventEmitter.addListener('onNetworkError', function(e) {
+      console.log('onNetworkError')
+      console.log(e)
+    });  
+    this.onMatrixErrorEvent = DeviceEventEmitter.addListener('onMatrixError', (e) => {
+      console.log('onMatrixError')
+      console.log(e)
+      this.setState({wrongPassword: true})
+    });  
+    this.onUnexpectedErrorEvent = DeviceEventEmitter.addListener('onUnexpectedError', function(e) {
+      console.log('onUnexpectedError')
+      console.log(e)
+    });  
+    this.successSearch = DeviceEventEmitter.addListener('onSuccess', (e) => {
+        console.log('onSuccess')
+    })
   }
 
   componentDidUpdate(prevProps) {
@@ -100,6 +117,20 @@ class ContactList extends Component {
       await this.props.searchBar(text)
       await this.props.changeContactList(newData) 
   };
+
+  handleSearch = async (text) => {
+    await this.setState({ search: text , searchChanged: true});
+    if (this.state.search == '') {
+        if (this.state.searchChanged) {
+          await this.props.clearSearchBar();
+          await this.props.loadDirectChats();    
+          await this.setState({searchChanged: false});
+        }
+    } else {
+        await this.props.searchBar(text);
+        await this.props.searchUserById(text);  
+    }
+  }
   
   capitalize(props) {
     let text = props.slice(0,1).toUpperCase() + props.slice(1, props.length);
@@ -146,7 +177,7 @@ class ContactList extends Component {
           ? 
           <SearchBar 
             placeholder="Search"
-            onChangeText={(text) => this.updateSearch(text)}
+            onChangeText={(text) => this.handleSearch(text)}
             platform="ios"
             value={this.props.contacts.search}
             containerStyle={this.props.appState.nightTheme ? styles.darkSearchBar: styles.searchBar}
@@ -157,7 +188,7 @@ class ContactList extends Component {
           <SearchBar 
             placeholder="Search"
             platform="ios"
-            onChangeText={(text) => this.updateSearch(text)}
+            onChangeText={(text) => this.handleSearch(text)}
             cancelButtonTitle={null}
             value={this.props.contacts.search}
             containerStyle={this.props.appState.nightTheme ? styles.darkSearchBar: styles.searchBar}
@@ -188,11 +219,11 @@ class ContactList extends Component {
                     <ListItem
                       key={i}
                       leftAvatar={
-                        (l.avatarUri == "")
+                        (l.avatarUrl == "")
                         ?
                         { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
                         :
-                        { source: { uri: l.avatarUri } }
+                        { source: { uri: l.avatarUrl } }
                       }
                       title={this.capitalize(l.name)}
                       titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
@@ -202,7 +233,7 @@ class ContactList extends Component {
                       onPress={(navigation) => {
                         navigation.navigate('Profile', {
                           userName: l.name,
-                          userID: l.userId,
+                          userId: l.userId,
                         })
                       }}  
                     />
@@ -224,11 +255,11 @@ class ContactList extends Component {
                   <ListItem
                     key={i}
                     leftAvatar={
-                      (l.avatarUri == "")
+                      (l.avatarUrl == "")
                       ?
                       { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
                       :
-                      { source: { uri: l.avatarUri } }
+                      { source: { uri: l.avatarUrl } }
                     }
                     title={this.capitalize(l.name)}
                     titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
@@ -238,7 +269,7 @@ class ContactList extends Component {
                     onPress={() => {
                       navigation.navigate('Profile', {
                         userName: l.name,
-                        userID: l.userId,
+                        userId: l.userId,
                       })
                   }}  
                   />
@@ -417,6 +448,7 @@ function mapDispatchToProps (dispatch) {
     selectContact: (data) => dispatch(selectContact(data)),
     deselectContact: () => dispatch(deselectContact()),
     getMyUserId: () => dispatch(getMyUserId()),
+    searchUserById: (data) => dispatch(searchUserById(data))
   }
 }
 

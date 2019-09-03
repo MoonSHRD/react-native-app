@@ -190,11 +190,11 @@ class MatchesList extends Component {
                     <ListItem
                       key={i}
                       leftAvatar={
-                        (l.avatarUri == "")
+                        (l.avatarUrl == "")
                         ?
                         { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
                         :
-                        { source: { uri: l.avatarUri } }
+                        { source: { uri: l.avatarUrl } }
                       }
                       title={this.capitalize(l.name)}
                       titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
@@ -226,11 +226,11 @@ class MatchesList extends Component {
                   <ListItem
                     key={i}
                     leftAvatar={
-                      (l.avatarUri == "")
+                      (l.avatarUrl == "")
                       ?
                       { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
                       :
-                      { source: { uri: l.avatarUri } }
+                      { source: { uri: l.avatarUrl } }
                     }
                     title={this.capitalize(l.name)}
                     titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
