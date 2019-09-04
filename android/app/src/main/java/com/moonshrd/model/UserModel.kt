@@ -2,8 +2,8 @@ package com.moonshrd.model
 
 data class UserModel (
         val userId: String,
-        val name: String,
-        val avatarUrl: String,
+        val name: String?,
+        val avatarUrl: String?,
 
         // Optional part of a model goes here
         val lastSeen: Long = 0, // UNIX timestamp
