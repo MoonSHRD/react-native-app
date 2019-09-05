@@ -173,7 +173,9 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             return
         }
 
-        getUserById(matrixInstance.defaultSession.myUserId, promise)
+        val currentSession = matrixInstance.defaultSession
+
+        promise.resolve(gson.toJson(UserModel(currentSession.myUserId, currentSession.dataHandler.myUser.displayname, currentSession.dataHandler.myUser.avatarUrl)))
     }
 
     @ReactMethod
@@ -279,6 +281,10 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     @ReactMethod
     fun updateAvatar(base64Avatar: String, promise: Promise) {
+        if(!isSessionExists(promise)) {
+            return
+        }
+
         val future = uploadImage(base64Avatar)
         future.thenAccept {
             matrixInstance.defaultSession.profileApiClient.updateDisplayname(it, object : ApiCallback<Void> {
