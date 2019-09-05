@@ -53,7 +53,6 @@ export function getMyUserId() {
 
 export function getMyUserProfile() {
   return (dispatch) => {
-    console.log('asd')
     const promise = MatrixClient.getMyProfile()
     promise.then((data) => {
       const jsonData = JSON.parse(data)
@@ -66,12 +65,41 @@ export function getMyUserProfile() {
   }
 }
 
+export function saveNewUserName(newName) {
+  return (dispatch) => {
+    const promise = MatrixClient.updateDisplayName(newName)
+    promise.then((data) => {
+      dispatch(getMyUserId())
+      dispatch(getMyUserProfile())
+      console.log(data)
+      },
+      (error) => {
+      console.log(error);
+      });
+  }
+}
+
+export function saveNewAvatar(newAvatar) {
+  return (dispatch) => {
+    const promise = MatrixClient.updateAvatar(newAvatar)
+    promise.then((data) => {
+      dispatch(getMyUserId())
+      dispatch(getMyUserProfile())
+      console.log(data)
+      },
+      (error) => {
+      console.log(error);
+      });
+  }
+}
 
 export function searchUserById(data) {
   return (dispatch) => {
     const promise = MatrixClient.searchUserById(data, 1)
     promise.then((data) => {
-      console.log(data)
+      const jsonData = JSON.parse(data)
+      dispatch(changeContactList(jsonData))
+      console.log(jsonData)
       },
       (error) => {
       console.log(error);

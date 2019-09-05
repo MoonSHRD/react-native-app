@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
-import { Image, Platform, View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
+import { Image, Platform, View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet, DeviceEventEmitter } from 'react-native';
 
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Button, Block, Text, Input } from '../components';
 import { theme } from '../constants';
 import { Avatar, ThemeConsumer } from 'react-native-elements';
+import ImagePicker from 'react-native-image-crop-picker';
+import ActionSheet from 'react-native-action-sheet';
 
 import {connect} from 'react-redux';
-import { getContactInfo, deselectContact, getMyUserProfile, createDirectChat } from '../store/actions/contactsActions';
+import { getContactInfo, deselectContact, getMyUserProfile, createDirectChat, saveNewUserName, saveNewAvatar } from '../store/actions/contactsActions';
 
 const { width, height } = Dimensions.get('window');
 
@@ -70,6 +72,9 @@ class Profile extends Component {
       userName:'',
       avatarUrl: '',
       name: 'Andrew Shoagase',
+      isModalVisible: false,
+      avatarChanged: false,
+      newName: '',
       phone: '+1(323)564-34-22',
       tags: [
           {
@@ -131,6 +136,10 @@ class Profile extends Component {
     await this.checkName()
   }
 
+  toggleModal = () => {
+    this.setState({ isModalVisible: !this.state.isModalVisible });
+  };
+
   checkName = async () => {
     await console.log('wwwww');
     const userName = await this.props.navigation.getParam('userName', 'userName');
@@ -153,6 +162,92 @@ class Profile extends Component {
     this.props.navigation.setParams({nightTheme: this.props.appState.nightTheme});  
   }
 
+  changeUserName = (data) => {
+    this.setState({newName: data})
+  }
+
+  changeAvatar = (data) => {
+    this.setState({newAvatar: data})
+  }
+
+  saveNewProfile = async () => {
+    if (this.state.newAvatar || this.state.newName) {
+        if (this.state.newName && this.state.newAvatar) {
+            await this.props.saveNewUserName(this.state.newName)
+            await this.props.saveNewAvatar(this.state.newAvatar)
+            await this.props.navigation.goBack()
+        }
+
+        if (this.state.newName) {
+            await this.props.saveNewUserName(this.state.newName)
+            await this.props.navigation.goBack()
+        } 
+
+        if (this.state.newAvatar) {
+            await this.props.saveNewAvatar(this.state.newAvatar)
+            await this.props.navigation.goBack()
+        }
+        
+    } else {
+        await this.props.navigation.goBack()
+    }
+  }
+
+  openGalleryPicker() {
+    ImagePicker.openPicker({
+        width: 100,
+        height: 100,
+        cropping: true,
+        includeBase64:  true,
+      }).then(image => {
+        this.setState({newAvatar: `data:${image.mime};base64,${image.data}`})
+        this.setState({avatarChanged: true})
+        console.log(image);
+      });
+  }
+
+  openCamera() {
+    ImagePicker.openCamera({
+        width: 100,
+        height: 100,
+        cropping: true,
+        includeBase64:  true,
+      }).then(image => {
+          this.setState({newAvatar: `data:${image.mime};base64,${image.data}`})
+          this.setState({avatarChanged: true})
+          console.log(image);
+      });      
+  }
+
+  openActionSheet() {
+    var CANCEL_INDEX = 2;
+    var BUTTONSiOS = [
+        'Choose from Gallery',
+        'Take a picture',
+        'Cancel'
+    ];
+    var BUTTONSandroid = [
+        'Choose from Gallery',
+        'Take a picture',
+        'Cancel'
+    ];
+
+    ActionSheet.showActionSheetWithOptions({
+        options: (Platform.OS == 'ios') ? BUTTONSiOS : BUTTONSandroid,
+        cancelButtonIndex: CANCEL_INDEX,
+        tintColor: 'blue'
+      },
+      (buttonIndex) => {
+          if (buttonIndex == 0) {
+              this.openGalleryPicker()
+          } 
+          if (buttonIndex == 1) {
+              this.openCamera()
+          }
+        console.log('button clicked :', buttonIndex);
+      });      
+  }
+
   componentDidMount() {
     this.setHeaderParams()
     this.willFocus = this.props.navigation.addListener('willFocus', async () => {
@@ -162,7 +257,20 @@ class Profile extends Component {
         this.loadProfile()
         :
         this.loadMyProfile()
-    })  
+    })
+    
+    this.onNetworkErrorEvent = DeviceEventEmitter.addListener('onNetworkError', function(e) {
+        console.log('onNetworkError')
+        console.log(e)
+      });  
+      this.onMatrixErrorEvent = DeviceEventEmitter.addListener('onMatrixError', (e) => {
+        console.log('onMatrixError')
+        console.log(e)
+      });  
+      this.onUnexpectedErrorEvent = DeviceEventEmitter.addListener('onUnexpectedError', function(e) {
+        console.log('onUnexpectedError')
+        console.log(e)
+      });    
 }
 
 componentDidUpdate(prevProps) {
@@ -181,6 +289,7 @@ componentDidUpdate(prevProps) {
     const userName = this.props.navigation.getParam('userName', 'userName')
     const userId = this.props.navigation.getParam('userId', 'userId')
 
+      
     return (
       <KeyboardAvoidingView behavior="padding" >
         <ScrollView
@@ -312,27 +421,71 @@ componentDidUpdate(prevProps) {
             />
             <Block style={styles.avatarContainer}>
             {
-                this.props.contacts.myProfile.avatarUrl != ''
+                this.state.avatarChanged
                 ?
-                <Avatar 
-                    rounded
-                    source={this.props.contacts.myProfile.avatarUrl}
-                    containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
-                    avatarStyle={styles.avatarImage}
-                />
+                <Block>
+                {
+                    this.state.newAvatar != ''
+                    ?
+                    <Avatar 
+                        rounded
+                        source={{uri: this.state.newAvatar}}
+                        containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
+                        avatarStyle={styles.avatarImage}
+                        onPress={() => {
+                            this.openActionSheet()
+                        }}
+                    />
+                    :
+                    <Avatar 
+                        rounded
+                        title={
+                            this.props.contacts.myProfile.name != ''
+                            ?
+                            this.capitalize(this.props.contacts.myProfile.name[0])
+                            :
+                            this.capitalize(this.props.contacts.myUserName[0])
+                        }
+                        containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
+                        avatarStyle={styles.avatarImage}
+                        onPress={() => {
+                            this.openActionSheet()
+                        }}
+                    />
+                } 
+                </Block>   
                 :
-                <Avatar 
-                    rounded
-                    title={
-                        this.props.contacts.myProfile.name != ''
-                        ?
-                        this.props.contacts.myProfile.name
-                        :
-                        this.capitalize(this.props.contacts.myUserName[0])
-                    }
-                    containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
-                    avatarStyle={styles.avatarImage}
-                />
+                <Block>
+                {
+                    this.props.contacts.myProfile.avatarUrl != ''
+                    ?
+                    <Avatar 
+                        rounded
+                        source={this.props.contacts.myProfile.avatarUrl}
+                        containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
+                        avatarStyle={styles.avatarImage}
+                        onPress={() => {
+                            this.openActionSheet()
+                        }}
+                    />
+                    :
+                    <Avatar 
+                        rounded
+                        title={
+                            this.props.contacts.myProfile.name != ''
+                            ?
+                            this.capitalize(this.props.contacts.myProfile.name[0])
+                            :
+                            this.capitalize(this.props.contacts.myUserName[0])
+                        }
+                        containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
+                        avatarStyle={styles.avatarImage}
+                        onPress={() => {
+                            this.openActionSheet()
+                        }}
+                    />
+                }
+                </Block>    
             }
             </Block>
             <Block style={styles.profileContainer}>
@@ -342,13 +495,13 @@ componentDidUpdate(prevProps) {
                     error={hasErrors('name')}
                     style={this.props.appState.nightTheme ? [styles.darkInput, hasErrors('name')] : [styles.input, hasErrors('name')]}
                     defaultValue={
-                        this.props.contacts.myUserName
+                        this.props.contacts.myProfile.name != ''
                         ?
-                        this.capitalize(this.props.contacts.myUserName)
+                        this.props.contacts.myProfile.name
                         :
-                        this.state.name
+                        this.capitalize(this.props.contacts.myUserName)
                     }
-                    onChangeText={text => this.setState({ name: text })}
+                    onChangeText={text => this.changeUserName(text)}
                 />
                 {
                     this.props.contacts.myProfile.phone
@@ -429,7 +582,7 @@ componentDidUpdate(prevProps) {
                     null
                 }
                 <Button gradient style={styles.confirmButton}               
-                    onPress={() => {Alert.alert('save profile')}}
+                    onPress={() => this.saveNewProfile()}
                 >
                     <Text headline bold white center>Save</Text>
                 </Button>       
@@ -627,6 +780,8 @@ function mapStateToProps (state) {
       deselectContact: () => dispatch(deselectContact()),
       getMyUserProfile: () => dispatch(getMyUserProfile()),
       createDirectChat: (data) => dispatch(createDirectChat(data)),
+      saveNewUserName: (data) => dispatch(saveNewUserName(data)),
+      saveNewAvatar: (data) => dispatch(saveNewAvatar(data)),
     }
   }
   

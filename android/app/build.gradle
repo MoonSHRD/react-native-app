@@ -130,6 +130,7 @@ android {
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
+        vectorDrawables.useSupportLibrary = true
     }
     signingConfigs {
         release {
@@ -172,6 +173,8 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-action-sheet')
+    implementation project(':react-native-image-crop-picker')
     implementation project(':react-native-vector-icons')
     implementation project(':react-native-svg')
     implementation project(':react-native-gesture-handler')

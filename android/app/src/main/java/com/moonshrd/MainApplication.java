@@ -3,6 +3,8 @@ package com.moonshrd;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.actionsheet.ActionSheetPackage;
+import com.reactnative.ivpusic.imagepicker.PickerPackage;
 import com.moonshrd.utils.matrix.Matrix;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.horcrux.svg.SvgPackage;
@@ -36,6 +38,8 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new ActionSheetPackage(),
+            new PickerPackage(),
             new VectorIconsPackage(),
             new SvgPackage(),
             new RNGestureHandlerPackage(),
