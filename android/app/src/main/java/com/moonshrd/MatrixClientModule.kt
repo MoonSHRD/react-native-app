@@ -153,7 +153,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             if(name != null && avatarUrl != null) {
                 promise.resolve(gson.toJson(UserModel(userID, name, avatarUrl)))
             } else {
-                promise.resolve(gson.toJson(UserModel("", "", "")))
+                promise.resolve(gson.toJson(UserModel(userID, "", "")))
             }
         }
     }
