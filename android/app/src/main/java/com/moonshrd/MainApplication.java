@@ -1,8 +1,14 @@
 package com.moonshrd;
 
 import android.app.Application;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 
 import com.facebook.react.ReactApplication;
+import com.moonshrd.services.P2ChatService;
 import com.moonshrd.utils.matrix.Matrix;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.horcrux.svg.SvgPackage;
@@ -25,6 +31,12 @@ import io.realm.RealmConfiguration;
 
 public class MainApplication extends Application implements ReactApplication {
   private static Matrix matrixInstance = null;
+
+  public static final String SERVICE_TOPIC = "moonshard";
+  public static final String PROTOCOL_ID = "/moonshard/1.0.0";
+    public static ServiceConnection serviceConnection = null;
+    public static P2ChatService service = null;
+    public Context context = null;
 
   private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
     @Override
@@ -60,6 +72,26 @@ public class MainApplication extends Application implements ReactApplication {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
     matrixInstance = Matrix.getInstance(getApplicationContext());
+
+      context = getApplicationContext();
+
+      this.context.startService(new Intent(this.context, P2ChatService.class));
+
+      ServiceConnection serviceConnection = new ServiceConnection() {
+          @Override
+          public void onServiceConnected(ComponentName name, IBinder service) {
+              MainApplication.serviceConnection = this;
+              MainApplication.service = ((P2ChatService.P2ChatServiceBinder) service).getService();
+          }
+
+          @Override
+          public void onServiceDisconnected(ComponentName name) {
+              MainApplication.serviceConnection = null;
+              MainApplication.service = null;
+          }
+      };
+
+      this.context.bindService(new Intent(this.context, P2ChatService.class), serviceConnection, Context.BIND_AUTO_CREATE);
   }
 
   public static Matrix getMatrixInstance() {
