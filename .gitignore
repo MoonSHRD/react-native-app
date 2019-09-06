@@ -26,7 +26,6 @@ project.xcworkspace
 # Android/IntelliJ
 #
 android/build/
-build/
 .idea
 .gradle
 local.properties
@@ -61,3 +60,4 @@ buck-out/
 .env
 ./ios/Index/DataStore/v5/
 /android/p2mobile/p2mobile.aar
+/android/p2mobile/p2mobile-sources.jar

@@ -6,7 +6,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.google.gson.Gson
-import com.moonshrd.model.UserModel
+import com.moonshrd.models.UserModel
 import com.moonshrd.utils.matrix.Matrix
 import java9.util.concurrent.CompletableFuture
 import kotlinx.coroutines.GlobalScope
@@ -287,7 +287,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
         val future = uploadImage(base64Avatar)
         future.thenAccept {
-            matrixInstance.defaultSession.profileApiClient.updateDisplayname(it, object : ApiCallback<Void> {
+            matrixInstance.defaultSession.profileApiClient.updateAvatarUrl(it, object : ApiCallback<Void> {
                 override fun onSuccess(info: Void?) {
                     promise.resolve(true)
                 }
