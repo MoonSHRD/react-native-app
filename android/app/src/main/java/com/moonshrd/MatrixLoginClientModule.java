@@ -10,6 +10,8 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.moonshrd.utils.RNUtilsKt;
 import com.moonshrd.utils.matrix.LoginHandler;
 import com.moonshrd.utils.matrix.Matrix;
@@ -34,7 +36,6 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
-    // TODO: make sending result to the UI via promises instead of ReactNative events
     private static String LOG_TAG = MatrixLoginClientModule.class.getSimpleName();
 
     public MatrixLoginClientModule(@Nonnull ReactApplicationContext reactContext) {
@@ -48,7 +49,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void register(String homeserverUri, String identityUri, String email, String password) {
+    public void register(String homeserverUri, String identityUri, String email, String password, Promise promise) {
         HomeServerConnectionConfig hsConfig = new HomeServerConnectionConfig.Builder()
                 .withHomeServerUri(Uri.parse(homeserverUri))
                 .withIdentityServerUri(Uri.parse(identityUri))
@@ -58,11 +59,11 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
         registrationManager.setHsConfig(hsConfig);
         registrationManager.setAccountData(email, password); // FIXME we temporary use usernames instead of email identity, should be changed in future
         //registrationManager.addEmailThreePid(new ThreePid(email, ThreePid.MEDIUM_EMAIL));
-        getRegFlowsAndRegister(hsConfig, registrationManager);
+        getRegFlowsAndRegister(hsConfig, registrationManager, promise);
     }
 
     @ReactMethod
-    public void login(String homeserverUri, String identityUri, String email, String password) {
+    public void login(String homeserverUri, String identityUri, String email, String password, Promise promise) {
         HomeServerConnectionConfig hsConfig = new HomeServerConnectionConfig.Builder()
                 .withHomeServerUri(Uri.parse(homeserverUri))
                 .withIdentityServerUri(Uri.parse(identityUri))
@@ -76,50 +77,50 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
                 UnrecognizedCertificateException uException = CertUtil.getCertificateException(e);
                 if(uException != null) {
                     hsConfig.getAllowedFingerprints().add(uException.getFingerprint());
-                    login(hsConfig, email, password);
+                    login(hsConfig, email, password, promise);
                 }
-                RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onNetworkError", "exceptionText", e.getMessage());
+                promise.reject("onNetworkError", e.getMessage());
             }
 
             @Override
             public void onMatrixError(MatrixError e) {
-                RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onMatrixError", "exceptionText", e.getMessage());
+                promise.reject("onMatrixError", e.getMessage());
             }
 
             @Override
             public void onUnexpectedError(Exception e) {
-                RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onUnexpectedError", "exceptionText", e.getMessage());
+                promise.reject("onUnexpectedError", e.getMessage());
             }
 
             @Override
             public void onSuccess(Void info) {
-                RNUtilsKt.sendEvent(getReactApplicationContext(), "onSuccess", null);
+                promise.resolve(true);
                 startListeningEventStream();
             }
         });
     }
 
-    private void login(HomeServerConnectionConfig hsConfig, String email, String password) {
+    private void login(HomeServerConnectionConfig hsConfig, String email, String password, Promise promise) {
         LoginHandler loginHandler = new LoginHandler();
         loginHandler.login(getReactApplicationContext(), hsConfig, email, "", "", password, new ApiCallback<Void>() {
             @Override
             public void onNetworkError(Exception e) {
-                RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onNetworkError", "exceptionText", e.getMessage());
+                promise.reject("onNetworkError", e.getMessage());
             }
 
             @Override
             public void onMatrixError(MatrixError e) {
-                RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onMatrixError", "exceptionText", e.getMessage());
+                promise.reject("onMatrixError", e.getMessage());
             }
 
             @Override
             public void onUnexpectedError(Exception e) {
-                RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onUnexpectedError", "exceptionText", e.getMessage());
+                promise.reject("onUnexpectedError", e.getMessage());
             }
 
             @Override
             public void onSuccess(Void info) {
-                RNUtilsKt.sendEvent(getReactApplicationContext(), "onSuccess", null);
+                promise.resolve(true);
                 startListeningEventStream();
             }
         });
@@ -151,8 +152,8 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
         matrixInstance.getLoginStorage().clear();
     }
 
-    private void getRegFlowsAndRegister(HomeServerConnectionConfig hsConfig, RegistrationManager registrationManager) {
-        Log.d(LOG_TAG, "## checkRegistrationFlows()");
+    private void getRegFlowsAndRegister(HomeServerConnectionConfig hsConfig, RegistrationManager registrationManager, Promise promise) {
+        Log.d(LOG_TAG, "## getRegFlowsAndRegister()");
 
         if (!registrationManager.hasRegistrationResponse()) {
             try {
@@ -165,12 +166,12 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
 
                     @Override
                     public void onNetworkError(Exception e) {
-                        RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onNetworkError", "exceptionText", e.getMessage());
+                        promise.reject("onNetworkError", e.getMessage());
                     }
 
                     @Override
                     public void onUnexpectedError(Exception e) {
-                        RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onUnexpectedError", "exceptionText", e.getMessage());
+                        promise.reject("onUnexpectedError", e.getMessage());
                     }
 
                     @Override
@@ -191,9 +192,9 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
 
                         if (null != registrationFlowResponse) {
                             registrationManager.setSupportedRegistrationFlows(registrationFlowResponse);
-                            attemptRegistration(registrationManager);
+                            attemptRegistration(registrationManager, promise);
                         } else {
-                            RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onMatrixError", "exceptionText", e.getMessage());
+                            promise.reject("onMatrixError", e.getMessage());
                         }
                     }
                 });
@@ -203,19 +204,19 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
         }
     }
 
-    private void attemptRegistration(RegistrationManager registrationManager) {
+    private void attemptRegistration(RegistrationManager registrationManager, Promise promise) {
         registrationManager.attemptRegistration(getReactApplicationContext(), new RegistrationManager.RegistrationListener() {
             @Override
             public void onRegistrationSuccess(String warningMessage) {
                 Log.i(LOG_TAG, "# onRegistrationSuccess(warningMessage=" + warningMessage + ")");
-                RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onRegistrationSuccess", "warningMessage", warningMessage);
+                promise.resolve(warningMessage);
                 startListeningEventStream();
             }
 
             @Override
             public void onRegistrationFailed(String message) {
                 Log.e(LOG_TAG, "# onRegistrationFailed(message=" + message + ")");
-                RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onRegistrationFailed", "message", message);
+                promise.reject("onRegistrationFailed", message);
             }
 
             @Override
@@ -238,7 +239,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
 
             @Override
             public void onThreePidRequestFailed(String message) {
-                RNUtilsKt.sendEventWithOneStringArg(getReactApplicationContext(), "onThreePidRequestFailed", "message", message);
+                promise.reject("onThreePidRequestFailed", message);
             }
 
             @Override
@@ -247,7 +248,10 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
                 args.putString("message", e.error);
                 args.putInt("retryAfter", e.retry_after_ms);
                 Log.d(LOG_TAG, "# onResourceLimitExceeded(e=" + e.error + ")");
-                RNUtilsKt.sendEvent(getReactApplicationContext(), "onResourceLimitExceeded", args);
+                JsonObject jsonObject = new JsonObject();
+                jsonObject.addProperty("message", e.getMessage());
+                jsonObject.addProperty("retryAfter", e.retry_after_ms);
+                promise.reject("onResourceLimitExceeded", jsonObject.toString());
             }
         });
     }
