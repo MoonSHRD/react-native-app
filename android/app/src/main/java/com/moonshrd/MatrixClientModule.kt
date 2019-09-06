@@ -287,7 +287,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
         val future = uploadImage(base64Avatar)
         future.thenAccept {
-            matrixInstance.defaultSession.profileApiClient.updateDisplayname(it, object : ApiCallback<Void> {
+            matrixInstance.defaultSession.profileApiClient.updateAvatarUrl(it, object : ApiCallback<Void> {
                 override fun onSuccess(info: Void?) {
                     promise.resolve(true)
                 }
