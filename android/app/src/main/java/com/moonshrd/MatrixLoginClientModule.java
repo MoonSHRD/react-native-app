@@ -78,6 +78,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
                 if(uException != null) {
                     hsConfig.getAllowedFingerprints().add(uException.getFingerprint());
                     login(hsConfig, email, password, promise);
+                    return;
                 }
                 promise.reject("onNetworkError", e.getMessage());
             }
