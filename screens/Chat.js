@@ -121,10 +121,15 @@ class Chat extends React.Component {
       messages: [
         {
           _id: 1,
-          text: 'Hello developer',
+          text: 'Test Message in personal chat',
+          createdAt: new Date(),
+        },
+        {
+          _id: 2,
+          text: 'Test Message in group chat',
           createdAt: new Date(),
           user: {
-            _id: 2,
+            _id: 3,
             name: 'React Native',
             avatar: 'https://placeimg.com/140/140/any',
           },
