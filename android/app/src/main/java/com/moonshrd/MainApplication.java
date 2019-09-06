@@ -8,8 +8,11 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 
 import com.facebook.react.ReactApplication;
+<<<<<<< HEAD
 import com.actionsheet.ActionSheetPackage;
 import com.reactnative.ivpusic.imagepicker.PickerPackage;
+=======
+>>>>>>> 2427781332860ec47cfb296a775e2070e8180561
 import com.moonshrd.services.P2ChatService;
 import com.moonshrd.utils.matrix.Matrix;
 import com.oblador.vectoricons.VectorIconsPackage;
