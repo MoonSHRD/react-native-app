@@ -1,4 +1,4 @@
-package com.moonshrd.model
+package com.moonshrd.models
 
 data class UserModel (
         val userId: String,
