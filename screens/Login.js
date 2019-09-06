@@ -70,12 +70,36 @@ class Login extends Component {
     
     if (!errors.length) {
       if (Platform.OS === 'android') {
-        MatrixLoginClient.login(
+        const promise  =  MatrixLoginClient.login(
           homeserverUri,
           identityUri,
           email,
           password,
         )  
+        promise.then((data) => {
+        Alert.alert(
+          'Success!',
+          'Your login was successful',
+          [
+          {
+              text: 'Continue', onPress: () => {
+                navigation.navigate('SignedIn');
+                loginResult(true)
+                saveMyName(this.state.email)
+              }
+          }
+          ],
+          { cancelable: false }
+        )  
+        console.log(data)
+        },
+        (error) => {
+          if (error = "Error: Invalid password") {
+            this.setState({wrongPassword: true})
+          }
+        console.log(error);
+        }
+        );          
       }
     }
     
@@ -91,42 +115,6 @@ class Login extends Component {
           { cancelable: false }
       );
     }
-  }
-
-  componentDidMount() {
-    const { navigation, loginResult, saveMyName } = this.props;
-    this.onNetworkErrorEvent = DeviceEventEmitter.addListener('onNetworkError', function(e) {
-      console.log('onNetworkError')
-      console.log(e)
-    });  
-    this.onMatrixErrorEvent = DeviceEventEmitter.addListener('onMatrixError', (e) => {
-      console.log('onMatrixError')
-      console.log(e)
-      this.setState({wrongPassword: true})
-    });  
-    this.onUnexpectedErrorEvent = DeviceEventEmitter.addListener('onUnexpectedError', function(e) {
-      console.log('onUnexpectedError')
-      console.log(e)
-    });  
-    this.successLogin = DeviceEventEmitter.addListener('onSuccess', (e) => {
-        console.log('onSuccess')
-        // console.log(e)
-        Alert.alert(
-          'Success!',
-          'Your login was successful',
-          [
-          {
-              text: 'Continue', onPress: () => {
-                navigation.navigate('SignedIn');
-                loginResult(true)
-                saveMyName(this.state.email)
-              }
-          }
-          ],
-          { cancelable: false }
-        )
-    });  
-
   }
 
 

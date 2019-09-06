@@ -51,7 +51,6 @@ class SignUp extends Component {
 
     Keyboard.dismiss();
     this.setState({ loading: true });
-    console.log('button pressed')
 
     // check with backend API or with some static data
     if (!email) errors.push('email');
@@ -73,12 +72,35 @@ class SignUp extends Component {
     
     if (!errors.length) {
       if (Platform.OS === 'android') {
-        MatrixLoginClient.register(
+        const promise = MatrixLoginClient.register(
           homeserverUri,
           identityUri,
           email,
           password,
         )  
+        promise.then((data) => {
+          Alert.alert(
+            'Success!',
+            'Your registration was successful',
+            [
+            {
+                text: 'Continue', onPress: () => {
+                  confirmLogin(true)
+                  saveUserName(email)
+                }
+            }
+            ],
+            { cancelable: false }
+          )  
+          console.log(data)
+          },
+          (error) => {
+            if (error = "Error: User already exist") {
+              this.setState({userAlreadyExist: true})
+            }
+          console.log(error);
+          }
+          );            
       }
       
       if (userAlreadyExist) {
