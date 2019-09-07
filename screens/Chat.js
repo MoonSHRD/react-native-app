@@ -1,13 +1,17 @@
 import React, { Component } from 'react';
-import { Text, KeyboardAvoidingView, StyleSheet, Platform, View } from 'react-native';
+import { Text, KeyboardAvoidingView, Dimensions, StyleSheet, Platform, View } from 'react-native';
 
 import { Block } from '../components';
-import { Avatar, Badge } from 'react-native-elements';
-import { GiftedChat, Actions, SystemMessage, Send } from 'react-native-gifted-chat';
+import { Avatar, Badge, Icon } from 'react-native-elements';
+import { GiftedChat, Actions, SystemMessage, Send, InputToolbar, Composer } from 'react-native-gifted-chat';
 import {connect} from 'react-redux';
 import TimeAgo from 'react-native-timeago';
-import Icon from 'react-native-vector-icons/Ionicons';
 import { theme } from '../constants';  
+import ImagePicker from 'react-native-image-crop-picker';
+import ActionSheet from 'react-native-action-sheet';
+
+const { width, height } = Dimensions.get('window');
+
 
 class Chat extends React.Component {
     static navigationOptions = ({ navigation }) => {
@@ -59,6 +63,7 @@ class Chat extends React.Component {
             headerLeft: (
                 <Icon
                     name="ios-arrow-back" 
+                    type='ionicon'
                     size={24} 
                     color={
                         navigation.getParam('nightTheme') 
@@ -68,12 +73,13 @@ class Chat extends React.Component {
                         theme.colors.blue
                       }
                         onPress={() => navigation.goBack()}
-                    style={{paddingVertical: 10, paddingHorizontal: 20,}}
+                    containerStyle={{paddingVertical: 10, paddingHorizontal: 20,}}
                 />
               ),
             headerRight: (
                 <Icon
                     name="ios-more" 
+                    type='ionicon'
                     size={24} 
                     color={
                         navigation.getParam('nightTheme') 
@@ -88,7 +94,7 @@ class Chat extends React.Component {
                             userId: userId,
                         })
                     }}  
-                    style={
+                    containerStyle={
                         Platform.OS === 'ios'
                         ?
                         {paddingVertical: 10, paddingHorizontal: 20}
@@ -144,6 +150,61 @@ class Chat extends React.Component {
     }))
   }
 
+  openGalleryPicker() {
+    ImagePicker.openPicker({
+        width: 100,
+        height: 100,
+        cropping: true,
+        includeBase64:  true,
+      }).then(image => {
+        this.setState({newAvatar: `data:${image.mime};base64,${image.data}`})
+        this.setState({avatarChanged: true})
+        console.log(image);
+      });
+  }
+
+  openCamera() {
+    ImagePicker.openCamera({
+        width: 100,
+        height: 100,
+        cropping: true,
+        includeBase64:  true,
+      }).then(image => {
+          this.setState({newAvatar: `data:${image.mime};base64,${image.data}`})
+          this.setState({avatarChanged: true})
+          console.log(image);
+      });      
+  }
+
+  openActionSheet() {
+    var CANCEL_INDEX = 2;
+    var BUTTONSiOS = [
+        'Choose from Gallery',
+        'Take a picture',
+        'Cancel'
+    ];
+    var BUTTONSandroid = [
+        'Choose from Gallery',
+        'Take a picture',
+        'Cancel'
+    ];
+
+    ActionSheet.showActionSheetWithOptions({
+        options: (Platform.OS == 'ios') ? BUTTONSiOS : BUTTONSandroid,
+        cancelButtonIndex: CANCEL_INDEX,
+        tintColor: 'blue'
+      },
+      (buttonIndex) => {
+          if (buttonIndex == 0) {
+              this.openGalleryPicker()
+          } 
+          if (buttonIndex == 1) {
+              this.openCamera()
+          }
+        console.log('button clicked :', buttonIndex);
+      });      
+  }
+
   renderSend(props) {
     return (
         <Send
@@ -151,21 +212,39 @@ class Chat extends React.Component {
         >
                 <Icon
                     name="ios-arrow-dropup-circle" 
+                    type="ionicon"
                     size={32} 
                     color={theme.colors.blue}
-                    style={{marginRight: 10, marginBottom: 5}}
+                    containerStyle={{marginRight: 16, marginBottom: 12}}
                 />
         </Send>
     );
+  }
+
+renderInputToolbar (props) {
+   return <InputToolbar {...props} containerStyle={{backgroundColor: 'rgba(244, 246, 255, 0.85)'}} />
+}
+
+renderComposer(props) {
+  return (
+    <View style={{flexDirection: 'row', width: width - 100,marginTop: 8, marginBottom: 8, borderRadius: 16, backgroundColor: theme.colors.white, marginRight:16, marginLeft: 16}}>
+      <Composer 
+        {...props} 
+        textInputStyle={{fontSize:12, paddingHorizontal: 8, lineHeight:16,}}
+        />
+    </View>
+  );
 }
 
 renderActions() {
     return (
         <Icon
             name="ios-attach" 
-            size={24} 
+            type="ionicon"
+            size={32} 
             color={theme.colors.blue}
-            style={{marginLeft: 16, marginTop: 12, transform: [{ rotate: '45deg' }]}}
+            containerStyle={{marginLeft: 16, marginBottom: 12, transform: [{ rotate: '45deg' }]}}
+            onPress={() => this.openActionSheet()}
         />
     );
 }
@@ -178,6 +257,9 @@ renderActions() {
         placeholder={'Type Message Here'}
         renderSend={this.renderSend}
         renderActions={this.renderActions}
+        renderComposer={this.renderComposer}
+        renderInputToolbar={this.renderInputToolbar} 
+        minInputToolbarHeight='58'
         alwaysShowSend={true}
         user={{
           _id: 1,

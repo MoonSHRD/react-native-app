@@ -83,9 +83,9 @@ class Login extends Component {
           [
           {
               text: 'Continue', onPress: () => {
-                navigation.navigate('SignedIn');
-                loginResult(true)
-                saveMyName(this.state.email)
+                this.props.navigation.navigate('SignedIn');
+                this.props.loginResult(true)
+                this.props.saveMyName(this.state.email)
               }
           }
           ],
