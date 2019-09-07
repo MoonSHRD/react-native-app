@@ -1,7 +1,11 @@
 package com.moonshrd;
 
 import android.app.Application;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.IBinder;
 
 import com.BV.LinearGradient.LinearGradientPackage;
 import com.actionsheet.ActionSheetPackage;
@@ -63,7 +67,7 @@ public class MainApplication extends Application implements ReactApplication {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
 
-    /*this.context.startService(new Intent(this.context, P2ChatService.class));
+    getApplicationContext().startService(new Intent(getApplicationContext(), P2ChatService.class));
 
     ServiceConnection serviceConnection = new ServiceConnection() {
       @Override
@@ -79,7 +83,7 @@ public class MainApplication extends Application implements ReactApplication {
       }
     };
 
-    this.context.bindService(new Intent(this.context, P2ChatService.class), serviceConnection, Context.BIND_AUTO_CREATE);*/
+    getApplicationContext().bindService(new Intent(getApplicationContext(), P2ChatService.class), serviceConnection, Context.BIND_AUTO_CREATE);
   }
 
   //==============================================================================================================
