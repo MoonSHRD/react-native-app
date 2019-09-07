@@ -36,7 +36,6 @@ import org.matrix.androidsdk.core.listeners.IMXNetworkEventListener;
 import org.matrix.androidsdk.crypto.keysbackup.KeysBackupStateManager;
 import org.matrix.androidsdk.data.RoomState;
 import org.matrix.androidsdk.data.store.IMXStore;
-import org.matrix.androidsdk.data.store.MXFileStore;
 import org.matrix.androidsdk.db.MXLatestChatMessageCache;
 import org.matrix.androidsdk.db.MXMediaCache;
 import org.matrix.androidsdk.listeners.MXEventListener;
@@ -634,12 +633,12 @@ public class Matrix {
      * @return The session.
      */
     private MXSession createSession(final Context context, HomeServerConnectionConfig hsConfig) {
-        MXFileStore store;
+        MXFixedFileStore store;
 
         //final MetricsListener metricsListener = new MetricsListenerProxy(VectorApp.getInstance().getAnalytics());
         final Credentials credentials = hsConfig.getCredentials();
 
-        store = new MXFileStore(hsConfig, CONFIG_ENABLE_LOCAL_FILE_ENCRYPTION, context);
+        store = new MXFixedFileStore(hsConfig, CONFIG_ENABLE_LOCAL_FILE_ENCRYPTION, context);
         //store.setMetricsListener(metricsListener);
 
         final MXDataHandler dataHandler = new MXDataHandler(store, credentials);

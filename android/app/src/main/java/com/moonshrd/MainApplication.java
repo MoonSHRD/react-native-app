@@ -33,7 +33,6 @@ public class MainApplication extends Application implements ReactApplication {
   public static final String PROTOCOL_ID = "/moonshard/1.0.0";
   public static ServiceConnection serviceConnection = null;
   public static P2ChatService service = null;
-  public Context context = null;
 
   private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
     @Override
@@ -71,9 +70,7 @@ public class MainApplication extends Application implements ReactApplication {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
 
-    context = getApplicationContext();
-
-    this.context.startService(new Intent(this.context, P2ChatService.class));
+    /*this.context.startService(new Intent(this.context, P2ChatService.class));
 
     ServiceConnection serviceConnection = new ServiceConnection() {
       @Override
@@ -89,7 +86,7 @@ public class MainApplication extends Application implements ReactApplication {
       }
     };
 
-    this.context.bindService(new Intent(this.context, P2ChatService.class), serviceConnection, Context.BIND_AUTO_CREATE);
+    this.context.bindService(new Intent(this.context, P2ChatService.class), serviceConnection, Context.BIND_AUTO_CREATE);*/
   }
 
   //==============================================================================================================
