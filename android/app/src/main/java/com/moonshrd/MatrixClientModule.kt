@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import org.matrix.androidsdk.core.callback.ApiCallback
 import org.matrix.androidsdk.core.model.MatrixError
 import org.matrix.androidsdk.data.Room
+import org.matrix.androidsdk.data.RoomMediaMessage
 import org.matrix.androidsdk.data.RoomState
 import org.matrix.androidsdk.data.RoomSummary
 import org.matrix.androidsdk.data.timeline.EventTimeline
@@ -34,7 +35,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
     }
 
     private fun isSessionExists(promise: Promise): Boolean {
-        if(matrixInstance.defaultSession == null) {
+        if (matrixInstance.defaultSession == null) {
             promise.reject("NullSession", "Session must not be null!")
             return false
         }
@@ -43,13 +44,13 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     @ReactMethod
     fun getDirectChats(promise: Promise) {
-        if(!isSessionExists(promise)) {
+        if (!isSessionExists(promise)) {
             return
         }
         GlobalScope.launch {
-            for(i in 0 until 15) {
-                if(!Globals.State.isInitialSyncComplete) {
-                    if(i == 14) {
+            for (i in 0 until 15) {
+                if (!Globals.State.isInitialSyncComplete) {
+                    if (i == 14) {
                         promise.reject("onUnexpectedError", "Sync waiting timeout!")
                     }
                     Thread.sleep(1000)
@@ -70,7 +71,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         directChats.forEach { room ->
             val roomSummary = room.roomSummary
             // hack for optimization: since we hold the same listener, we will not create a useless instance of this listener (else it will add new object to internal list of listeners and messing up the memory)
-            if(eventListeners[roomSummary!!.roomId] != null) {
+            if (eventListeners[roomSummary!!.roomId] != null) {
                 eventListeners[roomSummary.roomId] = NewEventsListener(reactApplicationContext, room, roomSummary)
             }
             room.timeline.addEventTimelineListener(eventListeners[room.roomId])
@@ -98,14 +99,14 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     @ReactMethod
     fun getUserById(userID: String, promise: Promise) {
-        if(!isSessionExists(promise)) {
+        if (!isSessionExists(promise)) {
             return
         }
 
         val userName = CompletableFuture<String?>()
         val userAvatarUrl = CompletableFuture<String?>()
 
-        matrixInstance.defaultSession.profileApiClient.displayname(userID, object: ApiCallback<String> {
+        matrixInstance.defaultSession.profileApiClient.displayname(userID, object : ApiCallback<String> {
             override fun onSuccess(info: String?) {
                 userName.complete(info)
             }
@@ -126,7 +127,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             }
         })
 
-        matrixInstance.defaultSession.profileApiClient.avatarUrl(userID,  object: ApiCallback<String> {
+        matrixInstance.defaultSession.profileApiClient.avatarUrl(userID, object : ApiCallback<String> {
             override fun onSuccess(info: String?) {
                 userAvatarUrl.complete(info)
             }
@@ -150,7 +151,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         GlobalScope.launch {
             val name = userName.get()
             val avatarUrl = userAvatarUrl.get()
-            if(name != null && avatarUrl != null) {
+            if (name != null && avatarUrl != null) {
                 promise.resolve(gson.toJson(UserModel(userID, name, avatarUrl)))
             } else {
                 promise.resolve(gson.toJson(UserModel(userID, "", "")))
@@ -160,7 +161,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     @ReactMethod
     fun getMyMxId(promise: Promise) {
-        if(!isSessionExists(promise)) {
+        if (!isSessionExists(promise)) {
             return
         }
 
@@ -169,7 +170,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     @ReactMethod
     fun getMyProfile(promise: Promise) {
-        if(!isSessionExists(promise)) {
+        if (!isSessionExists(promise)) {
             return
         }
 
@@ -180,10 +181,10 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     @ReactMethod
     fun createDirectChat(participantUserId: String, promise: Promise) {
-        if(!isSessionExists(promise)) {
+        if (!isSessionExists(promise)) {
             return
         }
-        if(isDirectChatExists(participantUserId)) {
+        if (isDirectChatExists(participantUserId)) {
             promise.reject("directChatExists", "Direct chat with $participantUserId exists.")
             return
         }
@@ -210,7 +211,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         val directChats = getDirectChatsInternal()
         var exists = false
         directChats.forEach {
-            if(it.userId == participantUserId) {
+            if (it.userId == participantUserId) {
                 exists = true
             }
         }
@@ -220,19 +221,19 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     @ReactMethod
     fun searchUserById(userName: String, limit: Int?, promise: Promise) {
-        if(!isSessionExists(promise)) {
+        if (!isSessionExists(promise)) {
             return
         }
 
         val tempLimit: Int?
-        if(limit == 0) {
+        if (limit == 0) {
             tempLimit = null
         } else {
             tempLimit = limit
         }
 
         val users = ArrayList<UserModel>()
-        matrixInstance.defaultSession.searchUsers(userName, tempLimit, null, object: ApiCallback<SearchUsersResponse> {
+        matrixInstance.defaultSession.searchUsers(userName, tempLimit, null, object : ApiCallback<SearchUsersResponse> {
             override fun onSuccess(info: SearchUsersResponse?) {
                 info!!.results.forEach {
                     users.add(UserModel(it.user_id, it.displayname, it.avatarUrl))
@@ -256,7 +257,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     @ReactMethod
     fun updateDisplayName(newDisplayName: String, promise: Promise) {
-        if(!isSessionExists(promise)) {
+        if (!isSessionExists(promise)) {
             return
         }
 
@@ -281,7 +282,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     @ReactMethod
     fun updateAvatar(base64Avatar: String, promise: Promise) {
-        if(!isSessionExists(promise)) {
+        if (!isSessionExists(promise)) {
             return
         }
 
@@ -317,7 +318,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
         val future = CompletableFuture<String>()
 
-        matrixInstance.defaultSession.mediaCache.uploadContent(imageInputStream, null, guessContentTypeFromStream(imageInputStream), null, object: IMXMediaUploadListener {
+        matrixInstance.defaultSession.mediaCache.uploadContent(imageInputStream, null, guessContentTypeFromStream(imageInputStream), null, object : IMXMediaUploadListener {
             override fun onUploadProgress(uploadId: String?, uploadStats: IMXMediaUploadListener.UploadStats?) {
                 //
             }
@@ -342,12 +343,30 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         return future
     }
 
+    @ReactMethod
+    private fun sendMessage(message: String, roomId: String, promise: Promise) {
+        val room = matrixInstance.defaultSession.dataHandler.getRoom(roomId)
+        room.sendTextMessage(message, message, message, object : RoomMediaMessage.EventCreationListener {
+            override fun onEventCreated(roomMediaMessage: RoomMediaMessage?) {
+                promise.resolve(true)
+            }
+
+            override fun onEventCreationFailed(roomMediaMessage: RoomMediaMessage?, errorMessage: String?) {
+                promise.reject("onEventCreationError", roomMediaMessage!!.text.toString())
+            }
+
+            override fun onEncryptionFailed(roomMediaMessage: RoomMediaMessage?) {
+                promise.reject("onEncryptionError", roomMediaMessage!!.text.toString())
+            }
+        })
+    }
+
     internal class NewEventsListener(private val reactContext: ReactApplicationContext,
                                      private val room: Room,
-                                     private val roomSummary: RoomSummary): EventTimeline.Listener {
+                                     private val roomSummary: RoomSummary) : EventTimeline.Listener {
         private val matrixInstance = Matrix.getInstance(reactContext)
         override fun onEvent(event: Event?, direction: EventTimeline.Direction?, roomState: RoomState?) {
-            if(event!!.type == Event.EVENT_TYPE_MESSAGE) {
+            if (event!!.type == Event.EVENT_TYPE_MESSAGE) {
                 matrixInstance.defaultLatestChatMessageCache.updateLatestMessage(reactContext, room.roomId, event.contentAsJsonObject.get("body").asString)
                 roomSummary.setLatestReceivedEvent(event, roomState)
             }
