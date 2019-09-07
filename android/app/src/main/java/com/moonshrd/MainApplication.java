@@ -1,11 +1,7 @@
 package com.moonshrd;
 
 import android.app.Application;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.IBinder;
 
 import com.BV.LinearGradient.LinearGradientPackage;
 import com.actionsheet.ActionSheetPackage;
@@ -16,9 +12,7 @@ import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
 import com.horcrux.svg.SvgPackage;
 import com.moonshrd.services.P2ChatService;
-import com.moonshrd.utils.matrix.Matrix;
 import com.oblador.vectoricons.VectorIconsPackage;
-import com.reactnative.ivpusic.imagepicker.PickerPackage;
 import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
 
 import org.matrix.androidsdk.MXSession;
@@ -45,7 +39,6 @@ public class MainApplication extends Application implements ReactApplication {
       return Arrays.asList(
           new MainReactPackage(),
             new ActionSheetPackage(),
-            new PickerPackage(),
             new VectorIconsPackage(),
             new SvgPackage(),
             new RNGestureHandlerPackage(),
