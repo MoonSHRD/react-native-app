@@ -14,6 +14,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import p2mobile.P2mobile;
+
 import static p2mobile.P2mobile.getMessages;
 import static p2mobile.P2mobile.publishMessage;
 import static p2mobile.P2mobile.start;

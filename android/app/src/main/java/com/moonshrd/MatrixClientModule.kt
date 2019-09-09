@@ -8,6 +8,7 @@ import com.facebook.react.bridge.ReactMethod
 import com.google.gson.Gson
 import com.moonshrd.models.UserModel
 import com.moonshrd.utils.matrix.Matrix
+import com.moonshrd.utils.sendEventWithOneStringArg
 import java9.util.concurrent.CompletableFuture
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -21,6 +22,7 @@ import org.matrix.androidsdk.data.timeline.EventTimeline
 import org.matrix.androidsdk.listeners.IMXMediaUploadListener
 import org.matrix.androidsdk.rest.model.Event
 import org.matrix.androidsdk.rest.model.search.SearchUsersResponse
+import p2mobile.P2mobile
 import java.io.ByteArrayInputStream
 import java.net.URLConnection.guessContentTypeFromStream
 
@@ -93,7 +95,6 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             )
             chatModels.add(chat)
         }
-
         return chatModels
     }
 
@@ -369,6 +370,8 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             if (event!!.type == Event.EVENT_TYPE_MESSAGE) {
                 matrixInstance.defaultLatestChatMessageCache.updateLatestMessage(reactContext, room.roomId, event.contentAsJsonObject.get("body").asString)
                 roomSummary.setLatestReceivedEvent(event, roomState)
+                val txtMsg = event.contentAsJsonObject.get("body").asString
+                sendEventWithOneStringArg(reactContext,"message","txtMessage",txtMsg)
             }
         }
     }
