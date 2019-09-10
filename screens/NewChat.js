@@ -9,7 +9,7 @@ import { SearchBar, ListItem, ThemeConsumer } from 'react-native-elements';
 import { theme } from '../constants';
 
 import {connect} from 'react-redux';
-import { getContactList, searchBar, changeContactList, clearSearchBar, selectChat } from '../store/actions/contactsActions';
+import { getContactList, searchBar, changeContactList, clearSearchBar, createDirectChat, selectChat } from '../store/actions/contactsActions';
 
 
 const { width, height } = Dimensions.get('window');
@@ -61,6 +61,28 @@ class NewChat extends Component {
 
   setHeaderParams = () => {
     this.props.navigation.setParams({nightTheme: this.props.appState.nightTheme});  
+  }
+
+  parseAvatarUrl(props) {
+    if (props != '') {
+        let parts = props.split('mxc://', 2);
+        let urlWithoutMxc  = parts[1];
+        let urlParts = urlWithoutMxc.split('/', 2)
+        let firstPart = urlParts[0]
+        let secondPart = urlParts[1] 
+        let serverUrl = 'https://matrix.moonshard.tech/_matrix/media/r0/download/'
+        return serverUrl + firstPart + '/' + secondPart    
+    }
+  }
+
+  parseUserId(props) {
+    if (props != '') {
+      let parts = props.split('@', 2);
+      let userId  = parts[1];
+      let userIdParts = userId.split(':', 2)
+      let firstPart = userIdParts[0]
+      return this.capitalize(firstPart)
+    }
   }
 
   componentDidMount() {
@@ -161,14 +183,6 @@ class NewChat extends Component {
           />
         }
         <View>
-          <ListItem 
-            key="newgroupchat"
-            title="Create group chat"
-            titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
-            leftIcon={{name:'group-add', color: this.props.appState.nightTheme ? theme.colors.white : theme.colors.notBlack}}
-            containerStyle={this.props.appState.nightTheme ? styles.darklistItem : styles.listItem}
-            onPress={()=> navigation.navigate('NewGroupChat')}
-          />
           {
             searchChanged
             ?
@@ -188,15 +202,23 @@ class NewChat extends Component {
                         ?
                         { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
                         :
-                        { source: { uri: l.avatarUrl } }
+                        { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
                       }
                       title={this.capitalize(l.name)}
                       titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
                       subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>}
                       subtitleStyle={styles.subtitle}
                       containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
-                      onPress={(navigation) => {
-                        this.props.selectChat('@'+l.name+':matrix.moonshard.tech')
+                      onPress={() => {
+                        this.props.createDirectChat(l.userId)
+                        this.props.navigation.navigate('Chat', {
+                          userName: this.capitalize(l.name),
+                          userIdName: this.parseUserId(l.userId),
+                          userId: l.userId,
+                          avatarUrl: this.parseAvatarUrl(l.avatarUrl),
+                          isActive: l.isActive,
+                          lastSeen: l.lastSeen,
+                          })  
                       }}  
                     />
                     </BoxShadow>
@@ -221,15 +243,23 @@ class NewChat extends Component {
                       ?
                       { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
                       :
-                      { source: { uri: l.avatarUrl } }
+                      { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
                     }
                     title={this.capitalize(l.name)}
                     titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
                     subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen} interval={60000}/></Text>}
                     subtitleStyle={styles.subtitle}
                     containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
-                    onPress={(navigation) => {
-                      this.props.selectChat('@'+l.name+':matrix.moonshard.tech')
+                    onPress={() => {
+                      this.props.createDirectChat(l.userId)
+                      this.props.navigation.navigate('Chat', {
+                        userName: this.capitalize(l.name),
+                        userIdName: this.parseUserId(l.userId),
+                        userId: l.userId,
+                        avatarUrl: this.parseAvatarUrl(l.avatarUrl),
+                        isActive: l.isActive,
+                        lastSeen: l.lastSeen,
+                        })
                     }}
                   />
                   </BoxShadow>
@@ -404,6 +434,7 @@ function mapDispatchToProps (dispatch) {
     updateSearchList: (data) => dispatch(changeContactList(data)),
     clearSearchBar: () => dispatch(clearSearchBar()),
     selectChat: (data) => dispatch(selectChat(data)),
+    createDirectChat: (data) => dispatch(createDirectChat(data)),
   }
 }
 

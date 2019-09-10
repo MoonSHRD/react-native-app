@@ -15,19 +15,23 @@ const { width, height } = Dimensions.get('window');
 
 class Chat extends React.Component {
     static navigationOptions = ({ navigation }) => {
-        const userName = navigation.getParam('userName', 'userName')
+        const userName = navigation.getParam('userName', '')
+        const userIdName = navigation.getParam('userIdName', '')
         const userId = navigation.getParam('userId', 'userId')
         const isActive = navigation.getParam('isActive')
         const lastSeen = navigation.getParam('lastSeen')
-        const avatar = navigation.getParam('avatar')
+        const avatarUrl = navigation.getParam('avatarUrl', '')
+        const avatarLink = navigation.getParam('avatarLink', '')
         return {
             headerTitle: (
                 <Block style={styles.userContainer}>
-                    {
-                        avatar != ''
+                  {
+                    userName != ''
+                    ?
+                      avatarUrl != ''
                         ? 
                         <Avatar 
-                            source={avatar}
+                            source={{uri: avatarLink }}
                             containerStyle={styles.avatar}
                             avatarStyle={styles.avatarImage}
                         />
@@ -37,10 +41,31 @@ class Chat extends React.Component {
                             avatarStyle={styles.avatarImage}
                             titleStyle={{fontSize: 12}}
                             title={userName[0]}
-                         />
-                    }
+                          />
+                    :
+                    avatarUrl != ''
+                      ? 
+                      <Avatar 
+                          source={{uri: avatarLink }}
+                          containerStyle={styles.avatar}
+                          avatarStyle={styles.avatarImage}
+                      />
+                      :
+                      <Avatar 
+                          containerStyle={styles.avatar}
+                          avatarStyle={styles.avatarImage}
+                          titleStyle={{fontSize: 12}}
+                          title={userIdName[0]}
+                        />
+                  }
                     <Block style={styles.nameContainer}>
+                      {
+                        userName != ''
+                        ?
                         <Text style={styles.userNameText}>{userName}</Text>
+                        :
+                        <Text style={styles.userNameText}>{userIdName}</Text>
+                      }
                         <Block styles={styles.statusContainer}>
                             {
                                 isActive == true
@@ -91,7 +116,9 @@ class Chat extends React.Component {
                     onPress={() => {
                         navigation.navigate('Profile', {
                             userName: userName,
+                            userIdName: userIdName,
                             userId: userId,
+                            avatarLink: avatarLink,
                         })
                     }}  
                     containerStyle={

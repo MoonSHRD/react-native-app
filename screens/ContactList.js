@@ -73,6 +73,7 @@ class ContactList extends Component {
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
       this.props.loadDirectChats()
       this.props.getMyUserId()
+      this.props.getMyUserProfile()
     });
 
     this.onNetworkErrorEvent = DeviceEventEmitter.addListener('onNetworkError', function(e) {
@@ -136,6 +137,28 @@ class ContactList extends Component {
     let text = props.slice(0,1).toUpperCase() + props.slice(1, props.length);
     return text
   }
+
+  parseAvatarUrl(props) {
+    if (props != '') {
+        let parts = props.split('mxc://', 2);
+        let urlWithoutMxc  = parts[1];
+        let urlParts = urlWithoutMxc.split('/', 2)
+        let firstPart = urlParts[0]
+        let secondPart = urlParts[1] 
+        let serverUrl = 'https://matrix.moonshard.tech/_matrix/media/r0/download/'
+        return serverUrl + firstPart + '/' + secondPart    
+    }
+}
+
+parseUserId(props) {
+  if (props != '') {
+    let parts = props.split('@', 2);
+    let userId  = parts[1];
+    let userIdParts = userId.split(':', 2)
+    let firstPart = userIdParts[0]
+    return this.capitalize(firstPart)
+  }
+}
 
   render() {
     const { navigation } = this.props;
@@ -221,7 +244,7 @@ class ContactList extends Component {
                       leftAvatar={
                         l.avatarUrl
                         ?
-                        { source: { uri: l.avatarUrl } }
+                        { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
                         :
                         { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
                       }
@@ -231,7 +254,9 @@ class ContactList extends Component {
                       onPress={() => {
                         this.props.navigation.navigate('Profile', {
                           userName: l.name,
+                          userIdName: this.parseUserId(l.userId),
                           userId: l.userId,
+                          avatarLink: this.parseAvatarUrl(l.avatarUrl),
                         })
                       }}  
                     />
@@ -257,7 +282,7 @@ class ContactList extends Component {
                       ?
                       { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
                       :
-                      { source: { uri: l.avatarUrl } }
+                      { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
                     }
                     title={this.capitalize(l.name)}
                     titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
@@ -267,7 +292,9 @@ class ContactList extends Component {
                     onPress={() => {
                       navigation.navigate('Profile', {
                         userName: l.name,
+                        userIdName: this.parseUserId(l.userId),
                         userId: l.userId,
+                        avatarLink: this.parseAvatarUrl(l.avatarUrl),
                       })
                   }}  
                   />
@@ -446,6 +473,7 @@ function mapDispatchToProps (dispatch) {
     selectContact: (data) => dispatch(selectContact(data)),
     deselectContact: () => dispatch(deselectContact()),
     getMyUserId: () => dispatch(getMyUserId()),
+    getMyUserProfile: () => dispatch(getMyUserProfile()),
     searchUserById: (data) => dispatch(searchUserById(data))
   }
 }

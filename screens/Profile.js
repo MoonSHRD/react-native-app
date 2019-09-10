@@ -134,6 +134,7 @@ class Profile extends Component {
     await console.log(userId)
     await this.props.getContactInfo(userId.toLowerCase())
     await this.checkName()
+    await this.loadAvatar()
   }
 
   toggleModal = () => {
@@ -141,9 +142,14 @@ class Profile extends Component {
   };
 
   checkName = async () => {
-    await console.log('wwwww');
-    const userName = await this.props.navigation.getParam('userName', 'userName');
-    if (userName != 'userName') {
+    const userName = await this.props.navigation.getParam('userName', '');
+    const userIdName = await this.props.navigation.getParam('userIdName', '')
+    if (userName == '') {
+        console.log('using userIdName')
+        var result = await this.capitalize(userIdName)
+        await this.setState({name: result})
+    } else {
+        console.log('using userName')
         var result = await this.capitalize(userName)
         await this.setState({name: result})
     }
@@ -154,8 +160,48 @@ class Profile extends Component {
     return text
   }
 
+  loadAvatar = async () => {
+    const avatarLink = await this.props.navigation.getParam('avatarLink', '');
+    if (avatarLink != '') {
+        await this.setState({avatarUrl: avatarLink})
+    }
+  }
+
+  parseUserId(props) {
+    if (props != '') {
+      let parts = props.split('@', 2);
+      let userId  = parts[1];
+      let userIdParts = userId.split(':', 2)
+      let firstPart = userIdParts[0]
+      return this.capitalize(firstPart)
+    }
+  }
+
+
+  loadMyAvatar = async () => {
+    const avatarLink = await this.props.navigation.getParam('myAvatar', '');
+    if (avatarLink != '') {
+        var result = await this.parseAvatarUrl(avatarLink)
+        await this.setState({avatarUrl: result})
+    }
+  }
+
+  parseAvatarUrl(props) {
+    if (props != '') {
+        let parts = props.split('mxc://', 2);
+        let urlWithoutMxc  = parts[1];
+        let urlParts = urlWithoutMxc.split('/', 2)
+        let firstPart = urlParts[0]
+        let secondPart = urlParts[1] 
+        let serverUrl = 'https://matrix.moonshard.tech/_matrix/media/r0/download/'
+        return serverUrl + firstPart + '/' + secondPart    
+    }
+}
+
+
   loadMyProfile = async () => {
     await this.props.getMyUserProfile()
+    await this.loadMyAvatar()
   }
 
   setHeaderParams = () => {
@@ -273,6 +319,7 @@ class Profile extends Component {
       });    
 }
 
+
 componentDidUpdate(prevProps) {
     if (prevProps.appState.nightTheme !== this.props.appState.nightTheme) {
       this.setHeaderParams()
@@ -286,7 +333,8 @@ componentDidUpdate(prevProps) {
     const { loading, errors, newTag, suggestedTags } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
     const scrollEnabled = this.state.screenHeight > height - 100;
-    const userName = this.props.navigation.getParam('userName', 'userName')
+    const userName = this.props.navigation.getParam('userName', '')
+    const userIdName = this.props.navigation.getParam('userIdName', '')
     const userId = this.props.navigation.getParam('userId', 'userId')
 
       
@@ -299,7 +347,7 @@ componentDidUpdate(prevProps) {
             style={this.props.appState.nightTheme ? styles.darkBackground : styles.background}
         >
         {
-            (userName != 'userName')
+            (userIdName != '')
             ?
             <Block style={this.props.appState.nightTheme ? styles.darkContainer : styles.container}>
             <Image 
@@ -312,7 +360,9 @@ componentDidUpdate(prevProps) {
                 ?
                 <Avatar 
                     rounded
-                    source={this.props.contacts.contact.avatarUrl}
+                    source={{
+                        uri: this.state.avatarUrl
+                    }}
                     containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
                     avatarStyle={styles.avatarImage}
                 />
@@ -324,7 +374,7 @@ componentDidUpdate(prevProps) {
                         ?
                         this.capitalize(this.props.contacts.contact.name[1])
                         :
-                        this.capitalize(userName[0])
+                        this.state.name[0]
                     }
                     containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
                     avatarStyle={styles.avatarImage}
@@ -405,8 +455,16 @@ componentDidUpdate(prevProps) {
                 }
                 <Button gradient style={styles.confirmButton}               
                     onPress={() => {
-                        Alert.alert('Send Message action')
-                        // this.props.createDirectChat(userId)
+                        this.props.createDirectChat(userId)
+                        this.props.navigation.navigate('Chat', {
+                            userName: this.capitalize(this.props.contacts.contact.name),
+                            userIdName: this.parseUserId(this.props.contacts.contact.userId),
+                            userId: this.props.contacts.contact.userId,
+                            avatarUrl: this.props.contacts.contact.avatarUrl,
+                            avatarLink: this.parseAvatarUrl(this.props.contacts.contact.avatarUrl),
+                            isActive: this.props.contacts.contact.isActive,
+                            lastSeen: this.props.contacts.contact.lastSeen,
+                          })    
                     }}
                 >
                     <Text headline bold white center>Send Message</Text>

@@ -87,6 +87,18 @@ class NewGroupChat extends Component {
   setHeaderParams = () => {
     this.props.navigation.setParams({nightTheme: this.props.appState.nightTheme});  
   }
+
+  parseAvatarUrl(props) {
+    if (props != '') {
+        let parts = props.split('mxc://', 2);
+        let urlWithoutMxc  = parts[1];
+        let urlParts = urlWithoutMxc.split('/', 2)
+        let firstPart = urlParts[0]
+        let secondPart = urlParts[1] 
+        let serverUrl = 'https://matrix.moonshard.tech/_matrix/media/r0/download/'
+        return serverUrl + firstPart + '/' + secondPart    
+    }
+  }
   
   componentDidMount() {
     this.setHeaderParams()
@@ -210,7 +222,7 @@ class NewGroupChat extends Component {
                       ?
                       { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
                       :
-                      { source: { uri: l.avatarUrl } }
+                      { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
                     }
                     title={this.capitalize(l.name)}
                     titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
@@ -259,7 +271,7 @@ class NewGroupChat extends Component {
                     ?
                     { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
                     :
-                    { source: { uri: l.avatarUrl } }
+                    { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
                   }
                   title={this.capitalize(l.name)}
                   titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}

@@ -89,6 +89,30 @@ class MatchesList extends Component {
       this.setHeaderParams()
     }  
   }
+
+  parseAvatarUrl(props) {
+    if (props != '') {
+        let parts = props.split('mxc://', 2);
+        let urlWithoutMxc  = parts[1];
+        let urlParts = urlWithoutMxc.split('/', 2)
+        let firstPart = urlParts[0]
+        let secondPart = urlParts[1] 
+        let serverUrl = 'https://matrix.moonshard.tech/_matrix/media/r0/download/'
+        console.log(serverUrl + firstPart + '/' + secondPart)
+        return serverUrl + firstPart + '/' + secondPart    
+    }
+}
+
+parseUserId(props) {
+  if (props != '') {
+    let parts = props.split('@', 2);
+    let userId  = parts[1];
+    let userIdParts = userId.split(':', 2)
+    let firstPart = userIdParts[0]
+    return this.capitalize(firstPart)
+  }
+}
+
   
   updateSearch = async(text) => {
     await this.setState({ search: text , searchChanged: true});
@@ -194,7 +218,7 @@ class MatchesList extends Component {
                         ?
                         { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
                         :
-                        { source: { uri: l.avatarUrl } }
+                        { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
                       }
                       title={this.capitalize(l.name)}
                       titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
@@ -204,7 +228,9 @@ class MatchesList extends Component {
                       onPress={() => {
                         navigation.navigate('Profile', {
                           userName: l.name,
-                          userID: l.userId,
+                          userIdName: this.parseUserId(l.userId),
+                          userId: l.userId,
+                          avatarLink: this.parseAvatarUrl(l.avatarUrl),
                         })
                       }}  
                     />
@@ -230,7 +256,7 @@ class MatchesList extends Component {
                       ?
                       { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
                       :
-                      { source: { uri: l.avatarUrl } }
+                      { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
                     }
                     title={this.capitalize(l.name)}
                     titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
@@ -246,7 +272,9 @@ class MatchesList extends Component {
                     onPress={() => {
                       navigation.navigate('Profile', {
                         userName: l.name,
-                        userID: l.userId,
+                        userIdName: this.parseUserId(l.userId),
+                        userId: l.userId,
+                        avatarLink: this.parseAvatarUrl(l.avatarUrl),
                       })
                     }}  
                   />
