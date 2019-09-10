@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Text, KeyboardAvoidingView, Dimensions, StyleSheet, Platform, View } from 'react-native';
 
-import { Block } from '../components';
+import { Block, Input } from '../components';
 import { Avatar, Badge, Icon } from 'react-native-elements';
 import { GiftedChat, Actions, SystemMessage, Send, InputToolbar, Composer } from 'react-native-gifted-chat';
 import {connect} from 'react-redux';
@@ -125,21 +125,74 @@ class Chat extends React.Component {
   componentWillMount() {
     this.setState({
       messages: [
+        // {
+        //   _id: 1,
+        //   text: 'Test Message in personal chat',
+        //   createdAt: new Date(),
+        // },
+        // {
+        //   _id: 2,
+        //   text: 'Test Message in group chat',
+        //   createdAt: new Date(),
+        //   user: {
+        //     _id: 3,
+        //     name: 'React Native',
+        //     avatar: 'https://placeimg.com/140/140/any',
+        //   },
+        // },
         {
           _id: 1,
-          text: 'Test Message in personal chat',
+          text: 'This is a quick reply. Do you love Gifted Chat? (radio) KEEP IT',
           createdAt: new Date(),
+          quickReplies: {
+            type: 'radio', // or 'checkbox',
+            keepIt: true,
+            values: [
+              {
+                title: '😋 Yes',
+                value: 'yes',
+              },
+              {
+                title: '📷 Yes, let me show you with a picture!',
+                value: 'yes_picture',
+              },
+              {
+                title: '😞 Nope. What?',
+                value: 'no',
+              },
+            ],
+          },
+          user: {
+            _id: 2,
+            name: 'React Native',
+          },
         },
         {
           _id: 2,
-          text: 'Test Message in group chat',
+          text: 'This is a quick reply. Do you love Gifted Chat? (checkbox)',
           createdAt: new Date(),
-          user: {
-            _id: 3,
-            name: 'React Native',
-            avatar: 'https://placeimg.com/140/140/any',
+          quickReplies: {
+            type: 'checkbox', // or 'radio',
+            values: [
+              {
+                title: 'Yes',
+                value: 'yes',
+              },
+              {
+                title: 'Yes, let me show you with a picture!',
+                value: 'yes_picture',
+              },
+              {
+                title: 'Nope. What?',
+                value: 'no',
+              },
+            ],
           },
-        },
+          user: {
+            _id: 2,
+            name: 'React Native',
+          },
+        }      
       ],
     })
   }
@@ -215,14 +268,16 @@ class Chat extends React.Component {
                     type="ionicon"
                     size={32} 
                     color={theme.colors.blue}
-                    containerStyle={{marginRight: 16, marginBottom: 12}}
+                    containerStyle={{marginRight: 16, marginBottom: 10}}
                 />
         </Send>
     );
   }
 
 renderInputToolbar (props) {
-   return <InputToolbar {...props} containerStyle={{backgroundColor: 'rgba(244, 246, 255, 0.85)'}} />
+   return (
+     <InputToolbar {...props} containerStyle={{backgroundColor: 'rgba(244, 246, 255, 0.85)'}} />
+   )
 }
 
 renderComposer(props) {
@@ -230,7 +285,8 @@ renderComposer(props) {
     <View style={{flexDirection: 'row', width: width - 100,marginTop: 8, marginBottom: 8, borderRadius: 16, backgroundColor: theme.colors.white, marginRight:16, marginLeft: 16}}>
       <Composer 
         {...props} 
-        textInputStyle={{fontSize:12, paddingHorizontal: 8, lineHeight:16,}}
+        textInputStyle={{fontSize:12, paddingHorizontal: 8, lineHeight:16, paddingVertical: 0}}
+        composerHeight={32}
         />
     </View>
   );
@@ -241,9 +297,9 @@ renderActions() {
         <Icon
             name="ios-attach" 
             type="ionicon"
-            size={32} 
+            size={28} 
             color={theme.colors.blue}
-            containerStyle={{marginLeft: 16, marginBottom: 12, transform: [{ rotate: '45deg' }]}}
+            containerStyle={{marginLeft: 22, marginBottom: 16, transform: [{ rotate: '45deg' }]}}
             onPress={() => this.openActionSheet()}
         />
     );
@@ -259,7 +315,7 @@ renderActions() {
         renderActions={this.renderActions}
         renderComposer={this.renderComposer}
         renderInputToolbar={this.renderInputToolbar} 
-        minInputToolbarHeight='58'
+        minInputToolbarHeight='48'
         alwaysShowSend={true}
         user={{
           _id: 1,
