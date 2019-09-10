@@ -21,6 +21,7 @@ import org.matrix.androidsdk.data.RoomSummary
 import org.matrix.androidsdk.data.timeline.EventTimeline
 import org.matrix.androidsdk.listeners.IMXMediaUploadListener
 import org.matrix.androidsdk.rest.model.Event
+import org.matrix.androidsdk.rest.model.User
 import org.matrix.androidsdk.rest.model.search.SearchUsersResponse
 import java.io.ByteArrayInputStream
 import java.net.URLConnection.guessContentTypeFromStream
@@ -114,6 +115,33 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
         val userName = CompletableFuture<String?>()
         val userAvatarUrl = CompletableFuture<String?>()
+        val userIsActive = CompletableFuture<Boolean?>()
+        val userLastSeen = CompletableFuture<Long?>()
+
+
+       matrixInstance.defaultSession.presenceApiClient.getPresence("",object : ApiCallback<User>{
+        override fun onSuccess(info: User?) {
+            userIsActive.complete(info?.isActive)
+            userLastSeen.complete(info?.lastActiveAgo)
+        }
+
+        override fun onUnexpectedError(e: java.lang.Exception?) {
+            userIsActive.complete(null)
+            userLastSeen.complete(null)
+        }
+
+        override fun onMatrixError(e: MatrixError?) {
+            userIsActive.complete(null)
+            userLastSeen.complete(null)
+        }
+
+        override fun onNetworkError(e: java.lang.Exception?) {
+            userIsActive.complete(null)
+            userLastSeen.complete(null)
+        }
+
+    })
+
 
         matrixInstance.defaultSession.profileApiClient.displayname(userID, object : ApiCallback<String> {
             override fun onSuccess(info: String?) {
@@ -160,8 +188,10 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         GlobalScope.launch {
             val name = userName.get()
             val avatarUrl = userAvatarUrl.get()
+            val isActive = userIsActive.get()
+            val lastSeen = userLastSeen.get()
             if (name != null && avatarUrl != null) {
-                promise.resolve(gson.toJson(UserModel(userID, name, avatarUrl)))
+                promise.resolve(gson.toJson(UserModel(userID, name, avatarUrl,lastSeen = lastSeen,isActive = isActive)))
             } else {
                 promise.resolve(gson.toJson(UserModel(userID, "", "")))
             }
