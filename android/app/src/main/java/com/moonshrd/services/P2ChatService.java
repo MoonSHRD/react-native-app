@@ -45,12 +45,17 @@ public class P2ChatService extends Service {
         scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
         new Thread(() -> start(MainApplication.SERVICE_TOPIC, MainApplication.PROTOCOL_ID, "", 0)).start();
         scheduledExecutorService.scheduleAtFixedRate(() -> {
-            String message = getMessages();
-            if (!message.isEmpty()) {
-                Message messageObject = gson.fromJson(message, Message.class);
-                Log.d(LOG_TAG, "New message! " + messageObject.from + " > " + messageObject.body);
-            }
+            getMessage(gson);
         }, 0, 300, TimeUnit.MILLISECONDS);
+    }
+
+
+    private void getMessage(Gson gson){
+        String message = getMessages();
+        if (!message.isEmpty()) {
+            Message messageObject = gson.fromJson(message, Message.class);
+            Log.d(LOG_TAG, "New message! " + messageObject.from + " > " + messageObject.body);
+        }
     }
 
     public class P2ChatServiceBinder extends Binder {

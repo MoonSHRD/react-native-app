@@ -22,15 +22,23 @@ import org.matrix.androidsdk.data.timeline.EventTimeline
 import org.matrix.androidsdk.listeners.IMXMediaUploadListener
 import org.matrix.androidsdk.rest.model.Event
 import org.matrix.androidsdk.rest.model.search.SearchUsersResponse
-import p2mobile.P2mobile
 import java.io.ByteArrayInputStream
 import java.net.URLConnection.guessContentTypeFromStream
+import javax.inject.Inject
 
 
 class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
-    private val gson = Gson() // TODO Optimize it with Dagger
-    private val matrixInstance = Matrix.getInstance(reactApplicationContext)
     private val eventListeners = HashMap<String, NewEventsListener>()
+
+    @Inject
+    lateinit var gson: Gson
+
+    @Inject
+    lateinit var matrixInstance: Matrix
+
+    init {
+        MainApplication.getComponent().injectsMatrixClientModule(this)
+    }
 
     override fun getName(): String {
         return "MatrixClient"
@@ -371,7 +379,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                 matrixInstance.defaultLatestChatMessageCache.updateLatestMessage(reactContext, room.roomId, event.contentAsJsonObject.get("body").asString)
                 roomSummary.setLatestReceivedEvent(event, roomState)
                 val txtMsg = event.contentAsJsonObject.get("body").asString
-                sendEventWithOneStringArg(reactContext,"message","txtMessage",txtMsg)
+                sendEventWithOneStringArg(reactContext, "message", "txtMessage", txtMsg)
             }
         }
     }
