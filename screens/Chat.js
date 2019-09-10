@@ -22,6 +22,7 @@ class Chat extends React.Component {
         const lastSeen = navigation.getParam('lastSeen')
         const avatarUrl = navigation.getParam('avatarUrl', '')
         const avatarLink = navigation.getParam('avatarLink', '')
+        const previousScreen = navigation.getParam('previousScreen', '')
         return {
             headerTitle: (
                 <Block style={styles.userContainer}>
@@ -85,7 +86,8 @@ class Chat extends React.Component {
                     </Block>
                 </Block>
             ),
-            headerLeft: (
+            headerLeft: 
+            (
                 <Icon
                     name="ios-arrow-back" 
                     type='ionicon'
@@ -97,7 +99,16 @@ class Chat extends React.Component {
                         :
                         theme.colors.blue
                       }
-                        onPress={() => navigation.goBack()}
+                        onPress={
+                          previousScreen == 'NewChat'
+                          ?
+                          () => {
+                            navigation.navigate('ChatList')
+                            console.log('sss')
+                          }
+                          :
+                          () => navigation.goBack()
+                        }
                     containerStyle={{paddingVertical: 10, paddingHorizontal: 20,}}
                 />
               ),

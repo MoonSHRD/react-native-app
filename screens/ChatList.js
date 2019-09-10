@@ -249,6 +249,7 @@ class ChatList extends Component {
                         avatarUrl: this.parseAvatarUrl(l.avatarUrl),
                         isActive: l.isActive,
                         lastSeen: l.lastSeen,
+                        previousScreen: 'ChatList'
                       })
                     }}  
                     />
@@ -324,6 +325,7 @@ class ChatList extends Component {
                       avatarLink: this.parseAvatarUrl(l.avatarUrl),
                       isActive: l.isActive,
                       lastSeen: l.lastSeen,
+                      previousScreen: 'ChatList'
                     })
                   }}  
                 />

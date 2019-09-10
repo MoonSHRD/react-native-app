@@ -218,6 +218,7 @@ class NewChat extends Component {
                           avatarUrl: this.parseAvatarUrl(l.avatarUrl),
                           isActive: l.isActive,
                           lastSeen: l.lastSeen,
+                          previousScreen: 'NewChat'
                           })  
                       }}  
                     />
@@ -259,6 +260,7 @@ class NewChat extends Component {
                         avatarUrl: this.parseAvatarUrl(l.avatarUrl),
                         isActive: l.isActive,
                         lastSeen: l.lastSeen,
+                        previousScreen: 'NewChat'
                         })
                     }}
                   />
