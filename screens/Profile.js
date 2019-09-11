@@ -220,7 +220,7 @@ class Profile extends Component {
     if (this.state.newAvatar || this.state.newName) {
         if (this.state.newName && this.state.newAvatar) {
             await this.props.saveNewUserName(this.state.newName)
-            await this.props.saveNewAvatar(this.state.newAvatar)
+            await this.props.saveNewAvatar(this.state.newAvatarBase64)
             await this.props.navigation.goBack()
         }
 
@@ -230,7 +230,7 @@ class Profile extends Component {
         } 
 
         if (this.state.newAvatar) {
-            await this.props.saveNewAvatar(this.state.newAvatar)
+            await this.props.saveNewAvatar(this.state.newAvatarBase64)
             await this.props.navigation.goBack()
         }
         
@@ -247,6 +247,8 @@ class Profile extends Component {
         includeBase64:  true,
       }).then(image => {
         this.setState({newAvatar: `data:${image.mime};base64,${image.data}`})
+        this.setState({newAvatarBase64: image.data})
+        console.log(image.data)
         this.setState({avatarChanged: true})
         console.log(image);
       });
@@ -260,6 +262,8 @@ class Profile extends Component {
         includeBase64:  true,
       }).then(image => {
           this.setState({newAvatar: `data:${image.mime};base64,${image.data}`})
+          this.setState({newAvatarBase64: image.data})
+          console.log(image.data)
           this.setState({avatarChanged: true})
           console.log(image);
       });      
