@@ -241,9 +241,6 @@ class Profile extends Component {
 
   openGalleryPicker() {
     ImagePicker.openPicker({
-        width: 100,
-        height: 100,
-        cropping: true,
         includeBase64:  true,
       }).then(image => {
         this.setState({newAvatar: `data:${image.mime};base64,${image.data}`})
@@ -256,9 +253,6 @@ class Profile extends Component {
 
   openCamera() {
     ImagePicker.openCamera({
-        width: 100,
-        height: 100,
-        cropping: true,
         includeBase64:  true,
       }).then(image => {
           this.setState({newAvatar: `data:${image.mime};base64,${image.data}`})
@@ -523,7 +517,7 @@ componentDidUpdate(prevProps) {
                     ?
                     <Avatar 
                         rounded
-                        source={this.props.contacts.myProfile.avatarUrl}
+                        source={{uri: this.props.contacts.myProfile.avatarLink}}
                         containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
                         avatarStyle={styles.avatarImage}
                         onPress={() => {

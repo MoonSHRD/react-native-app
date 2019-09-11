@@ -71,9 +71,9 @@ class ContactList extends Component {
   componentDidMount() {
     this.setHeaderParams()
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
-      this.props.loadDirectChats()
       this.props.getMyUserId()
       this.props.getMyUserProfile()
+      this.props.loadDirectChats()
     });
 
     this.onNetworkErrorEvent = DeviceEventEmitter.addListener('onNetworkError', function(e) {
@@ -83,7 +83,6 @@ class ContactList extends Component {
     this.onMatrixErrorEvent = DeviceEventEmitter.addListener('onMatrixError', (e) => {
       console.log('onMatrixError')
       console.log(e)
-      this.setState({wrongPassword: true})
     });  
     this.onUnexpectedErrorEvent = DeviceEventEmitter.addListener('onUnexpectedError', function(e) {
       console.log('onUnexpectedError')
