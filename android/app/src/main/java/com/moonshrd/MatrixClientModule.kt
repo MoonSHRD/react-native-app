@@ -215,7 +215,9 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
         val currentSession = matrixInstance.defaultSession
 
-        promise.resolve(gson.toJson(UserModel(currentSession.myUserId, currentSession.dataHandler.myUser.displayname, currentSession.dataHandler.myUser.avatarUrl)))
+        var kek = currentSession.contentManager.getDownloadableUrl(currentSession.dataHandler.myUser.avatarUrl,false)
+
+        promise.resolve(gson.toJson(UserModel(currentSession.myUserId, currentSession.dataHandler.myUser.displayname, currentSession.dataHandler.myUser.avatarUrl,avatarLink = kek)))
     }
 
     @ReactMethod
