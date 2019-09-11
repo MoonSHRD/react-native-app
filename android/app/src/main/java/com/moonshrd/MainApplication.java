@@ -10,16 +10,14 @@ import android.os.IBinder;
 import com.BV.LinearGradient.LinearGradientPackage;
 import com.actionsheet.ActionSheetPackage;
 import com.facebook.react.ReactApplication;
-import com.oblador.vectoricons.VectorIconsPackage;
-import com.horcrux.svg.SvgPackage;
-import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
-import com.reactnative.ivpusic.imagepicker.PickerPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
+import com.horcrux.svg.SvgPackage;
 import com.moonshrd.services.P2ChatService;
-import com.moonshrd.utils.matrix.Matrix;		
+import com.oblador.vectoricons.VectorIconsPackage;
+import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
 
 import org.matrix.androidsdk.MXSession;
 
@@ -47,7 +45,6 @@ public class MainApplication extends Application implements ReactApplication {
             new VectorIconsPackage(),
             new SvgPackage(),
             new RNGestureHandlerPackage(),
-            new PickerPackage(),
             new ActionSheetPackage(),
             new LinearGradientPackage(),
             new MatrixClientPackage()
