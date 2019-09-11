@@ -34,11 +34,12 @@ import org.matrix.androidsdk.sync.EventsThreadListener;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
 
 public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
     private static String LOG_TAG = MatrixLoginClientModule.class.getSimpleName();
 
-    public MatrixLoginClientModule(@Nonnull ReactApplicationContext reactContext) {
+    MatrixLoginClientModule(@Nonnull ReactApplicationContext reactContext) {
         super(reactContext);
     }
 

@@ -21,16 +21,25 @@ import org.matrix.androidsdk.data.RoomSummary
 import org.matrix.androidsdk.data.timeline.EventTimeline
 import org.matrix.androidsdk.listeners.IMXMediaUploadListener
 import org.matrix.androidsdk.rest.model.Event
+import org.matrix.androidsdk.rest.model.User
 import org.matrix.androidsdk.rest.model.search.SearchUsersResponse
-import p2mobile.P2mobile
 import java.io.ByteArrayInputStream
 import java.net.URLConnection.guessContentTypeFromStream
+import javax.inject.Inject
 
 
 class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
-    private val gson = Gson() // TODO Optimize it with Dagger
-    private val matrixInstance = Matrix.getInstance(reactApplicationContext)
     private val eventListeners = HashMap<String, NewEventsListener>()
+
+    @Inject
+    lateinit var gson: Gson
+
+    @Inject
+    lateinit var matrixInstance: Matrix
+
+    init {
+        MainApplication.getComponent().injectsMatrixClientModule(this)
+    }
 
     override fun getName(): String {
         return "MatrixClient"
@@ -106,6 +115,33 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
         val userName = CompletableFuture<String?>()
         val userAvatarUrl = CompletableFuture<String?>()
+        val userIsActive = CompletableFuture<Boolean?>()
+        val userLastSeen = CompletableFuture<Long?>()
+
+
+       matrixInstance.defaultSession.presenceApiClient.getPresence("",object : ApiCallback<User>{
+        override fun onSuccess(info: User?) {
+            userIsActive.complete(info?.isActive)
+            userLastSeen.complete(info?.lastActiveAgo)
+        }
+
+        override fun onUnexpectedError(e: java.lang.Exception?) {
+            userIsActive.complete(null)
+            userLastSeen.complete(null)
+        }
+
+        override fun onMatrixError(e: MatrixError?) {
+            userIsActive.complete(null)
+            userLastSeen.complete(null)
+        }
+
+        override fun onNetworkError(e: java.lang.Exception?) {
+            userIsActive.complete(null)
+            userLastSeen.complete(null)
+        }
+
+    })
+
 
         matrixInstance.defaultSession.profileApiClient.displayname(userID, object : ApiCallback<String> {
             override fun onSuccess(info: String?) {
@@ -152,8 +188,10 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         GlobalScope.launch {
             val name = userName.get()
             val avatarUrl = userAvatarUrl.get()
+            val isActive = userIsActive.get()
+            val lastSeen = userLastSeen.get()
             if (name != null && avatarUrl != null) {
-                promise.resolve(gson.toJson(UserModel(userID, name, avatarUrl)))
+                promise.resolve(gson.toJson(UserModel(userID, name, avatarUrl,lastSeen = lastSeen,isActive = isActive)))
             } else {
                 promise.resolve(gson.toJson(UserModel(userID, "", "")))
             }
@@ -177,7 +215,9 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
         val currentSession = matrixInstance.defaultSession
 
-        promise.resolve(gson.toJson(UserModel(currentSession.myUserId, currentSession.dataHandler.myUser.displayname, currentSession.dataHandler.myUser.avatarUrl)))
+        var kek = currentSession.contentManager.getDownloadableUrl(currentSession.dataHandler.myUser.avatarUrl,false)
+
+        promise.resolve(gson.toJson(UserModel(currentSession.myUserId, currentSession.dataHandler.myUser.displayname, currentSession.dataHandler.myUser.avatarUrl,avatarLink = kek)))
     }
 
     @ReactMethod
@@ -371,7 +411,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                 matrixInstance.defaultLatestChatMessageCache.updateLatestMessage(reactContext, room.roomId, event.contentAsJsonObject.get("body").asString)
                 roomSummary.setLatestReceivedEvent(event, roomState)
                 val txtMsg = event.contentAsJsonObject.get("body").asString
-                sendEventWithOneStringArg(reactContext,"message","txtMessage",txtMsg)
+                sendEventWithOneStringArg(reactContext, "message", "txtMessage", txtMsg)
             }
         }
     }
