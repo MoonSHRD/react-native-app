@@ -46,40 +46,40 @@ class ChatBackground extends Component {
     chatBackground: null,
     dataSource: [
         {
-            picture_url: require('../assets/backgrounds/photo-1501436513145-30f24e19fcc8.png'),
+            picture_url: require('../assets/backgrounds/photo-1501436513145-30f24e19fcc8.jpg'),
         },
         {
-            picture_url: require('../assets/backgrounds/photo-1561616177-3444f0cd052f.png'),
+            picture_url: require('../assets/backgrounds/photo-1561616177-3444f0cd052f.jpg'),
         },
         {
-            picture_url: require('../assets/backgrounds/photo-1561571994-3c61c554181a.png'),
+            picture_url: require('../assets/backgrounds/photo-1561571994-3c61c554181a.jpg'),
         },
         {
-            picture_url: require('../assets/backgrounds/photo-1561454260-8559bd155736.png'),  
+            picture_url: require('../assets/backgrounds/photo-1561454260-8559bd155736.jpg'),  
         },
         {
-            picture_url: require('../assets/backgrounds/photo-1561445136-7f9e628bd189.png'),
+            picture_url: require('../assets/backgrounds/photo-1561445136-7f9e628bd189.jpg'),
         },
         {
-            picture_url: require('../assets/backgrounds/photo-1560940742-43a23e56f1b4.png'),  
+            picture_url: require('../assets/backgrounds/photo-1560940742-43a23e56f1b4.jpg'),  
         },
         {
-            picture_url: require('../assets/backgrounds/photo-1560983073-c29bff7438ef.png'),
+            picture_url: require('../assets/backgrounds/photo-1560983073-c29bff7438ef.jpg'),
         },
         {
             picture_url: require('../assets/backgrounds/photo-1561056532-2d709f79aa7b.jpg'),
         },
         {
-            picture_url: require('../assets/backgrounds/photo-1560528836-2c73fd9c4cfe.png'),
+            picture_url: require('../assets/backgrounds/photo-1560528836-2c73fd9c4cfe.jpg'),
         },
         {
-            picture_url: require('../assets/backgrounds/photo-1560451090-1f3881d8f9e3.png'),  
+            picture_url: require('../assets/backgrounds/photo-1560451090-1f3881d8f9e3.jpg'),  
         },
         {
-            picture_url: require('../assets/backgrounds/photo-1560178783-75a464fbdf6b.png'),
+            picture_url: require('../assets/backgrounds/photo-1560178783-75a464fbdf6b.jpg'),
         },
         {
-          picture_url: require('../assets/backgrounds/photo-1565450443120-ea90b0ca5117.png'),
+          picture_url: require('../assets/backgrounds/photo-1565450443120-ea90b0ca5117.jpg'),
         }
     ],
   }
