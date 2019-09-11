@@ -356,10 +356,11 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
     private fun uploadImage(base64Image: String): CompletableFuture<String> {
         val imageByteArray = Base64.decode(base64Image, Base64.DEFAULT)
         val imageInputStream = ByteArrayInputStream(imageByteArray)
+        val fileMimeType = guessContentTypeFromStream(imageInputStream)
 
         val future = CompletableFuture<String>()
 
-        matrixInstance.defaultSession.mediaCache.uploadContent(imageInputStream, null, guessContentTypeFromStream(imageInputStream), null, object : IMXMediaUploadListener {
+        matrixInstance.defaultSession.mediaCache.uploadContent(imageInputStream, null, fileMimeType, null, object : IMXMediaUploadListener {
             override fun onUploadProgress(uploadId: String?, uploadStats: IMXMediaUploadListener.UploadStats?) {
                 //
             }
