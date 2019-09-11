@@ -10,6 +10,7 @@ import android.os.IBinder;
 import com.BV.LinearGradient.LinearGradientPackage;
 import com.actionsheet.ActionSheetPackage;
 import com.facebook.react.ReactApplication;
+import com.reactnative.ivpusic.imagepicker.PickerPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -45,15 +46,16 @@ public class MainApplication extends Application implements ReactApplication {
 
         @Override
         protected List<ReactPackage> getPackages() {
-            return Arrays.asList(
-                    new MainReactPackage(),
-                    new ActionSheetPackage(),
-                    new VectorIconsPackage(),
-                    new SvgPackage(),
-                    new RNGestureHandlerPackage(),
-                    new LinearGradientPackage(),
-                    new MatrixClientPackage()
-            );
+          return Arrays.asList(
+              new MainReactPackage(),
+                new PickerPackage(),
+                new VectorIconsPackage(),
+                new SvgPackage(),
+                new RNGestureHandlerPackage(),
+                new ActionSheetPackage(),
+                new LinearGradientPackage(),
+                new MatrixClientPackage()
+          );
         }
 
         @Override

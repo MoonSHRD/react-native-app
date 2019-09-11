@@ -67,7 +67,7 @@ class ChatBackground extends Component {
             picture_url: require('../assets/backgrounds/photo-1560983073-c29bff7438ef.png'),
         },
         {
-            picture_url: require('../assets/backgrounds/photo-1561056532-2d709f79aa7b.png'),
+            picture_url: require('../assets/backgrounds/photo-1561056532-2d709f79aa7b.jpg'),
         },
         {
             picture_url: require('../assets/backgrounds/photo-1560528836-2c73fd9c4cfe.png'),

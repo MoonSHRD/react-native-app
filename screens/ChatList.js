@@ -97,6 +97,28 @@ class ChatList extends Component {
     return text
   }
 
+  parseAvatarUrl(props) {
+    if (props != '') {
+        let parts = props.split('mxc://', 2);
+        let urlWithoutMxc  = parts[1];
+        let urlParts = urlWithoutMxc.split('/', 2)
+        let firstPart = urlParts[0]
+        let secondPart = urlParts[1] 
+        let serverUrl = 'https://matrix.moonshard.tech/_matrix/media/r0/download/'
+        return serverUrl + firstPart + '/' + secondPart    
+    }
+  }
+
+  parseUserId(props) {
+    if (props != '') {
+      let parts = props.split('@', 2);
+      let userId  = parts[1];
+      let userIdParts = userId.split(':', 2)
+      let firstPart = userIdParts[0]
+      return this.capitalize(firstPart)
+    }
+  }
+
   updateSearch = async(text) => {
     await this.setState({ search: text , searchChanged: true});
     if (this.state.search == '') {
@@ -202,7 +224,7 @@ class ChatList extends Component {
                     ?
                     { title: l.name[0], titleStyle:{textTransform: 'capitalize'}, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
                     :
-                    { source: { uri: l.avatarUrl }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
+                    { source: { uri: this.parseAvatarUrl(l.avatarUrl) }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
                     }
                     title={this.capitalize(l.name)}
                     titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
@@ -222,10 +244,12 @@ class ChatList extends Component {
                     onPress={(navigation) => {
                       this.props.navigation.navigate('Chat', {
                         userName: this.capitalize(l.name),
+                        userIdName: this.parseUserId(l.userId),
                         userId: l.userId,
-                        avatar: l.avatarUrl,
+                        avatarUrl: this.parseAvatarUrl(l.avatarUrl),
                         isActive: l.isActive,
                         lastSeen: l.lastSeen,
+                        previousScreen: 'ChatList'
                       })
                     }}  
                     />
@@ -275,7 +299,7 @@ class ChatList extends Component {
                   ?
                   { title: l.name[0], titleStyle:{textTransform: 'capitalize'}, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
                   :
-                  { source: { uri: l.avatarUrl }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
+                  { source: { uri: this.parseAvatarUrl(l.avatarUrl) }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
                   }
                   title={this.capitalize(l.name)}
                   titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
@@ -295,10 +319,13 @@ class ChatList extends Component {
                   onPress={(navigation) => {
                     this.props.navigation.navigate('Chat', {
                       userName: this.capitalize(l.name),
+                      userIdName: this.parseUserId(l.userId),
                       userId: l.userId,
-                      avatar: l.avatarUrl,
+                      avatarUrl: l.avatarUrl,
+                      avatarLink: this.parseAvatarUrl(l.avatarUrl),
                       isActive: l.isActive,
                       lastSeen: l.lastSeen,
+                      previousScreen: 'ChatList'
                     })
                   }}  
                 />

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { Text, KeyboardAvoidingView, Dimensions, StyleSheet, Platform, View } from 'react-native';
+import { Text, KeyboardAvoidingView, Dimensions, StyleSheet, Platform, View, TouchableOpacity } from 'react-native';
 
-import { Block } from '../components';
+import { Block, Input, Button } from '../components';
 import { Avatar, Badge, Icon } from 'react-native-elements';
 import { GiftedChat, Actions, SystemMessage, Send, InputToolbar, Composer } from 'react-native-gifted-chat';
 import {connect} from 'react-redux';
@@ -15,19 +15,24 @@ const { width, height } = Dimensions.get('window');
 
 class Chat extends React.Component {
     static navigationOptions = ({ navigation }) => {
-        const userName = navigation.getParam('userName', 'userName')
+        const userName = navigation.getParam('userName', '')
+        const userIdName = navigation.getParam('userIdName', '')
         const userId = navigation.getParam('userId', 'userId')
         const isActive = navigation.getParam('isActive')
         const lastSeen = navigation.getParam('lastSeen')
-        const avatar = navigation.getParam('avatar')
+        const avatarUrl = navigation.getParam('avatarUrl', '')
+        const avatarLink = navigation.getParam('avatarLink', '')
+        const previousScreen = navigation.getParam('previousScreen', '')
         return {
             headerTitle: (
                 <Block style={styles.userContainer}>
-                    {
-                        avatar != ''
+                  {
+                    userName != ''
+                    ?
+                      avatarUrl != ''
                         ? 
                         <Avatar 
-                            source={avatar}
+                            source={{uri: avatarLink }}
                             containerStyle={styles.avatar}
                             avatarStyle={styles.avatarImage}
                         />
@@ -37,10 +42,31 @@ class Chat extends React.Component {
                             avatarStyle={styles.avatarImage}
                             titleStyle={{fontSize: 12}}
                             title={userName[0]}
-                         />
-                    }
+                          />
+                    :
+                    avatarUrl != ''
+                      ? 
+                      <Avatar 
+                          source={{uri: avatarLink }}
+                          containerStyle={styles.avatar}
+                          avatarStyle={styles.avatarImage}
+                      />
+                      :
+                      <Avatar 
+                          containerStyle={styles.avatar}
+                          avatarStyle={styles.avatarImage}
+                          titleStyle={{fontSize: 12}}
+                          title={userIdName[0]}
+                        />
+                  }
                     <Block style={styles.nameContainer}>
+                      {
+                        userName != ''
+                        ?
                         <Text style={styles.userNameText}>{userName}</Text>
+                        :
+                        <Text style={styles.userNameText}>{userIdName}</Text>
+                      }
                         <Block styles={styles.statusContainer}>
                             {
                                 isActive == true
@@ -60,7 +86,8 @@ class Chat extends React.Component {
                     </Block>
                 </Block>
             ),
-            headerLeft: (
+            headerLeft: 
+            (
                 <Icon
                     name="ios-arrow-back" 
                     type='ionicon'
@@ -72,7 +99,16 @@ class Chat extends React.Component {
                         :
                         theme.colors.blue
                       }
-                        onPress={() => navigation.goBack()}
+                        onPress={
+                          previousScreen == 'NewChat'
+                          ?
+                          () => {
+                            navigation.navigate('ChatList')
+                            console.log('sss')
+                          }
+                          :
+                          () => navigation.goBack()
+                        }
                     containerStyle={{paddingVertical: 10, paddingHorizontal: 20,}}
                 />
               ),
@@ -91,7 +127,9 @@ class Chat extends React.Component {
                     onPress={() => {
                         navigation.navigate('Profile', {
                             userName: userName,
+                            userIdName: userIdName,
                             userId: userId,
+                            avatarLink: avatarLink,
                         })
                     }}  
                     containerStyle={
@@ -125,21 +163,74 @@ class Chat extends React.Component {
   componentWillMount() {
     this.setState({
       messages: [
+        // {
+        //   _id: 1,
+        //   text: 'Test Message in personal chat',
+        //   createdAt: new Date(),
+        // },
+        // {
+        //   _id: 2,
+        //   text: 'Test Message in group chat',
+        //   createdAt: new Date(),
+        //   user: {
+        //     _id: 3,
+        //     name: 'React Native',
+        //     avatar: 'https://placeimg.com/140/140/any',
+        //   },
+        // },
         {
           _id: 1,
-          text: 'Test Message in personal chat',
+          text: 'This is a quick reply. Do you love Gifted Chat? (radio) KEEP IT',
           createdAt: new Date(),
+          quickReplies: {
+            type: 'radio', // or 'checkbox',
+            keepIt: true,
+            values: [
+              {
+                title: '😋 Yes',
+                value: 'yes',
+              },
+              {
+                title: '📷 Yes, let me show you with a picture!',
+                value: 'yes_picture',
+              },
+              {
+                title: '😞 Nope. What?',
+                value: 'no',
+              },
+            ],
+          },
+          user: {
+            _id: 2,
+            name: 'React Native',
+          },
         },
         {
           _id: 2,
-          text: 'Test Message in group chat',
+          text: 'This is a quick reply. Do you love Gifted Chat? (checkbox)',
           createdAt: new Date(),
-          user: {
-            _id: 3,
-            name: 'React Native',
-            avatar: 'https://placeimg.com/140/140/any',
+          quickReplies: {
+            type: 'checkbox', // or 'radio',
+            values: [
+              {
+                title: 'Yes',
+                value: 'yes',
+              },
+              {
+                title: 'Yes, let me show you with a picture!',
+                value: 'yes_picture',
+              },
+              {
+                title: 'Nope. What?',
+                value: 'no',
+              },
+            ],
           },
-        },
+          user: {
+            _id: 2,
+            name: 'React Native',
+          },
+        }      
       ],
     })
   }
@@ -148,32 +239,6 @@ class Chat extends React.Component {
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
     }))
-  }
-
-  openGalleryPicker() {
-    ImagePicker.openPicker({
-        width: 100,
-        height: 100,
-        cropping: true,
-        includeBase64:  true,
-      }).then(image => {
-        this.setState({newAvatar: `data:${image.mime};base64,${image.data}`})
-        this.setState({avatarChanged: true})
-        console.log(image);
-      });
-  }
-
-  openCamera() {
-    ImagePicker.openCamera({
-        width: 100,
-        height: 100,
-        cropping: true,
-        includeBase64:  true,
-      }).then(image => {
-          this.setState({newAvatar: `data:${image.mime};base64,${image.data}`})
-          this.setState({avatarChanged: true})
-          console.log(image);
-      });      
   }
 
   openActionSheet() {
@@ -196,10 +261,20 @@ class Chat extends React.Component {
       },
       (buttonIndex) => {
           if (buttonIndex == 0) {
-              this.openGalleryPicker()
+            ImagePicker.openPicker({
+              includeBase64:  true,
+            }).then(image => {
+              this.setState({newMessage: `data:${image.mime};base64,${image.data}`})
+              console.log(image);
+            });      
           } 
           if (buttonIndex == 1) {
-              this.openCamera()
+            ImagePicker.openCamera({
+              includeBase64:  true,
+            }).then(image => {
+              this.setState({newMessage: `data:${image.mime};base64,${image.data}`})
+                console.log(image);
+            });      
           }
         console.log('button clicked :', buttonIndex);
       });      
@@ -215,14 +290,16 @@ class Chat extends React.Component {
                     type="ionicon"
                     size={32} 
                     color={theme.colors.blue}
-                    containerStyle={{marginRight: 16, marginBottom: 12}}
+                    containerStyle={{marginRight: 16, marginBottom: 10}}
                 />
         </Send>
     );
   }
 
 renderInputToolbar (props) {
-   return <InputToolbar {...props} containerStyle={{backgroundColor: 'rgba(244, 246, 255, 0.85)'}} />
+   return (
+     <InputToolbar {...props} containerStyle={{backgroundColor: 'rgba(244, 246, 255, 0.85)'}} />
+   )
 }
 
 renderComposer(props) {
@@ -230,23 +307,31 @@ renderComposer(props) {
     <View style={{flexDirection: 'row', width: width - 100,marginTop: 8, marginBottom: 8, borderRadius: 16, backgroundColor: theme.colors.white, marginRight:16, marginLeft: 16}}>
       <Composer 
         {...props} 
-        textInputStyle={{fontSize:12, paddingHorizontal: 8, lineHeight:16,}}
+        textInputStyle={{fontSize:12, paddingHorizontal: 8, lineHeight:16, paddingVertical: 0}}
+        composerHeight={32}
         />
     </View>
   );
 }
 
-renderActions() {
-    return (
-        <Icon
+renderCustomActions = props => {
+  return (
+    <Actions 
+      {...props} 
+      containerStyle={{width: 28, height: 28, marginLeft: 0, marginBottom: 12}}
+      icon={() => {
+        return (
+          <Icon
             name="ios-attach" 
             type="ionicon"
-            size={32} 
+            size={28} 
             color={theme.colors.blue}
-            containerStyle={{marginLeft: 16, marginBottom: 12, transform: [{ rotate: '45deg' }]}}
-            onPress={() => this.openActionSheet()}
-        />
-    );
+            containerStyle={{marginLeft: 16}}
+          />
+        )
+      }}
+    />
+  )
 }
 
   render() {
@@ -256,10 +341,12 @@ renderActions() {
         onSend={messages => this.onSend(messages)}
         placeholder={'Type Message Here'}
         renderSend={this.renderSend}
-        renderActions={this.renderActions}
+        renderActions={this.renderCustomActions}
+        onPressActionButton={this.openActionSheet}
+        renderAvatar={null}
         renderComposer={this.renderComposer}
         renderInputToolbar={this.renderInputToolbar} 
-        minInputToolbarHeight='58'
+        minInputToolbarHeight={48}
         alwaysShowSend={true}
         user={{
           _id: 1,
