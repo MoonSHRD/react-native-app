@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { Text, KeyboardAvoidingView, Dimensions, StyleSheet, Platform, View } from 'react-native';
+import { Text, KeyboardAvoidingView, Dimensions, StyleSheet, Platform, View, TouchableOpacity } from 'react-native';
 
-import { Block, Input } from '../components';
+import { Block, Input, Button } from '../components';
 import { Avatar, Badge, Icon } from 'react-native-elements';
 import { GiftedChat, Actions, SystemMessage, Send, InputToolbar, Composer } from 'react-native-gifted-chat';
 import {connect} from 'react-redux';
@@ -330,17 +330,24 @@ renderComposer(props) {
   );
 }
 
-renderActions() {
-    return (
-        <Icon
+renderCustomActions = props => {
+  return (
+    <Actions 
+      {...props} 
+      containerStyle={{width: 28, height: 28, marginLeft: 0, marginBottom: 12}}
+      icon={() => {
+        return (
+          <Icon
             name="ios-attach" 
             type="ionicon"
             size={28} 
             color={theme.colors.blue}
-            containerStyle={{marginLeft: 22, marginBottom: 16, transform: [{ rotate: '45deg' }]}}
-            onPress={() => this.openActionSheet()}
-        />
-    );
+            containerStyle={{marginLeft: 16}}
+          />
+        )
+      }}
+    />
+  )
 }
 
   render() {
@@ -350,10 +357,12 @@ renderActions() {
         onSend={messages => this.onSend(messages)}
         placeholder={'Type Message Here'}
         renderSend={this.renderSend}
-        renderActions={this.renderActions}
+        renderActions={this.renderCustomActions}
+        onPressActionButton={this.openActionSheet}
+        renderAvatar={null}
         renderComposer={this.renderComposer}
         renderInputToolbar={this.renderInputToolbar} 
-        minInputToolbarHeight='48'
+        minInputToolbarHeight={48}
         alwaysShowSend={true}
         user={{
           _id: 1,
