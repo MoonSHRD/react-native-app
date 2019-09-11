@@ -241,32 +241,6 @@ class Chat extends React.Component {
     }))
   }
 
-  openGalleryPicker() {
-    ImagePicker.openPicker({
-        width: 100,
-        height: 100,
-        cropping: true,
-        includeBase64:  true,
-      }).then(image => {
-        this.setState({newAvatar: `data:${image.mime};base64,${image.data}`})
-        this.setState({avatarChanged: true})
-        console.log(image);
-      });
-  }
-
-  openCamera() {
-    ImagePicker.openCamera({
-        width: 100,
-        height: 100,
-        cropping: true,
-        includeBase64:  true,
-      }).then(image => {
-          this.setState({newAvatar: `data:${image.mime};base64,${image.data}`})
-          this.setState({avatarChanged: true})
-          console.log(image);
-      });      
-  }
-
   openActionSheet() {
     var CANCEL_INDEX = 2;
     var BUTTONSiOS = [
@@ -287,10 +261,20 @@ class Chat extends React.Component {
       },
       (buttonIndex) => {
           if (buttonIndex == 0) {
-              this.openGalleryPicker()
+            ImagePicker.openPicker({
+              includeBase64:  true,
+            }).then(image => {
+              this.setState({newMessage: `data:${image.mime};base64,${image.data}`})
+              console.log(image);
+            });      
           } 
           if (buttonIndex == 1) {
-              this.openCamera()
+            ImagePicker.openCamera({
+              includeBase64:  true,
+            }).then(image => {
+              this.setState({newMessage: `data:${image.mime};base64,${image.data}`})
+                console.log(image);
+            });      
           }
         console.log('button clicked :', buttonIndex);
       });      
