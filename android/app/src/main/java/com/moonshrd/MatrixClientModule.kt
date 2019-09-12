@@ -26,6 +26,9 @@ import org.matrix.androidsdk.rest.model.search.SearchUsersResponse
 import java.io.ByteArrayInputStream
 import java.net.URLConnection.guessContentTypeFromStream
 import javax.inject.Inject
+import org.matrix.androidsdk.rest.model.TokensChunkEvents
+
+
 
 
 class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
@@ -214,10 +217,11 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         }
 
         val currentSession = matrixInstance.defaultSession
-
-        var kek = currentSession.contentManager.getDownloadableUrl(currentSession.dataHandler.myUser.avatarUrl,false)
-
-        promise.resolve(gson.toJson(UserModel(currentSession.myUserId, currentSession.dataHandler.myUser.displayname, currentSession.dataHandler.myUser.avatarUrl,avatarLink = kek)))
+        val httpUrlAvatar = currentSession.contentManager.getDownloadableUrl(currentSession.dataHandler.myUser.avatarUrl,false)
+        promise.resolve(gson.toJson(UserModel(currentSession.myUserId,
+                currentSession.dataHandler.myUser.displayname,
+                currentSession.dataHandler.myUser.avatarUrl,
+                avatarLink = httpUrlAvatar)))
     }
 
     @ReactMethod
@@ -301,6 +305,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         if (!isSessionExists(promise)) {
             return
         }
+
 
         matrixInstance.defaultSession.profileApiClient.updateDisplayname(newDisplayName, object : ApiCallback<Void> {
             override fun onSuccess(info: Void?) {
@@ -399,6 +404,31 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
             override fun onEncryptionFailed(roomMediaMessage: RoomMediaMessage?) {
                 promise.reject("onEncryptionError", roomMediaMessage!!.text.toString())
+            }
+        })
+    }
+
+    @ReactMethod
+    private fun getHistoryMessage(roomId:String,tokenMessageEnd:String, promise: Promise){
+        val room = matrixInstance.defaultSession.dataHandler.getRoom(roomId)
+
+        matrixInstance.defaultSession.roomsApiClient.getRoomMessagesFrom(room.roomId, tokenMessageEnd, EventTimeline.Direction.BACKWARDS, 15,null, object : ApiCallback<TokensChunkEvents> {
+
+            override fun onSuccess(info: TokensChunkEvents) {
+                val jsonMessages = gson.toJson(info)
+                promise.resolve(jsonMessages)
+            }
+
+            override fun onUnexpectedError(e: Exception) {
+                promise.reject("onUnexpectedError", e.message)
+            }
+
+            override fun onNetworkError(e: Exception) {
+                promise.reject("onNetworkError", e.message)
+            }
+
+            override fun onMatrixError(e: MatrixError) {
+                promise.reject("onMatrixError", e.message)
             }
         })
     }
