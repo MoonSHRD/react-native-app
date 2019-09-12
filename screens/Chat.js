@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
-import { Text, KeyboardAvoidingView, Dimensions, StyleSheet, Platform, View, TouchableOpacity } from 'react-native';
+import { Text, Dimensions, StyleSheet, Platform, View, DeviceEventEmitter } from 'react-native';
 
-import { Block, Input, Button } from '../components';
+import { Block } from '../components';
 import { Avatar, Badge, Icon } from 'react-native-elements';
-import { GiftedChat, Actions, SystemMessage, Send, InputToolbar, Composer } from 'react-native-gifted-chat';
+import { GiftedChat, Actions, Send, InputToolbar, Composer } from 'react-native-gifted-chat';
 import {connect} from 'react-redux';
 import TimeAgo from 'react-native-timeago';
 import { theme } from '../constants';  
 import ImagePicker from 'react-native-image-crop-picker';
 import ActionSheet from 'react-native-action-sheet';
+import MatrixClient from '../native/MatrixClient';  
 
 const { width, height } = Dimensions.get('window');
 
@@ -152,6 +153,26 @@ class Chat extends React.Component {
 
   componentDidMount = () => {
       console.log(this.props.navigation.getParam('userName', 'userName'))
+      this.newEventListener = DeviceEventEmitter.addListener('NewEventsListener', (e) => {
+        console.log(e)
+        console.log('NewEventsListener')
+      })
+      this.onEventCreated = DeviceEventEmitter.addListener('onEventCreated', (e) => {
+        console.log(e)
+        console.log('onEventCreated')
+      })
+      this.onEventCreationError = DeviceEventEmitter.addListener('onEventCreationError', (e) => {
+        console.log(e)
+        console.log('onEventCreationError')
+      })
+      this.onEncryptionError = DeviceEventEmitter.addListener('onEncryptionError', (e) => {
+        console.log(e)
+        console.log('onEncryptionError')
+      })
+      this.onEvent = DeviceEventEmitter.addListener('onEvent', (e) => {
+        console.log(e)
+        console.log('onEvent')
+      })
   }
 
   capitalize(props) {
@@ -239,6 +260,19 @@ class Chat extends React.Component {
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
     }))
+  }
+
+  sendMessage() {
+    const promise = MatrixClient.sendMessage('test message', '!XyBKRdPFCadmFBlPlg:matrix.moonshard.tech')
+    promise.then((data) => {
+      const jsonData = JSON.parse(data)
+      console.log('Data: ' + data)
+      console.log('Json Data: ' + jsonData)
+      },
+      (error) => {
+      console.log(error);
+      }
+    );
   }
 
   openActionSheet() {
@@ -338,7 +372,7 @@ renderCustomActions = props => {
     return (
       <GiftedChat
         messages={this.state.messages}
-        onSend={messages => this.onSend(messages)}
+        onSend={() => this.sendMessage()}
         placeholder={'Type Message Here'}
         renderSend={this.renderSend}
         renderActions={this.renderCustomActions}
