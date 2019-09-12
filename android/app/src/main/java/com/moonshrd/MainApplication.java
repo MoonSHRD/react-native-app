@@ -23,6 +23,7 @@ import com.moonshrd.services.P2ChatService;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
 
+
 import org.matrix.androidsdk.MXSession;
 
 import java.util.Arrays;

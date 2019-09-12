@@ -82,7 +82,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         directChats.forEach { room ->
             val roomSummary = room.roomSummary
             // hack for optimization: since we hold the same listener, we will not create a useless instance of this listener (else it will add new object to internal list of listeners and messing up the memory)
-            if (eventListeners[roomSummary!!.roomId] != null) {
+            if (eventListeners[roomSummary!!.roomId] == null) {
                 eventListeners[roomSummary.roomId] = NewEventsListener(reactApplicationContext, room, roomSummary)
             }
             room.timeline.addEventTimelineListener(eventListeners[room.roomId])
