@@ -11,5 +11,6 @@ data class UserModel (
         val lastMessageDate: Long = 0,
         val lastMessageState: String = "", // Just Event.SentState in String representation
         val unreadMessagesCount: Int = 0,
-        val avatarLink: String?=null
-        )
+        val avatarLink: String?=null,
+        val roomId: String?=null
+)

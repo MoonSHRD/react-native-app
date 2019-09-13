@@ -104,7 +104,8 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                     matrixInstance.defaultLatestChatMessageCache.getLatestText(reactApplicationContext, roomSummary.roomId),
                     roomSummary.latestReceivedEvent.originServerTs,
                     roomSummary.latestReceivedEvent.mSentState.name,
-                    roomSummary.mUnreadEventsCount
+                    roomSummary.mUnreadEventsCount,
+                    roomId = room.roomId
             )
             chatModels.add(chat)
         }
