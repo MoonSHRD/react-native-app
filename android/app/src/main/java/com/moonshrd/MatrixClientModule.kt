@@ -123,27 +123,26 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
 
        matrixInstance.defaultSession.presenceApiClient.getPresence("",object : ApiCallback<User>{
-        override fun onSuccess(info: User?) {
-            userIsActive.complete(info?.isActive)
-            userLastSeen.complete(info?.lastActiveAgo)
-        }
+            override fun onSuccess(info: User?) {
+                userIsActive.complete(info?.isActive)
+                userLastSeen.complete(info?.lastActiveAgo)
+            }
 
-        override fun onUnexpectedError(e: java.lang.Exception?) {
-            userIsActive.complete(null)
-            userLastSeen.complete(null)
-        }
+            override fun onUnexpectedError(e: java.lang.Exception?) {
+                userIsActive.complete(null)
+                userLastSeen.complete(null)
+            }
 
-        override fun onMatrixError(e: MatrixError?) {
-            userIsActive.complete(null)
-            userLastSeen.complete(null)
-        }
+            override fun onMatrixError(e: MatrixError?) {
+                userIsActive.complete(null)
+                userLastSeen.complete(null)
+            }
 
-        override fun onNetworkError(e: java.lang.Exception?) {
-            userIsActive.complete(null)
-            userLastSeen.complete(null)
-        }
-
-    })
+            override fun onNetworkError(e: java.lang.Exception?) {
+                userIsActive.complete(null)
+                userLastSeen.complete(null)
+            }
+        })
 
 
         matrixInstance.defaultSession.profileApiClient.displayname(userID, object : ApiCallback<String> {
