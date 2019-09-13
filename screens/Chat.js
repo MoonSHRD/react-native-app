@@ -9,7 +9,7 @@ import TimeAgo from 'react-native-timeago';
 import { theme } from '../constants';  
 import ImagePicker from 'react-native-image-crop-picker';
 import ActionSheet from 'react-native-action-sheet';
-import MatrixClient from '../native/MatrixClient';  
+import { getDirectChatHistory, updateDirectChatHistory, sendMessage, handleMessageChange } from '../store/actions/chatActions';
 
 const { width, height } = Dimensions.get('window');
 
@@ -152,7 +152,7 @@ class Chat extends React.Component {
   };
 
   componentDidMount = () => {
-      console.log(this.props.navigation.getParam('userName', 'userName'))
+      this.getMessageHistory()
       this.newEventListener = DeviceEventEmitter.addListener('NewEventsListener', (e) => {
         console.log(e)
         console.log('NewEventsListener')
@@ -173,6 +173,11 @@ class Chat extends React.Component {
         console.log(e)
         console.log('onEvent')
       })
+    }
+
+  getMessageHistory() {
+    const roomId = this.props.navigation.getParam('roomId', '')
+    this.props.getDirectChatHistory(roomId)
   }
 
   capitalize(props) {
@@ -256,23 +261,24 @@ class Chat extends React.Component {
     })
   }
 
-  onSend(messages = []) {
-    this.setState(previousState => ({
-      messages: GiftedChat.append(previousState.messages, messages),
-    }))
-  }
+  // onSend(messages = []) {
+  //   this.setState(previousState => ({
+  //     messages: GiftedChat.append(previousState.messages, messages),
+  //   }))
+  // }
 
-  sendMessage() {
-    const promise = MatrixClient.sendMessage('test message', '!XyBKRdPFCadmFBlPlg:matrix.moonshard.tech')
-    promise.then((data) => {
-      const jsonData = JSON.parse(data)
-      console.log('Data: ' + data)
-      console.log('Json Data: ' + jsonData)
-      },
-      (error) => {
-      console.log(error);
+  onSend() {
+    const roomId = this.props.navigation.getParam('roomId', '')
+    if (this.props.chat.newTextMessage != '') {
+      const promise = MatrixClient.sendMessage(this.props.chat.newTextMessage, roomId)
+      promise.then((data) => {
+        console.log(data)
+        },
+        (error) => {
+        console.log(error);
       }
-    );
+      );  
+    }
   }
 
   openActionSheet() {
@@ -371,6 +377,8 @@ renderCustomActions = props => {
   render() {
     return (
       <GiftedChat
+        text={this.props.chat.newTextMessage}
+        onInputTextChanged={text => this.props.handleMessageChange(text)}    
         messages={this.state.messages}
         onSend={() => this.sendMessage()}
         placeholder={'Type Message Here'}
@@ -464,9 +472,20 @@ function mapStateToProps (state) {
     return {
       contacts: state.contacts,
       appState: state.appState,
+      chat: state.chat,
     }
   }
+
+  function mapDispatchToProps (dispatch) {
+    return {
+      getDirectChatHistory: (roomId) => dispatch(getDirectChatHistory(roomId)),
+      updateDirectChatHistory: (roomId, end) => dispatch(updateDirectChatHistory(roomId, end)),
+      sendMessage: (message, roomId) => dispatch(sendMessage(message, roomId)),
+      handleMessageChange: (text) => dispatch(handleMessageChange(text)),
+    }
+  }  
     
   export default connect(
     mapStateToProps,
+    mapDispatchToProps
   )(Chat)
