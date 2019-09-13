@@ -6,6 +6,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.moonshrd.models.UserModel
 import com.moonshrd.utils.matrix.Matrix
 import com.moonshrd.utils.sendEventWithOneStringArg
@@ -395,6 +396,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         val room = matrixInstance.defaultSession.dataHandler.getRoom(roomId)
         room.sendTextMessage(message, message, message, object : RoomMediaMessage.EventCreationListener {
             override fun onEventCreated(roomMediaMessage: RoomMediaMessage?) {
+                getHistoryMessageTest(roomId,null)
                 promise.resolve(true)
             }
 
@@ -415,7 +417,20 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         matrixInstance.defaultSession.roomsApiClient.getRoomMessagesFrom(room.roomId, tokenMessageEnd, EventTimeline.Direction.BACKWARDS, 15,null, object : ApiCallback<TokensChunkEvents> {
 
             override fun onSuccess(info: TokensChunkEvents) {
-                val jsonMessages = gson.toJson(info)
+                //it hack need because we can`t direct convert info to Json
+                val messages = arrayListOf<JsonObject>()
+
+                val newInfo: HashMap<String, Any> = hashMapOf()
+
+                for(i in info.chunk.indices){
+                    messages.add(info.chunk[i].toJsonObject())
+                }
+
+                newInfo["start"] = info.start
+                newInfo["end"] = info.end
+                newInfo["messages"] = messages
+
+                val jsonMessages = gson.toJson(newInfo)
                 promise.resolve(jsonMessages)
             }
 
@@ -429,6 +444,39 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
             override fun onMatrixError(e: MatrixError) {
                 promise.reject("onMatrixError", e.message)
+            }
+        })
+    }
+
+    private fun getHistoryMessageTest(roomId:String,tokenMessageEnd:String?){
+        val room = matrixInstance.defaultSession.dataHandler.getRoom(roomId)
+
+        matrixInstance.defaultSession.roomsApiClient.getRoomMessagesFrom(room.roomId, tokenMessageEnd, EventTimeline.Direction.BACKWARDS, 15,null, object : ApiCallback<TokensChunkEvents> {
+
+            override fun onSuccess(info: TokensChunkEvents) {
+                val messages = arrayListOf<JsonObject>()
+
+                val newInfo: HashMap<String, Any> = hashMapOf()
+
+                for(i in info.chunk.indices){
+                        messages.add(info.chunk[i].toJsonObject())
+                }
+
+                newInfo["start"] = info.start
+                newInfo["end"] = info.end
+                newInfo["messages"] = messages
+
+                val jsonMessages = gson.toJson(newInfo)
+
+            }
+
+            override fun onUnexpectedError(e: Exception) {
+            }
+
+            override fun onNetworkError(e: Exception) {
+            }
+
+            override fun onMatrixError(e: MatrixError) {
             }
         })
     }
