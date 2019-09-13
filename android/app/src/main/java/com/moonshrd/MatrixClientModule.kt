@@ -29,9 +29,6 @@ import java.net.URLConnection.guessContentTypeFromStream
 import javax.inject.Inject
 import org.matrix.androidsdk.rest.model.TokensChunkEvents
 
-
-
-
 class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
     private val eventListeners = HashMap<String, NewEventsListener>()
 
@@ -125,27 +122,26 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
 
        matrixInstance.defaultSession.presenceApiClient.getPresence("",object : ApiCallback<User>{
-        override fun onSuccess(info: User?) {
-            userIsActive.complete(info?.isActive)
-            userLastSeen.complete(info?.lastActiveAgo)
-        }
+            override fun onSuccess(info: User?) {
+                userIsActive.complete(info?.isActive)
+                userLastSeen.complete(info?.lastActiveAgo)
+            }
 
-        override fun onUnexpectedError(e: java.lang.Exception?) {
-            userIsActive.complete(null)
-            userLastSeen.complete(null)
-        }
+            override fun onUnexpectedError(e: java.lang.Exception?) {
+                userIsActive.complete(null)
+                userLastSeen.complete(null)
+            }
 
-        override fun onMatrixError(e: MatrixError?) {
-            userIsActive.complete(null)
-            userLastSeen.complete(null)
-        }
+            override fun onMatrixError(e: MatrixError?) {
+                userIsActive.complete(null)
+                userLastSeen.complete(null)
+            }
 
-        override fun onNetworkError(e: java.lang.Exception?) {
-            userIsActive.complete(null)
-            userLastSeen.complete(null)
-        }
-
-    })
+            override fun onNetworkError(e: java.lang.Exception?) {
+                userIsActive.complete(null)
+                userLastSeen.complete(null)
+            }
+        })
 
 
         matrixInstance.defaultSession.profileApiClient.displayname(userID, object : ApiCallback<String> {
