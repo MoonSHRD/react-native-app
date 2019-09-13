@@ -28,9 +28,6 @@ import java.net.URLConnection.guessContentTypeFromStream
 import javax.inject.Inject
 import org.matrix.androidsdk.rest.model.TokensChunkEvents
 
-
-
-
 class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
     private val eventListeners = HashMap<String, NewEventsListener>()
 

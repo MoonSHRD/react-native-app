@@ -36,7 +36,7 @@ public class MainApplication extends Application implements ReactApplication {
     public static final String SERVICE_TOPIC = "moonshard";
     public static final String PROTOCOL_ID = "/moonshard/1.0.0";
     public static ServiceConnection serviceConnection = null;
-    public static P2ChatService service = null;
+    private static P2ChatService service = null;
 
 
     private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
@@ -161,5 +161,9 @@ public class MainApplication extends Application implements ReactApplication {
         }
 
         return isSyncing;
+    }
+
+    public static P2ChatService getP2ChatService() {
+        return service;
     }
 }
