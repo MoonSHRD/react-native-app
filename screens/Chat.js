@@ -151,8 +151,9 @@ class Chat extends React.Component {
     messages: []
   };
 
-  componentDidMount = () => {
-      this.getMessageHistory()
+  componentDidMount = async () => {
+      await this.getMessageHistory()
+      // await this.setState({ messages: this.props.chat.messageHistory.messages })
       this.newEventListener = DeviceEventEmitter.addListener('NewEventsListener', (e) => {
         console.log(e)
         console.log('NewEventsListener')
@@ -185,81 +186,6 @@ class Chat extends React.Component {
     return text
   }
 
-
-  componentWillMount() {
-    this.setState({
-      messages: [
-        // {
-        //   _id: 1,
-        //   text: 'Test Message in personal chat',
-        //   createdAt: new Date(),
-        // },
-        // {
-        //   _id: 2,
-        //   text: 'Test Message in group chat',
-        //   createdAt: new Date(),
-        //   user: {
-        //     _id: 3,
-        //     name: 'React Native',
-        //     avatar: 'https://placeimg.com/140/140/any',
-        //   },
-        // },
-        {
-          _id: 1,
-          text: 'This is a quick reply. Do you love Gifted Chat? (radio) KEEP IT',
-          createdAt: new Date(),
-          quickReplies: {
-            type: 'radio', // or 'checkbox',
-            keepIt: true,
-            values: [
-              {
-                title: '😋 Yes',
-                value: 'yes',
-              },
-              {
-                title: '📷 Yes, let me show you with a picture!',
-                value: 'yes_picture',
-              },
-              {
-                title: '😞 Nope. What?',
-                value: 'no',
-              },
-            ],
-          },
-          user: {
-            _id: 2,
-            name: 'React Native',
-          },
-        },
-        {
-          _id: 2,
-          text: 'This is a quick reply. Do you love Gifted Chat? (checkbox)',
-          createdAt: new Date(),
-          quickReplies: {
-            type: 'checkbox', // or 'radio',
-            values: [
-              {
-                title: 'Yes',
-                value: 'yes',
-              },
-              {
-                title: 'Yes, let me show you with a picture!',
-                value: 'yes_picture',
-              },
-              {
-                title: 'Nope. What?',
-                value: 'no',
-              },
-            ],
-          },
-          user: {
-            _id: 2,
-            name: 'React Native',
-          },
-        }      
-      ],
-    })
-  }
 
   // onSend(messages = []) {
   //   this.setState(previousState => ({
@@ -374,13 +300,29 @@ renderCustomActions = props => {
   )
 }
 
+isCloseToTop({ layoutMeasurement, contentOffset, contentSize }) {
+  const paddingToTop = 80;
+  return contentSize.height - layoutMeasurement.height - paddingToTop <= contentOffset.y;
+}
+
+
   render() {
     return (
       <GiftedChat
         text={this.props.chat.newTextMessage}
         onInputTextChanged={text => this.props.handleMessageChange(text)}    
-        messages={this.state.messages}
+        messages={this.props.chat.messageHistory.messages}
         onSend={() => this.sendMessage()}
+        listViewProps={{
+          scrollEventThrottle: 400,
+          onScroll: ({ nativeEvent }) => {
+            if (this.isCloseToTop(nativeEvent)) {
+              const roomId = this.props.navigation.getParam('roomId', '')
+              this.setState({refreshing: true});
+              this.props.updateDirectChatHistory(roomId, this.props.chat.end);
+            }
+          }
+        }}
         placeholder={'Type Message Here'}
         renderSend={this.renderSend}
         renderActions={this.renderCustomActions}

@@ -6,9 +6,29 @@ export function getDirectChatHistory(roomId) {
       const promise = MatrixClient.getHistoryMessage(roomId, null)
       promise.then((data) => {
         const jsonData = JSON.parse(data)
+
+        // parsing json object from matrix for rendering
+
+        const messageHistory = new Object()
+        const time = new Date()
+        messageHistory.end = jsonData.end
+        messageHistory.start = jsonData.start
+        messageHistory.messages = jsonData.messages.map(data => {
+          var message = new Object()
+
+          message._id = `f${(~~(Math.random()*1e8)).toString(16)}`
+          message.text = data.content.body
+          message.createdAt = time - data.age
+          message.status = data.m_sent_state
+
+          return message
+        })
+
         dispatch(getMessageHistory())
-        dispatch(getMessageHistorySuccess(jsonData))
-        console.log(jsonData)
+        dispatch(setEnd(messageHistory.end))
+        dispatch(setStart(messageHistory.start))
+        dispatch(getMessageHistorySuccess(messageHistory))
+        console.log(messageHistory)
         },
         (error) => {
         dispatch(getMessageHistoryFailure())
@@ -23,10 +43,28 @@ export function getDirectChatHistory(roomId) {
       const promise = MatrixClient.getHistoryMessage(roomId, end)
       promise.then((data) => {
         const jsonData = JSON.parse(data)
+
+        // parsing json object from matrix for rendering
+
+        const messageHistory = new Object()
+        const time = new Date()
+        messageHistory.end = jsonData.end
+        messageHistory.start = jsonData.start
+        messageHistory.messages = jsonData.messages.map(data => {
+          var message = new Object()
+          message._id = `f${(~~(Math.random()*1e8)).toString(16)}`
+          message.text = data.content.body
+          message.createdAt = time - data.age
+          message.status = data.m_sent_state
+
+          return message
+        })
         dispatch(getMessageHistory())
-        dispatch(getUpdatedMessageHistory(jsonData))
+        dispatch(setEnd(messageHistory.end))
+        dispatch(setStart(messageHistory.start))
+        dispatch(getUpdatedMessageHistory(messageHistory))
         dispatch(updateMessageHistory())
-        console.log(jsonData)
+        console.log(messageHistory)
         },
         (error) => {
         dispatch(getMessageHistoryFailure())
