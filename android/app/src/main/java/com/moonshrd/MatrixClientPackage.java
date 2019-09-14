@@ -26,6 +26,4 @@ public class MatrixClientPackage implements ReactPackage {
     public List<ViewManager> createViewManagers(@Nonnull ReactApplicationContext reactContext) {
         return Collections.emptyList();
     }
-
-
 }
