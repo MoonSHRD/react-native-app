@@ -8,12 +8,17 @@ export function getDirectChatHistory(roomId) {
         const jsonData = JSON.parse(data)
 
         // parsing json object from matrix for rendering
-
         const messageHistory = new Object()
         const time = new Date()
         messageHistory.end = jsonData.end
         messageHistory.start = jsonData.start
-        messageHistory.messages = jsonData.messages.map(data => {
+        messageHistory.messages = jsonData.messages.filter((data) => {
+          console.log(data)
+          if (data.content.body == null) {
+            return false
+          }
+          return true
+        }).map(data => {
           var message = new Object()
 
           message._id = `f${(~~(Math.random()*1e8)).toString(16)}`
@@ -23,6 +28,16 @@ export function getDirectChatHistory(roomId) {
 
           return message
         })
+        // messageHistory.messages = jsonData.messages.map(data => {
+        //   var message = new Object()
+
+        //   message._id = `f${(~~(Math.random()*1e8)).toString(16)}`
+        //   message.text = data.content.body
+        //   message.createdAt = time - data.age
+        //   message.status = data.m_sent_state
+
+        //   return message
+        // })
 
         dispatch(getMessageHistory())
         dispatch(setEnd(messageHistory.end))
