@@ -9,6 +9,7 @@ import TimeAgo from 'react-native-timeago';
 import { theme } from '../constants';  
 import ImagePicker from 'react-native-image-crop-picker';
 import ActionSheet from 'react-native-action-sheet';
+import MatrixClient from '../native/MatrixClient';
 import { getDirectChatHistory, updateDirectChatHistory, sendMessage, handleMessageChange } from '../store/actions/chatActions';
 
 const { width, height } = Dimensions.get('window');
@@ -153,7 +154,6 @@ class Chat extends React.Component {
 
   componentDidMount = async () => {
       await this.getMessageHistory()
-      // await this.setState({ messages: this.props.chat.messageHistory.messages })
       this.newEventListener = DeviceEventEmitter.addListener('NewEventsListener', (e) => {
         console.log(e)
         console.log('NewEventsListener')
@@ -193,17 +193,11 @@ class Chat extends React.Component {
   //   }))
   // }
 
-  onSend() {
-    const roomId = this.props.navigation.getParam('roomId', '')
-    if (this.props.chat.newTextMessage != '') {
-      const promise = MatrixClient.sendMessage(this.props.chat.newTextMessage, roomId)
-      promise.then((data) => {
-        console.log(data)
-        },
-        (error) => {
-        console.log(error);
-      }
-      );  
+  onSend = async () => {
+    const {chat, sendMessage, navigation} = await this.props
+    const roomId = await navigation.getParam('roomId', '')
+    if (chat.newTextMessage != '') {
+      await sendMessage(chat.newTextMessage, roomId)
     }
   }
 
@@ -312,7 +306,7 @@ isCloseToTop({ layoutMeasurement, contentOffset, contentSize }) {
         text={this.props.chat.newTextMessage}
         onInputTextChanged={text => this.props.handleMessageChange(text)}    
         messages={this.props.chat.messageHistory.messages}
-        onSend={() => this.sendMessage()}
+        onSend={this.onSend}
         listViewProps={{
           scrollEventThrottle: 400,
           onScroll: ({ nativeEvent }) => {

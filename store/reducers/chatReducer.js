@@ -1,4 +1,4 @@
-import { SET_ROOM_ID, SET_END, SET_START, GET_MESSAGE_HISTORY, GET_MESSAGE_HISTORY_SUCCESS, GET_MESSAGE_HISTORY_FAILURE, GET_UPDATED_MESSAGE_HISTORY, UPDATE_MESSAGE_HISTORY, PUSH_NEW_MESSAGE, PUSH_NEW_MESSAGE_SUCCESS, PUSH_NEW_MESSAGE_FAILURE, NEW_MESSAGE, HANDLE_MESSAGE_CHANGE } from '../actions/constants'
+import { SET_ROOM_ID, SET_END, SET_START, GET_MESSAGE_HISTORY, GET_MESSAGE_HISTORY_SUCCESS, GET_MESSAGE_HISTORY_FAILURE, GET_UPDATED_MESSAGE_HISTORY, UPDATE_MESSAGE_HISTORY, PUSH_NEW_MESSAGE, PUSH_NEW_MESSAGE_SUCCESS, PUSH_NEW_MESSAGE_FAILURE, NEW_MESSAGE, HANDLE_MESSAGE_CHANGE, PUSH_NEW_MESSAGE_TO_HISTORY } from '../actions/constants'
 
 const initialState = {
     roomId: '',
@@ -6,12 +6,7 @@ const initialState = {
     newMessageHistory: [],
     end: '',
     start: '',
-    newMessage: {
-        _id: null,
-        text: '',
-        createdAt: new Date(),
-        status: ''
-    },
+    newMessage: {},
     newTextMessage: '',
     loading: false,
     error: false,
@@ -83,6 +78,11 @@ export default function appStateReducer (state = initialState, action) {
                 ...state,
                 newMessage: action.data
             }
+        case PUSH_NEW_MESSAGE_TO_HISTORY:
+            return {
+                ...state,
+                messageHistory: [...state.messageHistory, state.newMessage]
+            }    
         case HANDLE_MESSAGE_CHANGE: {    
             return {
                 ...state, 

@@ -1,4 +1,4 @@
-import { SET_ROOM_ID, SET_END, SET_START, GET_MESSAGE_HISTORY, GET_MESSAGE_HISTORY_SUCCESS, GET_MESSAGE_HISTORY_FAILURE, GET_UPDATED_MESSAGE_HISTORY, UPDATE_MESSAGE_HISTORY, PUSH_NEW_MESSAGE, PUSH_NEW_MESSAGE_SUCCESS, PUSH_NEW_MESSAGE_FAILURE, NEW_MESSAGE, HANDLE_MESSAGE_CHANGE } from '../actions/constants'
+import { SET_ROOM_ID, SET_END, SET_START, GET_MESSAGE_HISTORY, GET_MESSAGE_HISTORY_SUCCESS, GET_MESSAGE_HISTORY_FAILURE, GET_UPDATED_MESSAGE_HISTORY, UPDATE_MESSAGE_HISTORY, PUSH_NEW_MESSAGE, PUSH_NEW_MESSAGE_SUCCESS, PUSH_NEW_MESSAGE_FAILURE, NEW_MESSAGE, HANDLE_MESSAGE_CHANGE, PUSH_NEW_MESSAGE_TO_HISTORY } from '../actions/constants'
 import MatrixClient from '../../native/MatrixClient';  
 
 export function getDirectChatHistory(roomId) {
@@ -12,8 +12,8 @@ export function getDirectChatHistory(roomId) {
         const time = new Date()
         messageHistory.end = jsonData.end
         messageHistory.start = jsonData.start
+        
         messageHistory.messages = jsonData.messages.filter((data) => {
-          console.log(data)
           if (data.content.body == null) {
             return false
           }
@@ -28,16 +28,6 @@ export function getDirectChatHistory(roomId) {
 
           return message
         })
-        // messageHistory.messages = jsonData.messages.map(data => {
-        //   var message = new Object()
-
-        //   message._id = `f${(~~(Math.random()*1e8)).toString(16)}`
-        //   message.text = data.content.body
-        //   message.createdAt = time - data.age
-        //   message.status = data.m_sent_state
-
-        //   return message
-        // })
 
         dispatch(getMessageHistory())
         dispatch(setEnd(messageHistory.end))
@@ -65,8 +55,15 @@ export function getDirectChatHistory(roomId) {
         const time = new Date()
         messageHistory.end = jsonData.end
         messageHistory.start = jsonData.start
-        messageHistory.messages = jsonData.messages.map(data => {
+
+        messageHistory.messages = jsonData.messages.filter((data) => {
+          if (data.content.body == null) {
+            return false
+          }
+          return true
+        }).map(data => {
           var message = new Object()
+
           message._id = `f${(~~(Math.random()*1e8)).toString(16)}`
           message.text = data.content.body
           message.createdAt = time - data.age
@@ -74,6 +71,7 @@ export function getDirectChatHistory(roomId) {
 
           return message
         })
+
         dispatch(getMessageHistory())
         dispatch(setEnd(messageHistory.end))
         dispatch(setStart(messageHistory.start))
@@ -95,6 +93,16 @@ export function getDirectChatHistory(roomId) {
       promise.then((data) => {
         console.log(data)
         dispatch(pushNewMessage())
+
+        var newMessage = new Object()
+
+        newMessage._id = `f${(~~(Math.random()*1e8)).toString(16)}`
+        newMessage.text = message
+        newMessage.createdAt = new Date(),
+        newMessage.status = 'SENT'
+
+        dispatch(newMessage(newMessage))
+        dispatch(pushNewMessageToHistory())
         dispatch(pushNewMessageSuccess())
         },
         (error) => {
@@ -180,6 +188,12 @@ export function getDirectChatHistory(roomId) {
     return {
         type: NEW_MESSAGE,
         data
+    }
+  }
+
+  export function pushNewMessageToHistory() {
+    return {
+      type: PUSH_NEW_MESSAGE_TO_HISTORY,
     }
   }
 
