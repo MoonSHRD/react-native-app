@@ -111,6 +111,10 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     @ReactMethod
     fun getUserById(userID: String, promise: Promise) {
+      getDataUser(userID,promise)
+    }
+
+    private fun getDataUser(userID: String, promise: Promise){
         if (!isSessionExists(promise)) {
             return
         }
@@ -121,7 +125,13 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         val userLastSeen = CompletableFuture<Long?>()
 
 
-       matrixInstance.defaultSession.presenceApiClient.getPresence("",object : ApiCallback<User>{
+        val directChats = matrixInstance.defaultSession.dataHandler.store.rooms.filter {
+            it.isDirect
+        }
+
+        val roomId = getRoomId(directChats,userID)
+
+        matrixInstance.defaultSession.presenceApiClient.getPresence(userID,object : ApiCallback<User>{
             override fun onSuccess(info: User?) {
                 userIsActive.complete(info?.isActive)
                 userLastSeen.complete(info?.lastActiveAgo)
@@ -192,11 +202,20 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             val isActive = userIsActive.get()
             val lastSeen = userLastSeen.get()
             if (name != null && avatarUrl != null) {
-                promise.resolve(gson.toJson(UserModel(userID, name, avatarUrl,lastSeen = lastSeen,isActive = isActive)))
+                promise.resolve(gson.toJson(UserModel(userID, name, avatarUrl,lastSeen = lastSeen,isActive = isActive,roomId = roomId)))
             } else {
                 promise.resolve(gson.toJson(UserModel(userID, "", "")))
             }
         }
+    }
+
+    private fun getRoomId(rooms:List<Room>, useriD: String):String?{
+        for( i in rooms.indices){
+            if(rooms[i].getMember(useriD)!=null){
+                return rooms[i].roomId
+            }
+        }
+        return null
     }
 
     @ReactMethod
@@ -228,7 +247,8 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             return
         }
         if (isDirectChatExists(participantUserId)) {
-            promise.reject("directChatExists", "Direct chat with $participantUserId exists.")
+            getDataUser(participantUserId,promise)
+           // promise.reject("directChatExists", "Direct chat with $participantUserId exists.")
             return
         }
         matrixInstance.defaultSession.createDirectMessageRoom(participantUserId, object : ApiCallback<String> {
@@ -258,7 +278,6 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                 exists = true
             }
         }
-
         return exists
     }
 
@@ -303,7 +322,6 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         if (!isSessionExists(promise)) {
             return
         }
-
 
         matrixInstance.defaultSession.profileApiClient.updateDisplayname(newDisplayName, object : ApiCallback<Void> {
             override fun onSuccess(info: Void?) {
@@ -393,7 +411,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         val room = matrixInstance.defaultSession.dataHandler.getRoom(roomId)
         room.sendTextMessage(message, message, message, object : RoomMediaMessage.EventCreationListener {
             override fun onEventCreated(roomMediaMessage: RoomMediaMessage?) {
-                getHistoryMessageTest(roomId,null)
+              //  getHistoryMessageTest(roomId,null)
                 promise.resolve(true)
             }
 
@@ -420,7 +438,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                 val newInfo: HashMap<String, Any> = hashMapOf()
 
                 for(i in info.chunk.indices){
-                    messages.add(info.chunk[i].toJsonObject())
+                        messages.add(info.chunk[i].toJsonObject())
                 }
 
                 newInfo["start"] = info.start
@@ -465,6 +483,22 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
                 val jsonMessages = gson.toJson(newInfo)
 
+
+                matrixInstance.defaultSession.roomsApiClient.getRoomMessagesFrom(room.roomId, info.end, EventTimeline.Direction.BACKWARDS, 15,null, object : ApiCallback<TokensChunkEvents> {
+
+                    override fun onSuccess(info: TokensChunkEvents) {
+
+                    }
+
+                    override fun onUnexpectedError(e: Exception) {
+                    }
+
+                    override fun onNetworkError(e: Exception) {
+                    }
+
+                    override fun onMatrixError(e: MatrixError) {
+                    }
+                })
             }
 
             override fun onUnexpectedError(e: Exception) {
@@ -478,16 +512,21 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         })
     }
 
+
+
+    //can refactor with use dagger2
     internal class NewEventsListener(private val reactContext: ReactApplicationContext,
                                      private val room: Room,
                                      private val roomSummary: RoomSummary) : EventTimeline.Listener {
         private val matrixInstance = Matrix.getInstance(reactContext)
+
         override fun onEvent(event: Event?, direction: EventTimeline.Direction?, roomState: RoomState?) {
-            if (event!!.type == Event.EVENT_TYPE_MESSAGE) {
-                matrixInstance.defaultLatestChatMessageCache.updateLatestMessage(reactContext, room.roomId, event.contentAsJsonObject.get("body").asString)
+            event?.let {
+                matrixInstance.defaultLatestChatMessageCache.updateLatestMessage(reactContext, room.roomId, event!!.contentAsJsonObject.get("body").asString)
                 roomSummary.setLatestReceivedEvent(event, roomState)
-                val txtMsg = event.contentAsJsonObject.get("body").asString
-                sendEventWithOneStringArg(reactContext, "message", "txtMessage", txtMsg)
+                val gson =  Gson()
+                val msg = gson.toJson(event.toJsonObject())
+                sendEventWithOneStringArg(reactContext, "eventMessage", "message", msg)
             }
         }
     }
