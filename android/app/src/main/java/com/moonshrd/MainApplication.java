@@ -55,7 +55,8 @@ public class MainApplication extends Application implements ReactApplication {
                 new RNGestureHandlerPackage(),
                 new ActionSheetPackage(),
                 new LinearGradientPackage(),
-                new MatrixClientPackage()
+                new MatrixClientPackage(),
+                new P2ChatPackage()
           );
         }
 

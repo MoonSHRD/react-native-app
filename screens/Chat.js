@@ -9,7 +9,8 @@ import TimeAgo from 'react-native-timeago';
 import { theme } from '../constants';  
 import ImagePicker from 'react-native-image-crop-picker';
 import ActionSheet from 'react-native-action-sheet';
-import MatrixClient from '../native/MatrixClient';  
+import MatrixClient from '../native/MatrixClient';
+import { getDirectChatHistory, updateDirectChatHistory, sendMessage, handleMessageChange } from '../store/actions/chatActions';
 
 const { width, height } = Dimensions.get('window');
 
@@ -151,8 +152,8 @@ class Chat extends React.Component {
     messages: []
   };
 
-  componentDidMount = () => {
-      console.log(this.props.navigation.getParam('userName', 'userName'))
+  componentDidMount = async () => {
+      await this.getMessageHistory()
       this.newEventListener = DeviceEventEmitter.addListener('NewEventsListener', (e) => {
         console.log(e)
         console.log('NewEventsListener')
@@ -173,6 +174,11 @@ class Chat extends React.Component {
         console.log(e)
         console.log('onEvent')
       })
+    }
+
+  getMessageHistory() {
+    const roomId = this.props.navigation.getParam('roomId', '')
+    this.props.getDirectChatHistory(roomId)
   }
 
   capitalize(props) {
@@ -181,98 +187,18 @@ class Chat extends React.Component {
   }
 
 
-  componentWillMount() {
-    this.setState({
-      messages: [
-        // {
-        //   _id: 1,
-        //   text: 'Test Message in personal chat',
-        //   createdAt: new Date(),
-        // },
-        // {
-        //   _id: 2,
-        //   text: 'Test Message in group chat',
-        //   createdAt: new Date(),
-        //   user: {
-        //     _id: 3,
-        //     name: 'React Native',
-        //     avatar: 'https://placeimg.com/140/140/any',
-        //   },
-        // },
-        {
-          _id: 1,
-          text: 'This is a quick reply. Do you love Gifted Chat? (radio) KEEP IT',
-          createdAt: new Date(),
-          quickReplies: {
-            type: 'radio', // or 'checkbox',
-            keepIt: true,
-            values: [
-              {
-                title: '😋 Yes',
-                value: 'yes',
-              },
-              {
-                title: '📷 Yes, let me show you with a picture!',
-                value: 'yes_picture',
-              },
-              {
-                title: '😞 Nope. What?',
-                value: 'no',
-              },
-            ],
-          },
-          user: {
-            _id: 2,
-            name: 'React Native',
-          },
-        },
-        {
-          _id: 2,
-          text: 'This is a quick reply. Do you love Gifted Chat? (checkbox)',
-          createdAt: new Date(),
-          quickReplies: {
-            type: 'checkbox', // or 'radio',
-            values: [
-              {
-                title: 'Yes',
-                value: 'yes',
-              },
-              {
-                title: 'Yes, let me show you with a picture!',
-                value: 'yes_picture',
-              },
-              {
-                title: 'Nope. What?',
-                value: 'no',
-              },
-            ],
-          },
-          user: {
-            _id: 2,
-            name: 'React Native',
-          },
-        }      
-      ],
-    })
-  }
+  // onSend(messages = []) {
+  //   this.setState(previousState => ({
+  //     messages: GiftedChat.append(previousState.messages, messages),
+  //   }))
+  // }
 
-  onSend(messages = []) {
-    this.setState(previousState => ({
-      messages: GiftedChat.append(previousState.messages, messages),
-    }))
-  }
-
-  sendMessage() {
-    const promise = MatrixClient.sendMessage('test message', '!XyBKRdPFCadmFBlPlg:matrix.moonshard.tech')
-    promise.then((data) => {
-      const jsonData = JSON.parse(data)
-      console.log('Data: ' + data)
-      console.log('Json Data: ' + jsonData)
-      },
-      (error) => {
-      console.log(error);
-      }
-    );
+  onSend = async () => {
+    const {chat, sendMessage, navigation} = await this.props
+    const roomId = await navigation.getParam('roomId', '')
+    if (chat.newTextMessage != '') {
+      await sendMessage(chat.newTextMessage, roomId)
+    }
   }
 
   openActionSheet() {
@@ -368,11 +294,29 @@ renderCustomActions = props => {
   )
 }
 
+isCloseToTop({ layoutMeasurement, contentOffset, contentSize }) {
+  const paddingToTop = 80;
+  return contentSize.height - layoutMeasurement.height - paddingToTop <= contentOffset.y;
+}
+
+
   render() {
     return (
       <GiftedChat
-        messages={this.state.messages}
-        onSend={() => this.sendMessage()}
+        text={this.props.chat.newTextMessage}
+        onInputTextChanged={text => this.props.handleMessageChange(text)}    
+        messages={this.props.chat.messageHistory.messages}
+        onSend={this.onSend}
+        listViewProps={{
+          scrollEventThrottle: 400,
+          onScroll: ({ nativeEvent }) => {
+            if (this.isCloseToTop(nativeEvent)) {
+              const roomId = this.props.navigation.getParam('roomId', '')
+              this.setState({refreshing: true});
+              this.props.updateDirectChatHistory(roomId, this.props.chat.end);
+            }
+          }
+        }}
         placeholder={'Type Message Here'}
         renderSend={this.renderSend}
         renderActions={this.renderCustomActions}
@@ -464,9 +408,20 @@ function mapStateToProps (state) {
     return {
       contacts: state.contacts,
       appState: state.appState,
+      chat: state.chat,
     }
   }
+
+  function mapDispatchToProps (dispatch) {
+    return {
+      getDirectChatHistory: (roomId) => dispatch(getDirectChatHistory(roomId)),
+      updateDirectChatHistory: (roomId, end) => dispatch(updateDirectChatHistory(roomId, end)),
+      sendMessage: (message, roomId) => dispatch(sendMessage(message, roomId)),
+      handleMessageChange: (text) => dispatch(handleMessageChange(text)),
+    }
+  }  
     
   export default connect(
     mapStateToProps,
+    mapDispatchToProps
   )(Chat)

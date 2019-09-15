@@ -15,7 +15,7 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
     }
 
     override fun getName(): String {
-        return P2ChatModule::class.java.simpleName
+        return "P2Chat"
     }
 
     @ReactMethod

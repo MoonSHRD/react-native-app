@@ -7,6 +7,7 @@ import { Overlay, Avatar } from 'react-native-elements';
 import { theme } from './constants';
 import { createRootNavigator } from "./navigation/router";
 import { initAppWithRealm } from './store/actions/loginActions';
+import { getCurrentTopics } from './store/actions/p2chatActions';
 const { width, height } = Dimensions.get('window');
 
 
@@ -38,6 +39,7 @@ class App extends React.Component {
 
   componentDidMount() {
     this.props.initApplication()
+    // this.props.getCurrentTopics()
   }
 
   render() {
@@ -198,7 +200,8 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
   return {
-    initApplication: () => dispatch(initAppWithRealm())
+    initApplication: () => dispatch(initAppWithRealm()),
+    getCurrentTopics: () => dispatch(getCurrentTopics())
   }
 }
 
