@@ -10,7 +10,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.moonshrd.MainApplication
 import com.moonshrd.models.Message
-import com.moonshrd.utils.sendEvent
+import com.moonshrd.utils.sendRNEvent
 import p2mobile.P2mobile
 import p2mobile.P2mobile.start
 import java.util.*
@@ -22,6 +22,7 @@ import javax.inject.Inject
 
 class P2ChatService : Service() {
     private val newMatchEventName = "NewMatchEvent"
+    private val newMessageEventName = "NewMessageEvent"
 
     @Inject
     private lateinit var gson: Gson
@@ -76,6 +77,12 @@ class P2ChatService : Service() {
         if (message.isNotEmpty()) {
             val messageObject = gson.fromJson(message, Message::class.java)
             Log.d(LOG_TAG, "New message! [${messageObject.topic}] ${messageObject.from} > ${messageObject.body})") // FIXME
+
+            val writableMap = Arguments.createMap()
+            writableMap.putString("topic", messageObject.topic)
+            writableMap.putString("from", messageObject.from)
+            writableMap.putString("body", messageObject.body)
+            sendRNEvent(MainApplication.getReactContext(), newMessageEventName, writableMap)
         }
     }
 
@@ -94,7 +101,7 @@ class P2ChatService : Service() {
                 writableMap.putArray(mEntry.key, writableArray)
             }
 
-            sendEvent(MainApplication.getReactContext(), newMatchEventName, writableMap)
+            sendRNEvent(MainApplication.getReactContext(), newMatchEventName, writableMap)
         }
     }
 
@@ -114,9 +121,9 @@ class P2ChatService : Service() {
             get() = this@P2ChatService
     }
 
-    fun sendMessage(text: String) {
+    fun sendMessage(topic: String, text: String) {
         if (isServiceRunning) {
-            P2mobile.publishMessage(MainApplication.SERVICE_TOPIC, text + "\n")
+            P2mobile.publishMessage(topic, text + "\n")
         }
         onServiceIsNotRunning()
     }

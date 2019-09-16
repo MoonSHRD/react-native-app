@@ -36,7 +36,14 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
         promise.resolve(gson.toJson(topics))
     }
 
+    @ReactMethod
     fun getAllMatches(promise: Promise) {
         promise.resolve(gson.toJson(MainApplication.getP2ChatService().getAllMatches()))
+    }
+
+    @ReactMethod
+    fun sendMessage(topic: String, messageText: String, promise: Promise) {
+        MainApplication.getP2ChatService().sendMessage(topic, messageText)
+        promise.resolve(true)
     }
 }

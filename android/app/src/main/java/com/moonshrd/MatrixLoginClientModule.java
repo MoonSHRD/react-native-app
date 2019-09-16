@@ -223,7 +223,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
 
             @Override
             public void onWaitingEmailValidation() {
-                //RNUtilsKt.sendEvent(getReactApplicationContext(), "onWaitingEmailValidation", null);
+                //RNUtilsKt.sendRNEvent(getReactApplicationContext(), "onWaitingEmailValidation", null);
                 //attemptRegistration(registrationManager);
             }
 
