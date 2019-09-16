@@ -18,9 +18,6 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import android.support.v4.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
 
 
 class P2ChatService : Service() {
@@ -86,7 +83,7 @@ class P2ChatService : Service() {
         val newMatch = P2mobile.getNewMatch()
         if (newMatch.isNotEmpty()) {
             val matchMapType = object : TypeToken<Map<String, List<String>>>() {}.type
-            val match: Map<String, List<String>> = gson.fromJson(newMatch, matchMapType)
+            val match: Map<String, List<String>> = gson.fromJson(newMatch, matchMapType) // Pair of "MatrixID: Topics"
 
             val writableMap = Arguments.createMap()
             val writableArray = Arguments.createArray()
@@ -99,6 +96,17 @@ class P2ChatService : Service() {
 
             sendEvent(MainApplication.getReactContext(), newMatchEventName, writableMap)
         }
+    }
+
+    /**
+     * @return Pair of "Topic: MatrixIDs"
+     */
+    fun getAllMatches(): Map<String, List<String>> {
+        if (isServiceRunning) {
+            val matchesMapType = object : TypeToken<Map<String, List<String>>>() {}.type
+            return gson.fromJson(P2mobile.getAllMatches(), matchesMapType)
+        }
+        return Collections.emptyMap()
     }
 
     inner class P2ChatServiceBinder : Binder() {
