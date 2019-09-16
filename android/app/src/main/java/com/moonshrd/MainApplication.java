@@ -10,6 +10,7 @@ import android.os.IBinder;
 import com.BV.LinearGradient.LinearGradientPackage;
 import com.actionsheet.ActionSheetPackage;
 import com.facebook.react.ReactApplication;
+import com.facebook.react.bridge.ReactContext;
 import com.reactnative.ivpusic.imagepicker.PickerPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
@@ -37,6 +38,7 @@ public class MainApplication extends Application implements ReactApplication {
     public static final String PROTOCOL_ID = "/moonshard/1.0.0";
     public static ServiceConnection serviceConnection = null;
     private static P2ChatService service = null;
+    private static ReactContext reactContext;
 
 
     private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
@@ -81,6 +83,7 @@ public class MainApplication extends Application implements ReactApplication {
         SoLoader.init(this, /* native exopackage */ false);
 
         getApplicationContext().startService(new Intent(getApplicationContext(), P2ChatService.class));
+        reactContext = mReactNativeHost.getReactInstanceManager().getCurrentReactContext();
 
         ServiceConnection serviceConnection = new ServiceConnection() {
             @Override
@@ -97,6 +100,10 @@ public class MainApplication extends Application implements ReactApplication {
         };
 
         getApplicationContext().bindService(new Intent(getApplicationContext(), P2ChatService.class), serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    public static ReactContext getReactContext() {
+        return reactContext;
     }
 
     public static ApplicationComponent getComponent() {

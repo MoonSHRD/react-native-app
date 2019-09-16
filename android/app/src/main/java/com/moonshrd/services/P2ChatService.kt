@@ -5,28 +5,25 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import android.util.Log
-
+import com.facebook.react.bridge.Arguments
 import com.google.gson.Gson
 import com.moonshrd.MainApplication
+import com.moonshrd.models.Match
 import com.moonshrd.models.Message
-
-import java.util.ArrayList
-import java.util.Arrays
+import com.moonshrd.utils.sendEvent
+import p2mobile.P2mobile
+import p2mobile.P2mobile.start
+import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
-
 import javax.inject.Inject
 
-import p2mobile.P2mobile
-
-import p2mobile.P2mobile.getMessages
-import p2mobile.P2mobile.start
-
 class P2ChatService : Service() {
+    private val newMatchEventName = "NewMatchEvent"
 
     @Inject
-    internal var gson: Gson? = null
+    private lateinit var gson: Gson
     private val binder = P2ChatServiceBinder()
     private var scheduledExecutorService: ScheduledExecutorService? = null
 
@@ -34,7 +31,7 @@ class P2ChatService : Service() {
         get() {
             if (isServiceRunning) {
                 val topicsJson = P2mobile.getTopics()
-                val topicsArr = gson!!.fromJson(topicsJson, Array<String>::class.java)
+                val topicsArr = gson.fromJson(topicsJson, Array<String>::class.java)
                 return listOf(*topicsArr)
             }
             onServiceIsNotRunning()
@@ -60,18 +57,40 @@ class P2ChatService : Service() {
         P2mobile.setMatrixID(matrixID)
         scheduledExecutorService!!.scheduleAtFixedRate({
             if (isServiceRunning) {
-                getMessage(gson)
+                getMessage()
             }
         }, 0, 300, TimeUnit.MILLISECONDS)
+
+        scheduledExecutorService!!.scheduleAtFixedRate({
+            if (isServiceRunning) {
+                getMatch()
+            }
+        }, 0, 1, TimeUnit.SECONDS)
         isServiceRunning = true
     }
 
 
-    private fun getMessage(gson: Gson?) {
-        val message = getMessages()
+    private fun getMessage() {
+        val message = P2mobile.getMessages()
         if (message.isNotEmpty()) {
-            val messageObject = gson!!.fromJson(message, Message::class.java)
-            Log.d(LOG_TAG, "New message! " + messageObject.from + " > " + messageObject.body) // FIXME
+            val messageObject = gson.fromJson(message, Message::class.java)
+            Log.d(LOG_TAG, "New message! [${messageObject.topic}] ${messageObject.from} > ${messageObject.body})") // FIXME
+        }
+    }
+
+    private fun getMatch() {
+        val newMatch = P2mobile.getNewMatch()
+        if (newMatch.isNotEmpty()) {
+            val match = gson.fromJson(newMatch, Match::class.java)
+
+            val writableMap = Arguments.createMap()
+            val writableArray = Arguments.createArray()
+            match.topics.forEach {
+                writableArray.pushString(it)
+            }
+            writableMap.putArray(match.matrixID, writableArray)
+            
+            sendEvent(MainApplication.getReactContext(), newMatchEventName, writableMap)
         }
     }
 

@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName;
 public class Message {
     @SerializedName("Body") public String body;
     @SerializedName("From") public String from;
+    @SerializedName("Topic") public String topic;
 
     public Message() { }
 
