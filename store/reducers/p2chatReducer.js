@@ -6,7 +6,7 @@ const initialState = {
     topic: {}
 }
 
-export default function appStateReducer (state = initialState, action) {
+export default function p2chatReducer (state = initialState, action) {
     switch (action.type) {
         case GET_ALL_TOPICS:
             return {

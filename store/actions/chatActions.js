@@ -1,7 +1,7 @@
-import { SET_ROOM_ID, SET_END, SET_START, GET_MESSAGE_HISTORY, GET_MESSAGE_HISTORY_SUCCESS, GET_MESSAGE_HISTORY_FAILURE, GET_UPDATED_MESSAGE_HISTORY, UPDATE_MESSAGE_HISTORY, PUSH_NEW_MESSAGE, PUSH_NEW_MESSAGE_SUCCESS, PUSH_NEW_MESSAGE_FAILURE, NEW_MESSAGE, HANDLE_MESSAGE_CHANGE, PUSH_NEW_MESSAGE_TO_HISTORY } from '../actions/constants'
+import { SET_ROOM_ID, SET_END, SET_START, GET_MESSAGE_HISTORY, GET_MESSAGE_HISTORY_SUCCESS, GET_MESSAGE_HISTORY_FAILURE, GET_UPDATED_MESSAGE_HISTORY, UPDATE_MESSAGE_HISTORY, PUSH_NEW_MESSAGE, PUSH_NEW_MESSAGE_SUCCESS, PUSH_NEW_MESSAGE_FAILURE, NEW_MESSAGE, HANDLE_MESSAGE_CHANGE, PUSH_NEW_MESSAGE_TO_HISTORY, RESET_NEW_MESSAGE } from '../actions/constants'
 import MatrixClient from '../../native/MatrixClient';  
 
-export function getDirectChatHistory(roomId) {
+export function getDirectChatHistory (roomId, callback) {
     return (dispatch) => {
       const promise = MatrixClient.getHistoryMessage(roomId, null)
       promise.then((data) => {
@@ -21,10 +21,13 @@ export function getDirectChatHistory(roomId) {
         }).map(data => {
           var message = new Object()
 
-          message._id = `f${(~~(Math.random()*1e8)).toString(16)}`
+          message._id = data.event_id
           message.text = data.content.body
           message.createdAt = time - data.age
           message.status = data.m_sent_state
+          var user = new Object()
+          message.user = user
+          user._id = data.sender
 
           return message
         })
@@ -34,6 +37,7 @@ export function getDirectChatHistory(roomId) {
         dispatch(setStart(messageHistory.start))
         dispatch(getMessageHistorySuccess(messageHistory))
         console.log(messageHistory)
+        callback(messageHistory)
         },
         (error) => {
         dispatch(getMessageHistoryFailure())
@@ -41,7 +45,7 @@ export function getDirectChatHistory(roomId) {
         }
       );
     }
-  }  
+  }
 
   export function updateDirectChatHistory(roomId, end) {
     return (dispatch) => {
@@ -64,17 +68,20 @@ export function getDirectChatHistory(roomId) {
         }).map(data => {
           var message = new Object()
 
-          message._id = `f${(~~(Math.random()*1e8)).toString(16)}`
+          message._id = data.event_id
           message.text = data.content.body
           message.createdAt = time - data.age
           message.status = data.m_sent_state
+
+          var user = new Object()
+          message.user = user
+          user._id = data.sender
 
           return message
         })
 
         dispatch(getMessageHistory())
         dispatch(setEnd(messageHistory.end))
-        dispatch(setStart(messageHistory.start))
         dispatch(getUpdatedMessageHistory(messageHistory))
         dispatch(updateMessageHistory())
         console.log(messageHistory)
@@ -92,18 +99,9 @@ export function getDirectChatHistory(roomId) {
       const promise = MatrixClient.sendMessage(message, roomId)
       promise.then((data) => {
         console.log(data)
-        dispatch(pushNewMessage())
-
-        var newMessage = new Object()
-
-        newMessage._id = `f${(~~(Math.random()*1e8)).toString(16)}`
-        newMessage.text = message
-        newMessage.createdAt = new Date(),
-        newMessage.status = 'SENT'
-
-        dispatch(newMessage(newMessage))
-        dispatch(pushNewMessageToHistory())
-        dispatch(pushNewMessageSuccess())
+        // dispatch(pushNewMessage())
+        // dispatch(pushNewMessageToHistory())
+        // dispatch(pushNewMessageSuccess())
         },
         (error) => {
         console.log(error);
@@ -184,7 +182,7 @@ export function getDirectChatHistory(roomId) {
     }
   }
 
-  export function newMessage(data) {
+  export function setNewMessage(data) {
     return {
         type: NEW_MESSAGE,
         data
@@ -194,6 +192,12 @@ export function getDirectChatHistory(roomId) {
   export function pushNewMessageToHistory() {
     return {
       type: PUSH_NEW_MESSAGE_TO_HISTORY,
+    }
+  }
+
+  export function resetNewMessage() {
+    return {
+      type: RESET_NEW_MESSAGE,
     }
   }
 

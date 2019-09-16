@@ -7,10 +7,11 @@ import { theme } from '../constants';
 import { Avatar, ThemeConsumer } from 'react-native-elements';
 import ImagePicker from 'react-native-image-crop-picker';
 import ActionSheet from 'react-native-action-sheet';
+import MatrixClient from  '../native/MatrixClient';
 
 import {connect} from 'react-redux';
-import { getContactInfo, deselectContact, getMyUserProfile, createDirectChat, saveNewUserName, saveNewAvatar } from '../store/actions/contactsActions';
-
+import { getContactInfo, deselectContact, getMyUserProfile, createDirectChat, saveNewUserName, saveNewAvatar, getMyUserId } from '../store/actions/contactsActions';
+import { subcribeToTopic, unsubscribeFromTopic } from '../store/actions/p2chatActions';
 const { width, height } = Dimensions.get('window');
 
 class Profile extends Component {
@@ -125,6 +126,11 @@ class Profile extends Component {
       ]
   }
 
+  constructor(){
+    super();
+        this.goToChatScreen = this.goToChatScreen.bind(this);
+  } 
+
   onContentSizeChange = (contentWidth, contentHeight) => {
     this.setState({ screenHeight: contentHeight });
   };
@@ -134,6 +140,7 @@ class Profile extends Component {
     await console.log(userId)
     await this.props.getContactInfo(userId.toLowerCase())
     await this.checkName()
+    await this.props.getMyUserId()
     await this.loadAvatar()
   }
 
@@ -201,7 +208,38 @@ class Profile extends Component {
 
   loadMyProfile = async () => {
     await this.props.getMyUserProfile()
+    await this.props.getMyUserId()
     await this.loadMyAvatar()
+  }
+
+  createDirectChatWithUser = async (userId) => {
+    const promise = await MatrixClient.createDirectChat(userId)
+    promise.then( async (data) => {
+        await this.setState({roomId: data})
+        console.log(data)
+      },
+      (error) => {
+        console.log(error);
+      }
+    )
+  }
+
+  goToChatScreen = async (navigation) => {
+    await this.createDirectChatWithUser(userId)
+    const roomId = await this.state.roomId
+    if (this.props.contacts.contact.roomId != null) {
+        roomId = this.props.contacts.contact.roomId
+    }
+    await this.props.navigation.navigate('Chat', {
+        userName: this.capitalize(this.props.contacts.contact.name),
+        userIdName: this.parseUserId(this.props.contacts.contact.userId),
+        userId: this.props.contacts.contact.userId,
+        avatarUrl: this.props.contacts.contact.avatarUrl,
+        avatarLink: this.parseAvatarUrl(this.props.contacts.contact.avatarUrl),
+        isActive: this.props.contacts.contact.isActive,
+        lastSeen: this.props.contacts.contact.lastSeen,
+        roomId: roomId
+    })    
   }
 
   setHeaderParams = () => {
@@ -293,6 +331,7 @@ class Profile extends Component {
   }
 
   componentDidMount() {
+    this.setState({roomId: this.props.navigation.getParam('roomId', '')})
     this.setHeaderParams()
     this.willFocus = this.props.navigation.addListener('willFocus', async () => {
         const userName = await this.props.navigation.getParam('userName', 'userName')
@@ -314,7 +353,7 @@ class Profile extends Component {
       this.onUnexpectedErrorEvent = DeviceEventEmitter.addListener('onUnexpectedError', function(e) {
         console.log('onUnexpectedError')
         console.log(e)
-      });    
+      }); 
 }
 
 
@@ -452,18 +491,7 @@ componentDidUpdate(prevProps) {
                     null
                 }
                 <Button gradient style={styles.confirmButton}               
-                    onPress={() => {
-                        this.props.createDirectChat(userId)
-                        this.props.navigation.navigate('Chat', {
-                            userName: this.capitalize(this.props.contacts.contact.name),
-                            userIdName: this.parseUserId(this.props.contacts.contact.userId),
-                            userId: this.props.contacts.contact.userId,
-                            avatarUrl: this.props.contacts.contact.avatarUrl,
-                            avatarLink: this.parseAvatarUrl(this.props.contacts.contact.avatarUrl),
-                            isActive: this.props.contacts.contact.isActive,
-                            lastSeen: this.props.contacts.contact.lastSeen,
-                          })    
-                    }}
+                    onPress={() => this.goToChatScreen()}
                 >
                     <Text headline bold white center>Send Message</Text>
                 </Button>       
@@ -834,10 +862,13 @@ function mapStateToProps (state) {
     return {
       getContactInfo: (data) => dispatch(getContactInfo(data)),
       deselectContact: () => dispatch(deselectContact()),
+      getMyUserId: () => dispatch(getMyUserId()),
       getMyUserProfile: () => dispatch(getMyUserProfile()),
       createDirectChat: (data) => dispatch(createDirectChat(data)),
       saveNewUserName: (data) => dispatch(saveNewUserName(data)),
       saveNewAvatar: (data) => dispatch(saveNewAvatar(data)),
+      subcribeToTopic:  () =>  dispatch(subcribeToTopic()),
+      unsubscribeFromTopic:  () =>  dispatch(unsubscribeFromTopic()),  
     }
   }
   

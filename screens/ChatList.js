@@ -10,7 +10,7 @@ import { theme } from '../constants';
 import { Text, Block } from '../components';
 
 import {connect} from 'react-redux';
-import { getContactList, searchBar, changeContactList, clearSearchBar } from '../store/actions/contactsActions';
+import { getContactList, searchBar, changeContactList, clearSearchBar, getMyUserId } from '../store/actions/contactsActions';
 
 
 
@@ -83,6 +83,7 @@ class ChatList extends Component {
     this.setHeaderParams()
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
       this.props.loadDirectChats()
+      this.props.getMyUserId()
     });
   }
 
@@ -242,6 +243,7 @@ class ChatList extends Component {
                     subtitleStyle={styles.subtitle}
                     containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
                     onPress={(navigation) => {
+                      const myUserId = this.props.contacts.myUserID
                       this.props.navigation.navigate('Chat', {
                         userName: this.capitalize(l.name),
                         userIdName: this.parseUserId(l.userId),
@@ -251,6 +253,7 @@ class ChatList extends Component {
                         lastSeen: l.lastSeen,
                         previousScreen: 'ChatList',
                         roomId: l.roomId,
+                        myUserId: myUserId,
                       })
                     }}  
                     />
@@ -318,16 +321,17 @@ class ChatList extends Component {
                   subtitleStyle={styles.subtitle}
                   containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
                   onPress={(navigation) => {
+                    const myUserId = this.props.contacts.myUserID
                     this.props.navigation.navigate('Chat', {
                       userName: this.capitalize(l.name),
                       userIdName: this.parseUserId(l.userId),
                       userId: l.userId,
-                      avatarUrl: l.avatarUrl,
-                      avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                      avatarUrl: this.parseAvatarUrl(l.avatarUrl),
                       isActive: l.isActive,
                       lastSeen: l.lastSeen,
                       previousScreen: 'ChatList',
                       roomId: l.roomId,
+                      myUserId: myUserId,
                     })
                   }}  
                 />
@@ -514,6 +518,7 @@ function mapDispatchToProps (dispatch) {
   return {
     loadDirectChats: () => dispatch(getContactList()),
     searchBar: (data) => dispatch(searchBar(data)),
+    getMyUserId: () => dispatch(getMyUserId()),
     changeContactList: (data) => dispatch(changeContactList(data)),
     clearSearchBar: () => dispatch(clearSearchBar()),
   }
