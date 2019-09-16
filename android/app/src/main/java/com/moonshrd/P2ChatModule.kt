@@ -19,20 +19,24 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
     }
 
     @ReactMethod
-    public fun subcribeToTopic(topic: String, promise: Promise) {
+    fun subcribeToTopic(topic: String, promise: Promise) {
         MainApplication.getP2ChatService().subscribeToTopic(topic)
         promise.resolve(true)
     }
 
     @ReactMethod
-    public fun unsubscribeFromTopic(topic: String, promise: Promise) {
+    fun unsubscribeFromTopic(topic: String, promise: Promise) {
         MainApplication.getP2ChatService().unsubscribeFromTopic(topic)
         promise.resolve(true)
     }
 
     @ReactMethod
-    public fun getCurrentTopics(promise: Promise) {
+    fun getCurrentTopics(promise: Promise) {
         val topics = MainApplication.getP2ChatService().myTopics
         promise.resolve(gson.toJson(topics))
+    }
+
+    fun getAllMatches(promise: Promise) {
+        promise.resolve(gson.toJson(MainApplication.getP2ChatService().getAllMatches()))
     }
 }
