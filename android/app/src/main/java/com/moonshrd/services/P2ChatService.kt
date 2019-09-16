@@ -7,8 +7,8 @@ import android.os.IBinder
 import android.util.Log
 import com.facebook.react.bridge.Arguments
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.moonshrd.MainApplication
-import com.moonshrd.models.Match
 import com.moonshrd.models.Message
 import com.moonshrd.utils.sendEvent
 import p2mobile.P2mobile
@@ -18,6 +18,10 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import android.support.v4.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
 
 class P2ChatService : Service() {
     private val newMatchEventName = "NewMatchEvent"
@@ -81,15 +85,18 @@ class P2ChatService : Service() {
     private fun getMatch() {
         val newMatch = P2mobile.getNewMatch()
         if (newMatch.isNotEmpty()) {
-            val match = gson.fromJson(newMatch, Match::class.java)
+            val matchMapType = object : TypeToken<Map<String, List<String>>>() {}.type
+            val match: Map<String, List<String>> = gson.fromJson(newMatch, matchMapType)
 
             val writableMap = Arguments.createMap()
             val writableArray = Arguments.createArray()
-            match.topics.forEach {
-                writableArray.pushString(it)
+            match.map { mEntry ->
+                mEntry.value.forEach {
+                    writableArray.pushString(it)
+                }
+                writableMap.putArray(mEntry.key, writableArray)
             }
-            writableMap.putArray(match.matrixID, writableArray)
-            
+
             sendEvent(MainApplication.getReactContext(), newMatchEventName, writableMap)
         }
     }

@@ -35,4 +35,8 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
         val topics = MainApplication.getP2ChatService().myTopics
         promise.resolve(gson.toJson(topics))
     }
+
+    public fun getAllMatches(promise: Promise) {
+        //val
+    }
 }
