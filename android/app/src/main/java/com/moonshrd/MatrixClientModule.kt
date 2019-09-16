@@ -21,6 +21,7 @@ import org.matrix.androidsdk.data.RoomState
 import org.matrix.androidsdk.data.RoomSummary
 import org.matrix.androidsdk.data.timeline.EventTimeline
 import org.matrix.androidsdk.listeners.IMXMediaUploadListener
+import org.matrix.androidsdk.rest.model.ChunkEvents
 import org.matrix.androidsdk.rest.model.Event
 import org.matrix.androidsdk.rest.model.User
 import org.matrix.androidsdk.rest.model.search.SearchUsersResponse
@@ -28,6 +29,7 @@ import java.io.ByteArrayInputStream
 import java.net.URLConnection.guessContentTypeFromStream
 import javax.inject.Inject
 import org.matrix.androidsdk.rest.model.TokensChunkEvents
+import org.matrix.androidsdk.rest.model.sync.RoomResponse
 
 class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
     private val eventListeners = HashMap<String, NewEventsListener>()
@@ -123,6 +125,8 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         val userAvatarUrl = CompletableFuture<String?>()
         val userIsActive = CompletableFuture<Boolean?>()
         val userLastSeen = CompletableFuture<Long?>()
+        val userMembership = CompletableFuture<String?>()
+
 
 
         val directChats = matrixInstance.defaultSession.dataHandler.store.rooms.filter {
@@ -152,7 +156,6 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                 userLastSeen.complete(null)
             }
         })
-
 
         matrixInstance.defaultSession.profileApiClient.displayname(userID, object : ApiCallback<String> {
             override fun onSuccess(info: String?) {
@@ -196,13 +199,41 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             }
         })
 
+
+        matrixInstance.defaultSession.roomsApiClient.getRoomMembers(roomId,null,null,null,object:ApiCallback<ChunkEvents>{
+            override fun onSuccess(info: ChunkEvents?) {
+                info?.let{
+                    for(i in it.chunk.indices){
+                            if(userID== it.chunk[i].userId){
+                                val membershipInfo = info.chunk[i].contentAsJsonObject.get("membership").toString()
+                                userMembership.complete(membershipInfo)
+                                break
+                            }
+                    }
+                }
+            }
+
+            override fun onUnexpectedError(e: java.lang.Exception?) {
+                var kek = ""
+            }
+
+            override fun onMatrixError(e: MatrixError?) {
+                var kek = ""
+            }
+
+            override fun onNetworkError(e: java.lang.Exception?) {
+                var kek = ""
+            }
+        })
+
         GlobalScope.launch {
             val name = userName.get()
             val avatarUrl = userAvatarUrl.get()
             val isActive = userIsActive.get()
             val lastSeen = userLastSeen.get()
+            val membership = userMembership.get()
             if (name != null && avatarUrl != null) {
-                promise.resolve(gson.toJson(UserModel(userID, name, avatarUrl,lastSeen = lastSeen,isActive = isActive,roomId = roomId)))
+                promise.resolve(gson.toJson(UserModel(userID, name, avatarUrl,lastSeen = lastSeen,isActive = isActive,roomId = roomId,membership = membership)))
             } else {
                 promise.resolve(gson.toJson(UserModel(userID, "", "")))
             }
@@ -246,11 +277,12 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         if (!isSessionExists(promise)) {
             return
         }
+
         if (isDirectChatExists(participantUserId)) {
             getDataUser(participantUserId,promise)
-           // promise.reject("directChatExists", "Direct chat with $participantUserId exists.")
             return
         }
+
         matrixInstance.defaultSession.createDirectMessageRoom(participantUserId, object : ApiCallback<String> {
             override fun onSuccess(roomId: String?) {
                 promise.resolve(roomId)
@@ -463,6 +495,30 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         })
     }
 
+    @ReactMethod
+    fun acceptInvite(roomId:String,promise: Promise){
+        val room = matrixInstance.defaultSession.dataHandler.getRoom(roomId)
+        matrixInstance.defaultSession.roomsApiClient.joinRoom(roomId,null,null,object:ApiCallback<RoomResponse> {
+            override fun onSuccess(info: RoomResponse?) {
+                val infoRoom = gson.toJson(info)
+                promise.resolve(infoRoom)
+            }
+
+            override fun onUnexpectedError(e: Exception) {
+                promise.reject("onUnexpectedError", e.message)
+
+            }
+
+            override fun onMatrixError(e: MatrixError) {
+                promise.reject("onMatrixError", e.message)
+            }
+
+            override fun onNetworkError(e: java.lang.Exception) {
+                promise.reject("onNetworkError", e.message)
+            }
+        })
+    }
+
     private fun getHistoryMessageTest(roomId:String,tokenMessageEnd:String?){
         val room = matrixInstance.defaultSession.dataHandler.getRoom(roomId)
 
@@ -511,8 +567,6 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             }
         })
     }
-
-
 
     //can refactor with use dagger2
     internal class NewEventsListener(private val reactContext: ReactApplicationContext,
