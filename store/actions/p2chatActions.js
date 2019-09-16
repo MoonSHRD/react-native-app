@@ -2,42 +2,45 @@ import { GET_ALL_TOPICS, GET_TOPIC, NEW_TOPIC, ADD_TOPIC_TO_ARRAY } from '../act
 import P2Chat from '../../native/P2Chat';
 
 export function getCurrentTopics() {
-    const promise = P2Chat.getCurrentTopics()
-    promise.then((data) => {
-        console.log(data)
-        const jsonData = JSON.parse(data)
-        console.log(jsonData)
-    },
-    (error) => {
-        console.log(error);
+    return (dispatch) => {
+        const promise = P2Chat.getCurrentTopics()
+        promise.then((data) => {
+            const jsonData = JSON.parse(data)
+            console.log(jsonData)
+            dispatch(getAllTopics(jsonData))
+        },
+        (error) => {
+            console.log(error);
+        });
     }
-    );
 }
 
 export function subcribeToTopic() {
-    const promise = P2Chat.subcribeToTopic('test')
-    promise.then((data) => {
-        console.log(data)
-        const jsonData = JSON.parse(data)
-        console.log(jsonData)
-    },
-    (error) => {
-        console.log(error);
+    return (dispatch) =>  {
+        const promise = P2Chat.subcribeToTopic('moonshard')
+        promise.then((data) => {
+            console.log(data)
+            // const jsonData = JSON.parse(data)
+            // console.log(jsonData)
+        },
+        (error) => {
+            console.log(error);
+        });    
     }
-    );
 }
 
 export function unsubscribeFromTopic() {
-    const promise = P2Chat.unsubscribeFromTopic('test')
-    promise.then((data) => {
-        console.log(data)
-        const jsonData = JSON.parse(data)
-        console.log(jsonData)
-    },
-    (error) => {
-        console.log(error);
+    return (dispatch) => {
+        const promise = P2Chat.unsubscribeFromTopic('test')
+        promise.then((data) => {
+            console.log(data)
+            // const jsonData = JSON.parse(data)
+            // console.log(jsonData)
+        },
+        (error) => {
+            console.log(error);
+        });
     }
-    );
 }
 
 export function getAllTopics(data) {

@@ -1,9 +1,18 @@
-import { SET_ROOM_ID, SET_END, SET_START, GET_MESSAGE_HISTORY, GET_MESSAGE_HISTORY_SUCCESS, GET_MESSAGE_HISTORY_FAILURE, GET_UPDATED_MESSAGE_HISTORY, UPDATE_MESSAGE_HISTORY, PUSH_NEW_MESSAGE, PUSH_NEW_MESSAGE_SUCCESS, PUSH_NEW_MESSAGE_FAILURE, NEW_MESSAGE, HANDLE_MESSAGE_CHANGE, PUSH_NEW_MESSAGE_TO_HISTORY } from '../actions/constants'
+import { SET_ROOM_ID, SET_END, SET_START, GET_MESSAGE_HISTORY, GET_MESSAGE_HISTORY_SUCCESS, GET_MESSAGE_HISTORY_FAILURE, GET_UPDATED_MESSAGE_HISTORY, UPDATE_MESSAGE_HISTORY, PUSH_NEW_MESSAGE, PUSH_NEW_MESSAGE_SUCCESS, PUSH_NEW_MESSAGE_FAILURE, NEW_MESSAGE, HANDLE_MESSAGE_CHANGE, PUSH_NEW_MESSAGE_TO_HISTORY, RESET_NEW_MESSAGE } from '../actions/constants'
 
 const initialState = {
     roomId: '',
-    messageHistory: [],
-    newMessageHistory: [],
+    messageHistory: {
+        end: '',
+        messages: [],
+        start: '',
+    },
+    messages: [],
+    newMessageHistory: {
+        end: '',
+        messages: [],
+        start: '',
+    },
     end: '',
     start: '',
     newMessage: {},
@@ -12,7 +21,7 @@ const initialState = {
     error: false,
 }
 
-export default function appStateReducer (state = initialState, action) {
+export default function chatReducer (state = initialState, action) {
     switch (action.type) {
         case SET_ROOM_ID:
             return {
@@ -55,7 +64,13 @@ export default function appStateReducer (state = initialState, action) {
         case UPDATE_MESSAGE_HISTORY:
             return {
                 ...state,
-                messageHistory: [...state.messageHistory, state.newMessageHistory]
+                messageHistory: {
+                    end: state.newMessageHistory.end,
+                    messageHistory: [
+                        ...state.messageHistory.messages, ...state.newMessageHistory.messages 
+                    ],
+                    start: state.messageHistory.start,
+                }
             }
         case PUSH_NEW_MESSAGE:
             return {
@@ -78,10 +93,22 @@ export default function appStateReducer (state = initialState, action) {
                 ...state,
                 newMessage: action.data
             }
+        case RESET_NEW_MESSAGE:
+            return {
+                ...state,
+                newMessage: {}
+            }
         case PUSH_NEW_MESSAGE_TO_HISTORY:
             return {
                 ...state,
-                messageHistory: [...state.messageHistory, state.newMessage]
+                messageHistory: {
+                    ...state.messageHistory,
+                        end: state.messageHistory.end,
+                        messages: [
+                            state.newMessage,  ...state.messageHistory.messages
+                        ],
+                        start: state.messageHistory.start,
+                },
             }    
         case HANDLE_MESSAGE_CHANGE: {    
             return {

@@ -10,7 +10,7 @@ import { Text, Block } from '../components';
 
 import {connect} from 'react-redux';
 import { getContactList, searchBar, changeContactList, clearSearchBar, selectContact, deselectContact, getMyUserId, getMyUserProfile, searchUserById } from '../store/actions/contactsActions';
-
+import { getCurrentTopics } from '../store/actions/p2chatActions';
 
 const { width, height } = Dimensions.get('window');
 
@@ -73,6 +73,7 @@ class ContactList extends Component {
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
       this.props.getMyUserId()
       this.props.getMyUserProfile()
+      // this.props.getCurrentTopics()
       this.props.loadDirectChats()
     });
 
@@ -256,6 +257,7 @@ parseUserId(props) {
                           userIdName: this.parseUserId(l.userId),
                           userId: l.userId,
                           avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                          roomId: l.roomId,
                         })
                       }}  
                     />
@@ -294,6 +296,7 @@ parseUserId(props) {
                         userIdName: this.parseUserId(l.userId),
                         userId: l.userId,
                         avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                        roomId: l.roomId,
                       })
                   }}  
                   />
@@ -460,6 +463,7 @@ function mapStateToProps (state) {
   return {
     contacts: state.contacts,
     appState: state.appState,
+    p2chat: state.p2chat,
   }
 }
 
@@ -473,7 +477,8 @@ function mapDispatchToProps (dispatch) {
     deselectContact: () => dispatch(deselectContact()),
     getMyUserId: () => dispatch(getMyUserId()),
     getMyUserProfile: () => dispatch(getMyUserProfile()),
-    searchUserById: (data) => dispatch(searchUserById(data))
+    searchUserById: (data) => dispatch(searchUserById(data)),
+    getCurrentTopics: () => dispatch(getCurrentTopics()),
   }
 }
 

@@ -231,6 +231,7 @@ parseUserId(props) {
                           userIdName: this.parseUserId(l.userId),
                           userId: l.userId,
                           avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                          roomId: l.roomId,
                         })
                       }}  
                     />
@@ -275,6 +276,7 @@ parseUserId(props) {
                         userIdName: this.parseUserId(l.userId),
                         userId: l.userId,
                         avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                        roomId: l.roomId,
                       })
                     }}  
                   />

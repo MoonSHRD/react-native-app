@@ -3,15 +3,14 @@ import { Text, Dimensions, StyleSheet, Platform, View, DeviceEventEmitter } from
 
 import { Block } from '../components';
 import { Avatar, Badge, Icon } from 'react-native-elements';
-import { GiftedChat, Actions, Send, InputToolbar, Composer } from 'react-native-gifted-chat';
+import { GiftedChat, Actions, Send, InputToolbar, Composer, GiftedAvatar } from 'react-native-gifted-chat';
 import {connect} from 'react-redux';
 import TimeAgo from 'react-native-timeago';
 import { theme } from '../constants';  
 import ImagePicker from 'react-native-image-crop-picker';
 import ActionSheet from 'react-native-action-sheet';
-import MatrixClient from '../native/MatrixClient';
-import { getDirectChatHistory, updateDirectChatHistory, sendMessage, handleMessageChange } from '../store/actions/chatActions';
-
+import { getDirectChatHistory, updateDirectChatHistory, sendMessage, handleMessageChange, pushNewMessageSuccess, pushNewMessage, pushNewMessageToHistory, resetNewMessage, setNewMessage } from '../store/actions/chatActions';
+import { getMyUserId } from '../store/actions/contactsActions';
 const { width, height } = Dimensions.get('window');
 
 
@@ -152,33 +151,59 @@ class Chat extends React.Component {
     messages: []
   };
 
+  addNewMessage(newMessage) {
+    this.setState((previousState) => {
+      return {
+        messages: GiftedChat.append(previousState.messages, newMessage),
+      };
+    });
+  }
+
+
   componentDidMount = async () => {
+      await this.props.getMyUserId()
       await this.getMessageHistory()
-      this.newEventListener = DeviceEventEmitter.addListener('NewEventsListener', (e) => {
-        console.log(e)
-        console.log('NewEventsListener')
-      })
-      this.onEventCreated = DeviceEventEmitter.addListener('onEventCreated', (e) => {
-        console.log(e)
-        console.log('onEventCreated')
-      })
-      this.onEventCreationError = DeviceEventEmitter.addListener('onEventCreationError', (e) => {
-        console.log(e)
-        console.log('onEventCreationError')
-      })
-      this.onEncryptionError = DeviceEventEmitter.addListener('onEncryptionError', (e) => {
-        console.log(e)
-        console.log('onEncryptionError')
-      })
-      this.onEvent = DeviceEventEmitter.addListener('onEvent', (e) => {
-        console.log(e)
-        console.log('onEvent')
+      var self = this;
+      const { chat, setNewMessage, pushNewMessage, pushNewMessageSuccess, pushNewMessageToHistory, resetNewMessage } = this.props;
+      this.eventMessage = DeviceEventEmitter.addListener('eventMessage', function(e) {
+        const data = e.message
+        const jsonData = JSON.parse(data)
+        const time = new Date()
+
+        var newMessage = new Object()
+
+        newMessage._id = jsonData.event_id
+        newMessage.text = jsonData.content.body
+        newMessage.createdAt = time - jsonData.unsigned.age
+        newMessage.status = jsonData.m_sent_state
+
+        var user = new Object()
+        newMessage.user = user
+        user._id = jsonData.sender
+
+        console.log(newMessage)
+
+        setNewMessage(newMessage)
+        pushNewMessage()
+        pushNewMessageSuccess()
+        self.addNewMessage(newMessage)
+        pushNewMessageToHistory()
+        resetNewMessage()
+        
       })
     }
 
   getMessageHistory() {
     const roomId = this.props.navigation.getParam('roomId', '')
-    this.props.getDirectChatHistory(roomId)
+    this.props.getDirectChatHistory(roomId, (messages) => {
+      console.log(messages)
+      const newMessages = messages.messages
+      this.setState((previousState) => {
+        return {
+          messages: GiftedChat.append(previousState.messages, newMessages),
+        };
+      });
+    });
   }
 
   capitalize(props) {
@@ -186,12 +211,6 @@ class Chat extends React.Component {
     return text
   }
 
-
-  // onSend(messages = []) {
-  //   this.setState(previousState => ({
-  //     messages: GiftedChat.append(previousState.messages, messages),
-  //   }))
-  // }
 
   onSend = async () => {
     const {chat, sendMessage, navigation} = await this.props
@@ -299,24 +318,38 @@ isCloseToTop({ layoutMeasurement, contentOffset, contentSize }) {
   return contentSize.height - layoutMeasurement.height - paddingToTop <= contentOffset.y;
 }
 
+loadPreviousMessages = async () => {
+  const roomId = await this.props.navigation.getParam('roomId', '')
+  await this.setState({refreshing: true});
+  await this.props.updateDirectChatHistory(roomId, this.props.chat.end);
+  const newMessages = this.props.chat.newMessageHistory.messages;
+  await this.setState((previousState) => {
+    return {
+      messages: GiftedChat.prepend(previousState.messages, newMessages),
+    };
+  });
+  await console.log('loaded')
+}
+
 
   render() {
+    const myUserId = this.props.contacts.myUserID
+
     return (
       <GiftedChat
         text={this.props.chat.newTextMessage}
         onInputTextChanged={text => this.props.handleMessageChange(text)}    
-        messages={this.props.chat.messageHistory.messages}
+        messages={this.state.messages}
         onSend={this.onSend}
         listViewProps={{
           scrollEventThrottle: 400,
           onScroll: ({ nativeEvent }) => {
             if (this.isCloseToTop(nativeEvent)) {
-              const roomId = this.props.navigation.getParam('roomId', '')
-              this.setState({refreshing: true});
-              this.props.updateDirectChatHistory(roomId, this.props.chat.end);
+              this.loadPreviousMessages()
             }
-          }
+          },
         }}
+        // loadEarlier={this.state.refreshing}
         placeholder={'Type Message Here'}
         renderSend={this.renderSend}
         renderActions={this.renderCustomActions}
@@ -327,7 +360,7 @@ isCloseToTop({ layoutMeasurement, contentOffset, contentSize }) {
         minInputToolbarHeight={48}
         alwaysShowSend={true}
         user={{
-          _id: 1,
+          _id: myUserId,
         }}
       />
     )
@@ -414,10 +447,17 @@ function mapStateToProps (state) {
 
   function mapDispatchToProps (dispatch) {
     return {
-      getDirectChatHistory: (roomId) => dispatch(getDirectChatHistory(roomId)),
+      getDirectChatHistory: (roomId, callback) => dispatch(getDirectChatHistory(roomId, callback)),
       updateDirectChatHistory: (roomId, end) => dispatch(updateDirectChatHistory(roomId, end)),
       sendMessage: (message, roomId) => dispatch(sendMessage(message, roomId)),
       handleMessageChange: (text) => dispatch(handleMessageChange(text)),
+      getMyUserId: () => dispatch(getMyUserId()),
+      setNewMessage: (data) => dispatch(setNewMessage(data)),
+      pushNewMessage: () => dispatch(pushNewMessage()),
+      pushNewMessageSuccess: () => dispatch(pushNewMessageSuccess()),
+      pushNewMessageToHistory: () => dispatch(pushNewMessageToHistory()),
+      resetNewMessage: () => dispatch(resetNewMessage()),
+      loadMessages: (roomId, callback) => dispatch(loadMessages(roomId, callback))
     }
   }  
     
