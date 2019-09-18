@@ -47,7 +47,7 @@ allprojects {
             url("$rootDir/../node_modules/v8-android/dist")
         }
         maven {
-            url 'https://jitpack.io'
+            url 'https://www.jitpack.io'
         }
         maven {
             // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
