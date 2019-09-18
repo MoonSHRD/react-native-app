@@ -150,11 +150,11 @@ class Profile extends Component {
 
   acceptInvite = async (roomId) => {
       const promise = MatrixClient.acceptInvite(roomId)
-      promise.then((data) => {
+      promise.then(async = (data) => {
           const jsonData = JSON.parse(data)
           const user = new Object()
-
-          await this.props.navigation.navigate('Chat', {
+          
+          this.props.navigation.navigate('Chat', {
             userName: jsonData.name,
             userIdName: this.parseUserId(jsonData.userId),
             userId: jsonData.userId,
