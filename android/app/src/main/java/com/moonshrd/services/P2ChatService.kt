@@ -153,6 +153,6 @@ class P2ChatService : Service() {
 
     companion object {
         private val LOG_TAG = "P2ChatService"
-        @JvmField var isServiceRunning = false
+        var isServiceRunning = false
     }
 }

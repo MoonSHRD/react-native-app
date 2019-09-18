@@ -82,41 +82,24 @@ public class MainApplication extends Application implements ReactApplication {
 
         SoLoader.init(this, /* native exopackage */ false);
 
+        getApplicationContext().startService(new Intent(getApplicationContext(), P2ChatService.class));
         reactContext = mReactNativeHost.getReactInstanceManager().getCurrentReactContext();
-    }
 
-    public static void startP2ChatService(Context context, String matrixID) {
-        if(!P2ChatService.isServiceRunning) {
+        ServiceConnection serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                MainApplication.serviceConnection = this;
+                MainApplication.service = ((P2ChatService.P2ChatServiceBinder) service).getService();
+            }
 
-            Intent intent = new Intent(context, P2ChatService.class);
-            intent.putExtra("matrixID", matrixID);
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                MainApplication.serviceConnection = null;
+                MainApplication.service = null;
+            }
+        };
 
-            context.startService(intent);
-            ServiceConnection serviceConnection = new ServiceConnection() {
-                @Override
-                public void onServiceConnected(ComponentName name, IBinder service) {
-                    MainApplication.serviceConnection = this;
-                    MainApplication.service = ((P2ChatService.P2ChatServiceBinder) service).getService();
-                }
-
-                @Override
-                public void onServiceDisconnected(ComponentName name) {
-                    MainApplication.serviceConnection = null;
-                    MainApplication.service = null;
-                }
-            };
-
-            context.bindService(new Intent(context, P2ChatService.class), serviceConnection, Context.BIND_AUTO_CREATE);
-            P2ChatService.isServiceRunning = true;
-        }
-    }
-
-    public static void stopP2ChatService(Context context) {
-        if(P2ChatService.isServiceRunning) {
-            //context.unbindService(serviceConnection);
-            context.stopService(new Intent(context, P2ChatService.class));
-            P2ChatService.isServiceRunning = false;
-        }
+        getApplicationContext().bindService(new Intent(getApplicationContext(), P2ChatService.class), serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     public static ReactContext getReactContext() {
