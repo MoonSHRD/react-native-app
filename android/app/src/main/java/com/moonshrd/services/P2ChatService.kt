@@ -49,14 +49,14 @@ class P2ChatService : Service() {
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        onServiceStart(intent.getStringExtra("matrixID"))
+        onServiceStart()
         return START_NOT_STICKY
     }
 
-    private fun onServiceStart(matrixID: String) {
+    private fun onServiceStart() {
         scheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
         Thread { start(MainApplication.SERVICE_TOPIC, MainApplication.PROTOCOL_ID, "", 0) }.start()
-        P2mobile.setMatrixID(matrixID)
+        P2mobile.setMatrixID("")
         scheduledExecutorService!!.scheduleAtFixedRate({
             if (isServiceRunning) {
                 getMessage()
@@ -114,6 +114,12 @@ class P2ChatService : Service() {
             return gson.fromJson(P2mobile.getAllMatches(), matchesMapType)
         }
         return Collections.emptyMap()
+    }
+
+    fun setMatrixID(matrixID: String) {
+        if(isServiceRunning) {
+            P2mobile.setMatrixID(matrixID)
+        }
     }
 
     inner class P2ChatServiceBinder : Binder() {
