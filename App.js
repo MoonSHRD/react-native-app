@@ -37,10 +37,17 @@ class App extends React.Component {
     };
   }
 
+  initializeApp = async () =>  {
+    const isRegistered = await this.props.initApplication()
+    if (isRegistered) {
+      this.props.getCurrentTopics()
+      this.props.getAllMatches()  
+    }
+  }
+
+
   componentDidMount() {
-    this.props.initApplication()
-    this.props.getCurrentTopics()
-    this.props.getAllMatches()
+    this.initializeApp()
   }
 
   render() {

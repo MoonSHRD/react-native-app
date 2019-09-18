@@ -12,6 +12,7 @@ import MatrixClient from  '../native/MatrixClient';
 import {connect} from 'react-redux';
 import { getContactInfo, deselectContact, getMyUserProfile, createDirectChat, saveNewUserName, saveNewAvatar, getMyUserId } from '../store/actions/contactsActions';
 import { subcribeToTopic, unsubscribeFromTopic } from '../store/actions/p2chatActions';
+
 const { width, height } = Dimensions.get('window');
 
 class Profile extends Component {

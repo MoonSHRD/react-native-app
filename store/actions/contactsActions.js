@@ -23,6 +23,7 @@ export function getContactInfo(userID) {
     const promise = MatrixClient.getUserById(userID)
     promise.then((data) => {
       const jsonData = JSON.parse(data)
+      console.log(data)
       dispatch(getContact())
       dispatch(getContactSuccess(jsonData))
       console.log(jsonData)

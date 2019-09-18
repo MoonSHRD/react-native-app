@@ -73,7 +73,7 @@ class ContactList extends Component {
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
       this.props.getMyUserId()
       this.props.getMyUserProfile()
-      // this.props.getCurrentTopics()
+      this.props.getCurrentTopics()
       this.props.loadDirectChats()
     });
 

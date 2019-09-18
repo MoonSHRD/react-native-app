@@ -52,6 +52,7 @@ import MatrixLoginClient from '../../native/MatrixLoginClient';
       promise.then((data) => {
         console.log(data)
         dispatch(initApplication(data))
+        return data
         },
         (error) => {
         console.log(error);

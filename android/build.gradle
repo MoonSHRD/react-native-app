@@ -39,8 +39,12 @@ allprojects {
         mavenLocal()
         jcenter()
         maven {
-            // Android JSC is installed from npm
-            url("$rootDir/../node_modules/jsc-android/dist")
+            // Replace AAR from original RN with AAR from react-native-v8
+            url("$rootDir/../node_modules/react-native-v8/dist")
+        }
+        maven {
+            // prebuilt libv8.so
+            url("$rootDir/../node_modules/v8-android/dist")
         }
         maven {
             url 'https://jitpack.io'

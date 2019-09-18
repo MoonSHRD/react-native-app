@@ -283,7 +283,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
             }
         }, matrixInstance.getDefaultSession().getNetworkConnectivityReceiver(),null);
 
-        startP2ChatService(matrixInstance.getDefaultSession().getMyUserId());
+//        startP2ChatService(matrixInstance.getDefaultSession().getMyUserId());
     }
 
     private void startP2ChatService(String matrixID) {
