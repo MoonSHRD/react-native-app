@@ -68,4 +68,5 @@ export const GET_ALL_TOPICS = 'GET_ALL_TOPICS';
 export const GET_TOPIC = 'GET_TOPIC';
 export const NEW_TOPIC = 'NEW_TOPIC';
 export const ADD_TOPIC_TO_ARRAY = 'ADD_TOPIC_TO_ARRAY';
+export const GET_MATCHES = 'GET_MATCHES';
 

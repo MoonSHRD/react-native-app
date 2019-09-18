@@ -148,6 +148,28 @@ class Profile extends Component {
     this.setState({ isModalVisible: !this.state.isModalVisible });
   };
 
+  acceptInvite = async (roomId) => {
+      const promise = MatrixClient.acceptInvite(roomId)
+      promise.then((data) => {
+          const jsonData = JSON.parse(data)
+          const user = new Object()
+
+          await this.props.navigation.navigate('Chat', {
+            userName: jsonData.name,
+            userIdName: this.parseUserId(jsonData.userId),
+            userId: jsonData.userId,
+            avatarUrl: jsonData.avatarUrl,
+            avatarLink: this.parseAvatarUrl(jsonData.avatarUrl),
+            isActive: jsonData.isActive,
+            lastSeen: jsonData.lastSeen,
+            roomId: jsonData.roomId
+        },
+        (error) => {
+            console.log(error);
+        })        
+      })
+  }
+
   checkName = async () => {
     const userName = await this.props.navigation.getParam('userName', '');
     const userIdName = await this.props.navigation.getParam('userIdName', '')
@@ -215,7 +237,9 @@ class Profile extends Component {
   createDirectChatWithUser = async (userId) => {
     const promise = await MatrixClient.createDirectChat(userId)
     promise.then( async (data) => {
-        await this.setState({roomId: data})
+        jsonData = JSON.parse(data)
+
+        await this.setState({roomId: jsonData.roomId})
         console.log(data)
       },
       (error) => {
@@ -225,11 +249,17 @@ class Profile extends Component {
   }
 
   goToChatScreen = async (navigation) => {
-    await this.createDirectChatWithUser(userId)
-    const roomId = await this.state.roomId
     if (this.props.contacts.contact.roomId != null) {
         roomId = this.props.contacts.contact.roomId
     }
+
+    if (this.props.contacts.contact.membership == 'invite') {
+        this.acceptInvite(roomId)
+    }
+
+    await this.createDirectChatWithUser(userId)
+    const roomId = await this.state.roomId
+
     await this.props.navigation.navigate('Chat', {
         userName: this.capitalize(this.props.contacts.contact.name),
         userIdName: this.parseUserId(this.props.contacts.contact.userId),

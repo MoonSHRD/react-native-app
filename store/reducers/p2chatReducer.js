@@ -1,9 +1,10 @@
-import { GET_ALL_TOPICS, GET_TOPIC, NEW_TOPIC, ADD_TOPIC_TO_ARRAY } from '../actions/constants'
+import { GET_ALL_TOPICS, GET_TOPIC, NEW_TOPIC, ADD_TOPIC_TO_ARRAY, GET_MATCHES } from '../actions/constants'
 
 const initialState = {
     topics: [],
     newTopic: {},
-    topic: {}
+    topic: {},
+    matches: {},
 }
 
 export default function p2chatReducer (state = initialState, action) {
@@ -27,6 +28,11 @@ export default function p2chatReducer (state = initialState, action) {
             return {
                 ...state,
                 topics: [...state.topics, state.newTopic]
+            }
+        case GET_MATCHES:
+            return {
+                ...state,
+                matches: action.data,
             }
         default:
             return state               

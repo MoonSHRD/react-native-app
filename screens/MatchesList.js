@@ -232,6 +232,7 @@ parseUserId(props) {
                           userId: l.userId,
                           avatarLink: this.parseAvatarUrl(l.avatarUrl),
                           roomId: l.roomId,
+                          type: "match",
                         })
                       }}  
                     />
@@ -277,6 +278,7 @@ parseUserId(props) {
                         userId: l.userId,
                         avatarLink: this.parseAvatarUrl(l.avatarUrl),
                         roomId: l.roomId,
+                        type: "match",
                       })
                     }}  
                   />
