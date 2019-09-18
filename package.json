@@ -7,7 +7,8 @@
     "android": "react-native --port=8081 run-android",
     "ios": "react-native run-ios --port=8081 --simulator='iPhone 7'",
     "react-devtools": "react-devtools",
-    "test": "jest"
+    "test": "jest",
+    "postinstall": "npx jetify"
   },
   "dependencies": {
     "babel-preset-react-native": "2.1.0",

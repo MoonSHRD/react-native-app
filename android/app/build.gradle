@@ -183,7 +183,7 @@ dependencies {
     implementation project(':react-native-linear-gradient')
     implementation project(path: ':p2mobile')
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"		
+    implementation 'androidx.appcompat:appcompat:1.0.0'
     implementation "com.facebook.react:react-native:0.59.9"  // From node_modules
     implementation 'com.github.matrix-org:matrix-android-sdk:0.9.26'
     implementation 'com.google.code.gson:gson:2.8.5'
@@ -197,7 +197,7 @@ dependencies {
     //kapt
     kapt 'com.google.dagger:dagger-compiler:2.15'
     
-    implementation 'com.android.support:multidex:1.0.3'
+    implementation 'androidx.multidex:multidex:2.0.0'
 }
 
 // Run this once to be able to run the application with BUCK
