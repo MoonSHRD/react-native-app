@@ -25,7 +25,7 @@ class P2ChatService : Service() {
     private val newMessageEventName = "NewMessageEvent"
 
     @Inject
-    private lateinit var gson: Gson
+    lateinit var gson: Gson
     private val binder = P2ChatServiceBinder()
     private var scheduledExecutorService: ScheduledExecutorService? = null
 
