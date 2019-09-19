@@ -125,7 +125,6 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         val userAvatarUrl = CompletableFuture<String?>()
         val userIsActive = CompletableFuture<Boolean?>()
         val userLastSeen = CompletableFuture<Long?>()
-        val userMembership = CompletableFuture<String?>()
 
 
 
@@ -199,41 +198,13 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             }
         })
 
-
-        matrixInstance.defaultSession.roomsApiClient.getRoomMembers(roomId,null,null,null,object:ApiCallback<ChunkEvents>{
-            override fun onSuccess(info: ChunkEvents?) {
-                info?.let{
-                    for(i in it.chunk.indices){
-                            if(userID== it.chunk[i].userId){
-                                val membershipInfo = info.chunk[i].contentAsJsonObject.get("membership").toString()
-                                userMembership.complete(membershipInfo)
-                                break
-                            }
-                    }
-                }
-            }
-
-            override fun onUnexpectedError(e: java.lang.Exception?) {
-                var kek = ""
-            }
-
-            override fun onMatrixError(e: MatrixError?) {
-                var kek = ""
-            }
-
-            override fun onNetworkError(e: java.lang.Exception?) {
-                var kek = ""
-            }
-        })
-
         GlobalScope.launch {
             val name = userName.get()
             val avatarUrl = userAvatarUrl.get()
             val isActive = userIsActive.get()
             val lastSeen = userLastSeen.get()
-            val membership = userMembership.get()
             if (name != null && avatarUrl != null) {
-                promise.resolve(gson.toJson(UserModel(userID, name, avatarUrl,lastSeen = lastSeen,isActive = isActive,roomId = roomId,membership = membership)))
+                promise.resolve(gson.toJson(UserModel(userID, name, avatarUrl,lastSeen = lastSeen,isActive = isActive,roomId = roomId)))
             } else {
                 promise.resolve(gson.toJson(UserModel(userID, "", "")))
             }
