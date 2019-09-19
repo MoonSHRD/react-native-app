@@ -57,7 +57,10 @@ class P2ChatService : Service() {
 
     private fun onServiceStart() {
         scheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
-        Thread { start(MainApplication.SERVICE_TOPIC, MainApplication.PROTOCOL_ID, "", 0) }.start()
+        Thread {
+            start(MainApplication.SERVICE_TOPIC, MainApplication.PROTOCOL_ID, "", 0)
+            Logger.i("P2mobile started successfully!")
+        }.start()
         P2mobile.setMatrixID("")
         scheduledExecutorService!!.scheduleAtFixedRate({
             if (isServiceRunning) {
