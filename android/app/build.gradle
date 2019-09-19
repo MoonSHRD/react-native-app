@@ -207,6 +207,7 @@ dependencies {
     kapt 'com.google.dagger:dagger-compiler:2.15'
     
     implementation 'androidx.multidex:multidex:2.0.0'
+    implementation 'com.orhanobut:logger:2.2.0'
 }
 
 // Run this once to be able to run the application with BUCK
