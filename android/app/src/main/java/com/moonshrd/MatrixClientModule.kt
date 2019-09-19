@@ -21,7 +21,6 @@ import org.matrix.androidsdk.data.RoomState
 import org.matrix.androidsdk.data.RoomSummary
 import org.matrix.androidsdk.data.timeline.EventTimeline
 import org.matrix.androidsdk.listeners.IMXMediaUploadListener
-import org.matrix.androidsdk.rest.model.ChunkEvents
 import org.matrix.androidsdk.rest.model.Event
 import org.matrix.androidsdk.rest.model.User
 import org.matrix.androidsdk.rest.model.search.SearchUsersResponse
@@ -113,10 +112,10 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     @ReactMethod
     fun getUserById(userID: String, promise: Promise) {
-      getDataUser(userID,promise)
+      getUserData(userID,promise)
     }
 
-    private fun getDataUser(userID: String, promise: Promise){
+    private fun getUserData(userID: String, promise: Promise){
         if (!isSessionExists(promise)) {
             return
         }
@@ -125,8 +124,6 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         val userAvatarUrl = CompletableFuture<String?>()
         val userIsActive = CompletableFuture<Boolean?>()
         val userLastSeen = CompletableFuture<Long?>()
-
-
 
         val directChats = matrixInstance.defaultSession.dataHandler.store.rooms.filter {
             it.isDirect
@@ -203,11 +200,13 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             val avatarUrl = userAvatarUrl.get()
             val isActive = userIsActive.get()
             val lastSeen = userLastSeen.get()
-            if (name != null && avatarUrl != null) {
-                promise.resolve(gson.toJson(UserModel(userID, name, avatarUrl,lastSeen = lastSeen,isActive = isActive,roomId = roomId)))
-            } else {
-                promise.resolve(gson.toJson(UserModel(userID, "", "")))
-            }
+            gson.toJson(UserModel(
+                    userID,
+                    name ?: "",
+                    avatarUrl ?: "",
+                    lastSeen,
+                    isActive,
+                    roomId = roomId))
         }
     }
 
@@ -250,7 +249,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         }
 
         if (isDirectChatExists(participantUserId)) {
-            getDataUser(participantUserId,promise)
+            getUserData(participantUserId,promise)
             return
         }
 
