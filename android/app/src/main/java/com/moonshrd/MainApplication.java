@@ -10,6 +10,10 @@ import android.os.IBinder;
 import com.BV.LinearGradient.LinearGradientPackage;
 import com.actionsheet.ActionSheetPackage;
 import com.facebook.react.ReactApplication;
+import com.orhanobut.logger.AndroidLogAdapter;
+import com.orhanobut.logger.FormatStrategy;
+import com.orhanobut.logger.Logger;
+import com.orhanobut.logger.PrettyFormatStrategy;
 import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
 import com.reactnative.ivpusic.imagepicker.PickerPackage;
 import com.facebook.react.bridge.ReactContext;
@@ -76,6 +80,9 @@ public class MainApplication extends Application implements ReactApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+        
+        setupLogger();
+
         component = DaggerApplicationComponent.builder()
                 .applicationModule(new ApplicationModule(getApplicationContext()))
                 .build();
@@ -100,6 +107,14 @@ public class MainApplication extends Application implements ReactApplication {
         };
 
         getApplicationContext().bindService(new Intent(getApplicationContext(), P2ChatService.class), serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    private static void setupLogger() {
+        FormatStrategy formatStrategy = PrettyFormatStrategy.newBuilder()
+                .showThreadInfo(false)
+                .tag("MoonShard")
+                .build();
+        Logger.addLogAdapter(new AndroidLogAdapter(formatStrategy));
     }
 
     public static ReactContext getReactContext() {
