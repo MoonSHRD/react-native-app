@@ -1,6 +1,7 @@
 package com.moonshrd
 
 import android.util.Base64
+import android.util.Log
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
@@ -70,7 +71,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                 }
                 break
             }
-
+            Log.d("getDirectChats",gson.toJson(getDirectChatsInternal()))
             promise.resolve(gson.toJson(getDirectChatsInternal()))
         }
     }
