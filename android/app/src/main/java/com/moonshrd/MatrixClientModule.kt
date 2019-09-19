@@ -71,8 +71,9 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                 }
                 break
             }
-            Log.d("getDirectChats",gson.toJson(getDirectChatsInternal()))
-            promise.resolve(gson.toJson(getDirectChatsInternal()))
+            val chats = getDirectChatsInternal()
+            val chatsJson = gson.toJson(chats)
+            promise.resolve(chatsJson)
         }
     }
 
