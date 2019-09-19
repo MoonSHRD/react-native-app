@@ -35,7 +35,8 @@ class P2ChatService : Service() {
             if (isServiceRunning) {
                 val topicsJson = P2mobile.getTopics()
                 val topicsArr = gson.fromJson(topicsJson, Array<String>::class.java)
-                return listOf(*topicsArr)
+                topicsArr ?: return emptyList()
+                return topicsArr.toList()
             }
             onServiceIsNotRunning()
             return ArrayList()
@@ -77,7 +78,7 @@ class P2ChatService : Service() {
         val message = P2mobile.getMessages()
         if (message.isNotEmpty()) {
             val messageObject = gson.fromJson(message, Message::class.java)
-            Log.d(LOG_TAG, "New message! [${messageObject.topic}] ${messageObject.from} > ${messageObject.body})") // FIXME
+            Logger.d("New message! [${messageObject.topic}] ${messageObject.from} > ${messageObject.body})")
 
             val writableMap = Arguments.createMap()
             writableMap.putString("topic", messageObject.topic)
@@ -99,7 +100,7 @@ class P2ChatService : Service() {
             var isValidMatch = true
 
             match.map { mEntry ->
-                if(mEntry.key.isNotEmpty()) {
+                if(mEntry.key.isNotEmpty()) { // TODO move empty mxid filtering to native (golang) part
                     mEntry.value.forEach {
                         writableArray.pushString(it)
                     }
@@ -169,7 +170,6 @@ class P2ChatService : Service() {
     }
 
     companion object {
-        private val LOG_TAG = "P2ChatService"
         var isServiceRunning = false
     }
 }
