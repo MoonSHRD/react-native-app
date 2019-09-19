@@ -11,6 +11,7 @@ import com.google.gson.reflect.TypeToken
 import com.moonshrd.MainApplication
 import com.moonshrd.models.Message
 import com.moonshrd.utils.sendRNEvent
+import com.orhanobut.logger.Logger
 import p2mobile.P2mobile
 import p2mobile.P2mobile.start
 import java.util.*
@@ -94,14 +95,24 @@ class P2ChatService : Service() {
 
             val writableMap = Arguments.createMap()
             val writableArray = Arguments.createArray()
+
+            var isValidMatch = true
+
             match.map { mEntry ->
-                mEntry.value.forEach {
-                    writableArray.pushString(it)
+                if(mEntry.key.isNotEmpty()) {
+                    mEntry.value.forEach {
+                        writableArray.pushString(it)
+                    }
+                    writableMap.putArray(mEntry.key, writableArray)
+                } else {
+                    isValidMatch = false
+                    return@map
                 }
-                writableMap.putArray(mEntry.key, writableArray)
             }
 
-            sendRNEvent(MainApplication.getReactContext(), newMatchEventName, writableMap)
+            if(isValidMatch) {
+                sendRNEvent(MainApplication.getReactContext(), newMatchEventName, writableMap)
+            }
         }
     }
 
@@ -149,7 +160,7 @@ class P2ChatService : Service() {
     }
 
     private fun onServiceIsNotRunning() {
-        Log.e(LOG_TAG, "P2ChatService is not running!")
+        Logger.e("P2ChatService is not running!")
     }
 
     override fun onDestroy() {
