@@ -210,9 +210,19 @@ class Profile extends Component {
       const userName = this.props.navigation.getParam('userName', 'userName')
       const userIdName = this.props.navigation.getParam('userIdName', 'userIdName').toLowerCase()
       const roomId = this.props.navigation.getParam('roomId', 'roomId')
-      console.log('Invite from ' + userIdName)
-      if (userName == 'Invite from ' + userIdName) {
+      console.log('Приглашение от ' + userIdName)
+      if (userName == 'Приглашение от ' + userIdName || userName == 'Invite from ' + userIdName) { 
             console.log('invite has to be sended')
+            Alert.alert(
+                'Success!',
+                'Invite was successfully handled',
+                [
+                {
+                    text: 'Continue',
+                }
+                ],
+                { cancelable: true }
+            )
             // const promise = MatrixClient.acceptInvite()
             // promise.then((data) => {
             //     console.log(data)
@@ -441,7 +451,7 @@ class Profile extends Component {
   componentDidMount() {
     this.setState({roomId: this.props.navigation.getParam('roomId', '')})
     this.setHeaderParams()
-    this.loadAllTags()
+    // this.loadAllTags()
     this.willFocus = this.props.navigation.addListener('willFocus', async () => {
         const userName = await this.props.navigation.getParam('userName', 'userName')
         await (userName != 'userName')
