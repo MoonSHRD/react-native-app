@@ -203,6 +203,7 @@ const styles = StyleSheet.create({
 function mapStateToProps (state) {
   return {
     login: state.login,
+    p2chat: state.p2chat,
   }
 }
 

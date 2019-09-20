@@ -11,7 +11,7 @@ import MatrixClient from  '../native/MatrixClient';
 
 import {connect} from 'react-redux';
 import { getContactInfo, deselectContact, getMyUserProfile, createDirectChat, saveNewUserName, saveNewAvatar, getMyUserId } from '../store/actions/contactsActions';
-import { subcribeToTopic, unsubscribeFromTopic } from '../store/actions/p2chatActions';
+import { subcribeToTopic, unsubscribeFromTopic, getCurrentTopics } from '../store/actions/p2chatActions';
 
 const { width, height } = Dimensions.get('window');
 
@@ -78,51 +78,111 @@ class Profile extends Component {
       avatarChanged: false,
       newName: '',
       phone: '+1(323)564-34-22',
-      tags: [
-          {
-            name: 'Bikes',
-            matched: true,
-          },
-          {
-            name: 'Marvel',
-            matched: false,
-          },
-          {
-              name: 'DC Comix',
-              matched: true,
-
-          },
-          {
-            name: 'Buzrum',
-            matched: true
-          },
-          {
-            name: 'Progressive Black Metal',
-            matched: false
-          },
-        ],
-      newTag: null,
+      tags: [],
+      newTag: '',
       errors: [],
       suggestedTags: [
         {
-            name: 'Cost',
-            matched: false
+            name: 'Crypto',
         },
         {
-            name: 'Cosplay',
-            matched: false,
+            name: 'Blockchain',
         },
         {
-            name: 'Cosmopolitan',
-            matched: false 
+            name: 'Finance',
         },  
         {
-            name: 'Costume',
-            matched: false,
+            name: 'Dating',
         },
         {
-            name: 'Costumes',
-            matched: true,
+            name: 'Business',
+        },
+        {
+            name: 'News',
+        },
+        {
+            name: 'Politics',
+        },
+        {
+            name: 'Food',
+        },
+        {
+            name: 'Home cooking',
+        },
+        {
+            name: 'English',
+        },
+        {
+            name: 'Spanish',
+        },
+        {
+            name: 'German',
+        },
+        {
+            name: 'French',
+        },
+        {
+            name: 'Greek',
+        },
+        {
+            name: 'Italian',
+        },
+        {
+            name: 'Portuguese',
+        },
+        {
+            name: 'Danish',
+        },
+        {
+            name: 'Dutch',
+        },
+        {
+            name: 'Chinese',
+        },
+        {
+            name: 'Japanese',
+        },
+        {
+            name: 'Football',
+        },
+        {
+            name: 'Basketball',
+        },
+        {
+            name: 'Golf',
+        },
+        {
+            name: 'Boxing',
+        },
+        {
+            name: 'Arts',
+        },
+        {
+            name: 'Contemporary art',
+        },
+        {
+            name: 'Digital art',
+        },
+        {
+            name: 'Classic art',
+        },
+        {
+            name: 'Music',
+        },
+        {
+            name: 'Illistrations',
+        },
+        {
+            name: 'Techno',
+        },
+        {
+            name: 'Rock',
+        },
+        {
+            name: 'Rap',
+        },
+        {
+            name: 'Hip Hop',
         },
       ]
   }
@@ -254,10 +314,6 @@ class Profile extends Component {
         roomId = this.props.contacts.contact.roomId
     }
 
-    if (this.props.contacts.contact.membership == 'invite') {
-        this.acceptInvite(roomId)
-    }
-
     await this.createDirectChatWithUser(userId)
     const roomId = await this.state.roomId
 
@@ -364,6 +420,7 @@ class Profile extends Component {
   componentDidMount() {
     this.setState({roomId: this.props.navigation.getParam('roomId', '')})
     this.setHeaderParams()
+    this.loadAllTags()
     this.willFocus = this.props.navigation.addListener('willFocus', async () => {
         const userName = await this.props.navigation.getParam('userName', 'userName')
         await (userName != 'userName')
@@ -394,6 +451,53 @@ componentDidUpdate(prevProps) {
     }  
   }
 
+
+filterItems(array, search) {
+    return array.filter(function(array) {
+        return array.name.toString().toLowerCase().indexOf(search.toString().toLowerCase()) !== -1;
+    })
+}
+
+loadAllTags = () => {
+    this.props.getCurrentTopics()
+    allTags = new Object()
+    this.props.p2chat.topics.map((data) => {
+        allTags.name = data
+
+        return allTags
+    })
+    this.setState({tags: allTags})
+}
+
+subscribeOnThis = async (topic, index) => {
+    await console.log('pressed topic ' +  topic + ' ' + index) 
+    const promise = await this.props.subcribeToTopic(topic)
+    promise.then((data) => {
+        console.log(data)
+        newTag = new Object()
+        newTag.name = topic
+        await this.setState({
+            tags: this.state.tags.concat(newTag)
+        })
+    },
+    (error) => {
+        console.log(error)
+    })
+}
+
+unsubscribeFromThis = async (topic) => {
+    await console.log('pressed topic' +  topic)
+    const promise = this.props.unsubscribeFromTopic(topic)
+    promise.then((data) => {
+        console.log(data)
+        await this.setState({
+           tags: this.state.tags.filter(tag => tag.name !== topic)
+        })
+    },
+    (error) => {
+        console.log(error)
+    })
+}
 
 
   render() {
@@ -633,24 +737,26 @@ componentDidUpdate(prevProps) {
                     null
                 }
                 {
-                    this.props.contacts.myProfile.tags
+                    this.state.tags
                     ?
                     <Block>
                         <Text subhead gray style={{marginTop:20}}>My Tags</Text>
                         <Block style={styles.tagContainer}>
                         {
-                            this.props.contacts.myProfile.tags.map((l,i) => (
+                            this.state.tags.map((l,i) => (
                                     l.matched
                                     ?
                                     <Button
                                         key={i}
-                                        style={styles.matchedTag}>
+                                        style={styles.matchedTag}
+                                        onPress={() => this.unsubscribeFromThis(l.name)}>
                                         <Text caption white center>{l.name}</Text>
                                     </Button>
                                     :
                                     <Button
                                         key={i}
-                                        style={styles.dismatchedTag}>
+                                        style={styles.dismatchedTag}
+                                        onPress={() => this.unsubscribeFromThis(l.name)}>
                                         <Text caption blue center>{l.name}</Text>
                                     </Button>
                             ))
@@ -669,26 +775,30 @@ componentDidUpdate(prevProps) {
                     onChangeText={text => this.setState({ newTag: text })}
                 />
                 {
-                    newTag !== null 
+                    newTag !== '' 
                     ?
                     <Block style={this.props.appState.nightTheme ? styles.darkNewTagContainer : styles.newTagContainer}>
                         <Text caption2 gray style={styles.suggestedTagsText}>Suggested tags</Text>
                         <Block style={styles.newTagList}>
                             {
-                                suggestedTags.map((l,i) => (
-                                    l.matched
-                                    ?
+                                this.filterItems(suggestedTags, newTag).map((l,i) => (
+                                    // l.matched
+                                    // ?
+                                    // <Button
+                                    //     key={i}
+                                    //     style={this.props.appState.nightTheme ? styles.darkMatchedTag : styles.matchedTag}
+                                    //     onPress={this.subscribeOnThis(l.name)}>
+                                    //     <Text caption style={this.props.appState.nightTheme ? {color: theme.colors.black}: {color: theme.colors.white}} center>{l.name}</Text>
+                                    // </Button>
+                                    // :
+                                    <View>
                                     <Button
                                         key={i}
-                                        style={this.props.appState.nightTheme ? styles.darkMatchedTag : styles.matchedTag}>
-                                        <Text caption style={this.props.appState.nightTheme ? {color: theme.colors.black}: {color: theme.colors.white}} center>{l.name}</Text>
+                                        style={this.props.appState.nightTheme ? styles.darkDismatchedTag : styles.dismatchedTag}
+                                        onPress={() => {this.subscribeOnThis(l.name, i)}}>
+                                            <Text caption style={this.props.appState.nightTheme ? {color: theme.colors.white}: {color: theme.colors.blue}} center>{l.name}</Text>
                                     </Button>
-                                    :
-                                    <Button
-                                        key={i}
-                                        style={this.props.appState.nightTheme ? styles.darkDismatchedTag : styles.dismatchedTag}>
-                                        <Text caption style={this.props.appState.nightTheme ? {color: theme.colors.white}: {color: theme.colors.blue}} center>{l.name}</Text>
-                                    </Button>
+                                    </View>
                                 ))
                             }
                         </Block>
@@ -886,6 +996,7 @@ function mapStateToProps (state) {
     return {
       contacts: state.contacts,
       appState: state.appState,
+      p2chat: state.p2chat,
     }
   }
   
@@ -898,8 +1009,9 @@ function mapStateToProps (state) {
       createDirectChat: (data) => dispatch(createDirectChat(data)),
       saveNewUserName: (data) => dispatch(saveNewUserName(data)),
       saveNewAvatar: (data) => dispatch(saveNewAvatar(data)),
-      subcribeToTopic:  () =>  dispatch(subcribeToTopic()),
-      unsubscribeFromTopic:  () =>  dispatch(unsubscribeFromTopic()),  
+      subcribeToTopic:  (data) =>  dispatch(subcribeToTopic(data)),
+      unsubscribeFromTopic:  (data) =>  dispatch(unsubscribeFromTopic(data)), 
+      getCurrentTopics: () => dispatch(getCurrentTopics()), 
     }
   }
   
