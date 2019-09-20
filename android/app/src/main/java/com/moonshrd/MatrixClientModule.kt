@@ -202,13 +202,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             val avatarUrl = userAvatarUrl.get()
             val isActive = userIsActive.get()
             val lastSeen = userLastSeen.get()
-            gson.toJson(UserModel(
-                    userID,
-                    name ?: "",
-                    avatarUrl ?: "",
-                    lastSeen,
-                    isActive,
-                    roomId = roomId))
+            gson.toJson(UserModel(userID, name ?: "", avatarUrl ?: "", lastSeen, isActive, roomId = roomId))
         }
     }
 
