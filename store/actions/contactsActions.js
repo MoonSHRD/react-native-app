@@ -7,28 +7,28 @@ export function getContactList() {
     promise.then((data) => {
       const jsonData = JSON.parse(data)
 
-      const contactList = new Array()
-      
-      contactList.contact = jsonData.filter((data) => {
-        if (data.name[0,13] == 'Invite from ') {
-          console.log('invite detected')
-          return true
-        }
-        return true
-      }).map(data => {
-        contact.avatarUrl = data.avatarUrl
-        contact.isActive = data.isActive
-        contact.lastMessage = data.lastMessage
-        contact.lastMessageDate = data.lastMessageDate
-        contact.lastMessageState = data.lastMessageState
-        contact.lastSeen = data.lastSeen
-        contact.name = data.name
-        contact.roomId = data.roomId
-        contact.unreadMessagesCount = data.unreadMessagesCount
-        contact.userId = data.userId
+//       const contactList = new Array()
+//       
+//       contactList.contact = jsonData.filter((data) => {
+//         if (data.name[0,13] == 'Invite from ') {
+//           console.log('invite detected')
+//           return true
+//         }
+//         return true
+//       }).map(data => {
+//         contact.avatarUrl = data.avatarUrl
+//         contact.isActive = data.isActive
+//         contact.lastMessage = data.lastMessage
+//         contact.lastMessageDate = data.lastMessageDate
+//         contact.lastMessageState = data.lastMessageState
+//         contact.lastSeen = data.lastSeen
+//         contact.name = data.name
+//         contact.roomId = data.roomId
+//         contact.unreadMessagesCount = data.unreadMessagesCount
+//         contact.userId = data.userId
 
-        return contact
-      })
+//         return contact
+//       })
 
       dispatch(getContacts())
       dispatch(getContactsSuccess(jsonData))

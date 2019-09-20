@@ -254,6 +254,9 @@ class Profile extends Component {
     const avatarLink = await this.props.navigation.getParam('avatarLink', '');
     if (avatarLink != '') {
         await this.setState({avatarUrl: avatarLink})
+    } else {
+        const newAvatarLink = await this.parseAvatarUrl(this.props.contacts.contact.avatarUrl)
+        await this.setState({avatarUrl: newAvatarLink})
     }
   }
 
@@ -310,7 +313,7 @@ class Profile extends Component {
   }
 
   goToChatScreen = async (navigation) => {
-    if (this.props.contacts.contact.roomId != null) {
+    if (this.props.contacts.contact.roomId != '') {
         roomId = this.props.contacts.contact.roomId
     }
 
@@ -472,11 +475,11 @@ loadAllTags = () => {
 subscribeOnThis = async (topic, index) => {
     await console.log('pressed topic ' +  topic + ' ' + index) 
     const promise = await this.props.subcribeToTopic(topic)
-    promise.then((data) => {
+    await promise.then((data) => {
         console.log(data)
         newTag = new Object()
         newTag.name = topic
-        await this.setState({
+        this.setState({
             tags: this.state.tags.concat(newTag)
         })
     },
@@ -488,9 +491,9 @@ subscribeOnThis = async (topic, index) => {
 unsubscribeFromThis = async (topic) => {
     await console.log('pressed topic' +  topic)
     const promise = this.props.unsubscribeFromTopic(topic)
-    promise.then((data) => {
+    await promise.then((data) => {
         console.log(data)
-        await this.setState({
+        this.setState({
            tags: this.state.tags.filter(tag => tag.name !== topic)
         })
     },
