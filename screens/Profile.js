@@ -200,9 +200,27 @@ class Profile extends Component {
     const userId = await this.props.navigation.getParam('userId', 'userId');
     await console.log(userId)
     await this.props.getContactInfo(userId.toLowerCase())
+    await this.checkIfInvite()
     await this.checkName()
     await this.props.getMyUserId()
     await this.loadAvatar()
+  }
+
+  checkIfInvite = async () => {
+      const userName = this.props.navigation.getParam('userName', 'userName')
+      const userIdName = this.props.navigation.getParam('userIdName', 'userIdName').toLowerCase()
+      const roomId = this.props.navigation.getParam('roomId', 'roomId')
+      console.log('Invite from ' + userIdName)
+      if (userName == 'Invite from ' + userIdName) {
+            console.log('invite has to be sended')
+            // const promise = MatrixClient.acceptInvite()
+            // promise.then((data) => {
+            //     console.log(data)
+            // },
+            // (error) => {
+            //     console.log(error)
+            // })
+      }
   }
 
   toggleModal = () => {

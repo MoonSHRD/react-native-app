@@ -298,7 +298,7 @@ parseUserId(props) {
                         avatarLink: this.parseAvatarUrl(l.avatarUrl),
                         roomId: l.roomId,
                       })
-                  }}  
+                  }}
                   />
                   </BoxShadow>
                   </View>
