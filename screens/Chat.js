@@ -131,6 +131,7 @@ class Chat extends React.Component {
                             userIdName: userIdName,
                             userId: userId,
                             avatarLink: avatarLink,
+                            previousScreen: 'Chat',
                         })
                     }}  
                     containerStyle={

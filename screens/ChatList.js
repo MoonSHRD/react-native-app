@@ -82,7 +82,9 @@ class ChatList extends Component {
   componentDidMount() {
     this.setHeaderParams()
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
-      this.props.loadDirectChats()
+      if (!this.props.contacts.alreadyLoaded) {
+        this.props.loadDirectChats()
+      }
       this.props.getMyUserId()
     });
   }

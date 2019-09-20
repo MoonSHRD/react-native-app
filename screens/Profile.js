@@ -10,7 +10,7 @@ import ActionSheet from 'react-native-action-sheet';
 import MatrixClient from  '../native/MatrixClient';
 
 import {connect} from 'react-redux';
-import { getContactInfo, deselectContact, getMyUserProfile, createDirectChat, saveNewUserName, saveNewAvatar, getMyUserId } from '../store/actions/contactsActions';
+import { getContactInfo, deselectContact, getMyUserProfile, saveNewUserName, saveNewAvatar, getMyUserId } from '../store/actions/contactsActions';
 import { subcribeToTopic, unsubscribeFromTopic, getCurrentTopics } from '../store/actions/p2chatActions';
 
 const { width, height } = Dimensions.get('window');
@@ -317,11 +317,12 @@ class Profile extends Component {
   }
 
   createDirectChatWithUser = async (userId) => {
-    const promise = await MatrixClient.createDirectChat(userId)
-    promise.then( async (data) => {
+    const promise = MatrixClient.createDirectChat(userId)
+    promise.then((data) => {
+        console.log(data)
         jsonData = JSON.parse(data)
 
-        await this.setState({roomId: jsonData.roomId})
+        // this.setState({roomId: jsonData.roomId})
         console.log(data)
       },
       (error) => {
@@ -333,10 +334,9 @@ class Profile extends Component {
   goToChatScreen = async (navigation) => {
     if (this.props.contacts.contact.roomId != '') {
         roomId = this.props.contacts.contact.roomId
-    }
-
+    } 
+    userId = this.props.contacts.contact.userId,
     await this.createDirectChatWithUser(userId)
-    const roomId = await this.state.roomId
 
     await this.props.navigation.navigate('Chat', {
         userName: this.capitalize(this.props.contacts.contact.name),
@@ -487,11 +487,11 @@ loadAllTags = () => {
         this.props.p2chat.topics.map((data, i) => {
             tag = new Object()
             tag.name = data.valueOf(i)
-    
-            this.setState({tags: this.state.tags.concat(tag)})    
+            allTags = this.state.tags.push(tag)
         })
     }
 }
+
 
 subscribeOnThis = async (topic, index) => {
     await console.log('pressed topic ' +  topic + ' ' + index) 
@@ -512,11 +512,11 @@ subscribeOnThis = async (topic, index) => {
 unsubscribeFromThis = async (topic) => {
     await console.log('pressed topic' +  topic)
     const promise = this.props.unsubscribeFromTopic(topic)
-    this.setState({
-        tags: this.state.tags.filter(tag => tag.name !== topic)
-    })    
     await promise.then((data) => {
         console.log(data)
+        this.setState({
+            tags: this.state.tags.filter(tag => tag.name !== topic)
+        })        
     },
     (error) => {
         console.log(error)
@@ -532,6 +532,7 @@ unsubscribeFromThis = async (topic) => {
     const userName = this.props.navigation.getParam('userName', '')
     const userIdName = this.props.navigation.getParam('userIdName', '')
     const userId = this.props.navigation.getParam('userId', 'userId')
+    const previousScreen = this.props.navigation.getParam('previousScreen', 'previousScreen')
 
       
     return (
@@ -568,7 +569,7 @@ unsubscribeFromThis = async (topic) => {
                     title={
                         this.props.contacts.contact.name != ''
                         ?
-                        this.capitalize(this.props.contacts.contact.name[1])
+                        this.capitalize(this.props.contacts.contact.name[0])
                         :
                         this.state.name[0]
                     }
@@ -650,7 +651,13 @@ unsubscribeFromThis = async (topic) => {
                     null
                 }
                 <Button gradient style={styles.confirmButton}               
-                    onPress={() => this.goToChatScreen()}
+                    onPress={
+                        previousScreen == 'Chat'
+                        ?
+                        () => navigation.goBack()
+                        :
+                        () => this.goToChatScreen()
+                    }
                 >
                     <Text headline bold white center>Send Message</Text>
                 </Button>       

@@ -22,6 +22,7 @@ const initialState = {
     avatar: null,
   },
   isLoading: false,
+  alreadyLoaded: false,
   error: false
 }
 
@@ -37,7 +38,8 @@ export default function contactsReducer (state = initialState, action) {
       return {
         ...state,
         isLoading: false,
-        contactList: action.data
+        contactList: action.data,
+        alreadyLoaded: true,
       }
     case FETCHING_CONTACTS_FAILURE:
       return {
