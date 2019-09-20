@@ -229,7 +229,13 @@ class ChatList extends Component {
                     :
                     { source: { uri: this.parseAvatarUrl(l.avatarUrl) }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
                     }
-                    title={this.capitalize(l.name)}
+                    title={
+                      l.name[0] == '@'
+                      ?
+                      this.parseUserId(l.name)
+                      :
+                      this.capitalize(l.name)
+                    }
                     titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
                     rightTitle={
                       <Moment element={Text} calendar={calendarStrings} style={styles.dateTag}>{new Date(l.lastSeen)}</Moment>
@@ -299,6 +305,56 @@ class ChatList extends Component {
             this.props.contacts.contactList.map((l, i) => (
               <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
               <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
+              {
+                l.name[0] == '@'
+                ?
+                <ListItem
+                  key={i}
+                  leftAvatar={
+                  (l.avatarUrl == "")
+                  ?
+                  { title: l.name[1], titleStyle:{textTransform: 'capitalize'}, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
+                  :
+                  { source: { uri: this.parseAvatarUrl(l.avatarUrl) }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
+                  }
+                  title={
+                    l.name[0] == '@'
+                    ?
+                    this.parseUserId(l.name)
+                    :
+                    this.capitalize(l.name)
+                  }
+                  titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                  rightTitle={
+                    <Moment element={Text} calendar={calendarStrings} style={styles.dateTag}>{new Date(l.lastSeen)}</Moment>
+                  }
+                  rightTitleStyle={styles.dateTag}
+                  subtitle={
+                    l.lastMessage == "" 
+                    ?
+                    l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>
+                    :
+                    l.lastMessage
+                  }
+                  subtitleStyle={styles.subtitle}
+                  containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                  onPress={(navigation) => {
+                    const myUserId = this.props.contacts.myUserID
+                    this.props.navigation.navigate('Chat', {
+                      userName: this.capitalize(l.name),
+                      userIdName: this.parseUserId(l.userId),
+                      userId: l.userId,
+                      avatarUrl: l.avatarUrl,
+                      avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                      isActive: l.isActive,
+                      lastSeen: l.lastSeen,
+                      previousScreen: 'ChatList',
+                      roomId: l.roomId,
+                      myUserId: myUserId,
+                    })
+                  }}  
+                />
+                :
                 <ListItem
                   key={i}
                   leftAvatar={
@@ -308,7 +364,60 @@ class ChatList extends Component {
                   :
                   { source: { uri: this.parseAvatarUrl(l.avatarUrl) }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
                   }
-                  title={this.capitalize(l.name)}
+                  title={
+                    l.name[0] == '@'
+                    ?
+                    this.parseUserId(l.name)
+                    :
+                    this.capitalize(l.name)
+                  }
+                  titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                  rightTitle={
+                    <Moment element={Text} calendar={calendarStrings} style={styles.dateTag}>{new Date(l.lastSeen)}</Moment>
+                  }
+                  rightTitleStyle={styles.dateTag}
+                  subtitle={
+                    l.lastMessage == "" 
+                    ?
+                    l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>
+                    :
+                    l.lastMessage
+                  }
+                  subtitleStyle={styles.subtitle}
+                  containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                  onPress={(navigation) => {
+                    const myUserId = this.props.contacts.myUserID
+                    this.props.navigation.navigate('Chat', {
+                      userName: this.capitalize(l.name),
+                      userIdName: this.parseUserId(l.userId),
+                      userId: l.userId,
+                      avatarUrl: l.avatarUrl,
+                      avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                      isActive: l.isActive,
+                      lastSeen: l.lastSeen,
+                      previousScreen: 'ChatList',
+                      roomId: l.roomId,
+                      myUserId: myUserId,
+                    })
+                  }}  
+                />
+              }
+                <ListItem
+                  key={i}
+                  leftAvatar={
+                  (l.avatarUrl == "")
+                  ?
+                  { title: l.name[0], titleStyle:{textTransform: 'capitalize'}, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
+                  :
+                  { source: { uri: this.parseAvatarUrl(l.avatarUrl) }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
+                  }
+                  title={
+                    l.name[0] == '@'
+                    ?
+                    this.parseUserId(l.name)
+                    :
+                    this.capitalize(l.name)
+                  }
                   titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
                   rightTitle={
                     <Moment element={Text} calendar={calendarStrings} style={styles.dateTag}>{new Date(l.lastSeen)}</Moment>

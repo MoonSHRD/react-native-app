@@ -322,7 +322,7 @@ class Profile extends Component {
         console.log(data)
         jsonData = JSON.parse(data)
 
-        // this.setState({roomId: jsonData.roomId})
+        this.setState({roomId: jsonData.roomId})
         console.log(data)
       },
       (error) => {
@@ -553,29 +553,63 @@ unsubscribeFromThis = async (topic) => {
             />
             <Block style={styles.avatarContainer}>
             {
-                this.props.contacts.contact.avatarUrl != ''
+                this.props.navigation.getParam('from', '') != 'search'
                 ?
-                <Avatar 
-                    rounded
-                    source={{
-                        uri: this.state.avatarUrl
-                    }}
-                    containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
-                    avatarStyle={styles.avatarImage}
-                />
-                :
-                <Avatar 
-                    rounded
-                    title={
-                        this.props.contacts.contact.name != ''
+                <Viev>
+                    {
+                        this.props.contacts.contact.avatarUrl != ''
                         ?
-                        this.capitalize(this.props.contacts.contact.name[0])
+                        <Avatar 
+                            rounded
+                            source={{
+                                uri: this.state.avatarUrl
+                            }}
+                            containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
+                            avatarStyle={styles.avatarImage}
+                        />
                         :
-                        this.state.name[0]
-                    }
-                    containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
-                    avatarStyle={styles.avatarImage}
-                />
+                        <Avatar 
+                            rounded
+                            title={
+                                this.props.contacts.contact.name != ''
+                                ?
+                                this.capitalize(this.props.contacts.contact.name[0])
+                                :
+                                this.state.name[0]
+                            }
+                            containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
+                            avatarStyle={styles.avatarImage}
+                        />
+                    } 
+                </Viev>   
+                :
+                <View>
+                {
+                    this.props.navigation.getParam('avatarLink', '') != ''
+                    ?
+                    <Avatar 
+                        rounded
+                        source={{
+                            uri: this.props.navigation.getParam('avatarLink', '')
+                        }}
+                        containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
+                        avatarStyle={styles.avatarImage}
+                    />
+                    :
+                    <Avatar 
+                        rounded
+                        title={
+                            this.props.contacts.contact.name != ''
+                            ?
+                            this.capitalize(this.props.contacts.contact.name[0])
+                            :
+                            this.state.name[0]
+                        }
+                        containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
+                        avatarStyle={styles.avatarImage}
+                    />
+                }
+                </View>
             }
             </Block>
             <Block style={styles.profileContainer}>

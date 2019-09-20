@@ -249,7 +249,13 @@ parseUserId(props) {
                         :
                         { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
                       }
-                      title={this.capitalize(l.name)}
+                      title={
+                        l.name[0] == '@'
+                        ?
+                        this.parseUserId(l.name)
+                        :
+                        this.capitalize(l.name)
+                      }
                       titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
                       containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
                       onPress={() => {
@@ -259,6 +265,7 @@ parseUserId(props) {
                           userId: l.userId,
                           avatarLink: this.parseAvatarUrl(l.avatarUrl),
                           roomId: l.roomId,
+                          from: 'search',
                         })
                       }}  
                     />
@@ -277,30 +284,71 @@ parseUserId(props) {
               this.props.contacts.contactList.map((l, i) => (
                 <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
                 <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
-                  <ListItem
-                    key={i}
-                    leftAvatar={
-                      (l.avatarUrl == "")
-                      ?
-                      { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
-                      :
-                      { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
-                    }
-                    title={this.capitalize(l.name)}
-                    titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
-                    subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen} interval={60000}/></Text>}
-                    subtitleStyle={styles.subtitle}
-                    containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
-                    onPress={() => {
-                      navigation.navigate('Profile', {
-                        userName: l.name,
-                        userIdName: this.parseUserId(l.userId),
-                        userId: l.userId,
-                        avatarLink: this.parseAvatarUrl(l.avatarUrl),
-                        roomId: l.roomId,
-                      })
-                  }}
-                  />
+                  {
+                    l.name[0] == '@'
+                    ?
+                    <ListItem
+                      key={i}
+                      leftAvatar={
+                        (l.avatarUrl == "")
+                        ?
+                        { title: l.name[1], titleStyle:{textTransform: 'capitalize'} }
+                        :
+                        { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
+                      }
+                      title={
+                        l.name[0] == '@'
+                        ?
+                        this.parseUserId(l.name)
+                        :
+                        this.capitalize(l.name)
+                      }
+                      titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                      subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen} interval={60000}/></Text>}
+                      subtitleStyle={styles.subtitle}
+                      containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                      onPress={() => {
+                        navigation.navigate('Profile', {
+                          userName: l.name,
+                          userIdName: this.parseUserId(l.userId),
+                          userId: l.userId,
+                          avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                          roomId: l.roomId,
+                        })
+                    }}
+                    />
+                    :
+                    <ListItem
+                      key={i}
+                      leftAvatar={
+                        (l.avatarUrl == "")
+                        ?
+                        { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
+                        :
+                        { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
+                      }
+                      title={
+                        l.name[0] == '@'
+                        ?
+                        this.parseUserId(l.name)
+                        :
+                        this.capitalize(l.name)
+                      }
+                      titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                      subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen} interval={60000}/></Text>}
+                      subtitleStyle={styles.subtitle}
+                      containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                      onPress={() => {
+                        navigation.navigate('Profile', {
+                          userName: l.name,
+                          userIdName: this.parseUserId(l.userId),
+                          userId: l.userId,
+                          avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                          roomId: l.roomId,
+                        })
+                    }}
+                    />
+                  }
                   </BoxShadow>
                   </View>
               ))
