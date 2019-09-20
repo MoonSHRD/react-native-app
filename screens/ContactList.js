@@ -70,12 +70,16 @@ class ContactList extends Component {
 
   componentDidMount() {
     this.setHeaderParams()
-    this.willFocus = this.props.navigation.addListener('willFocus', () => {
-      this.props.getMyUserId()
-      this.props.getMyUserProfile()
-      this.props.getCurrentTopics()
-      this.props.loadDirectChats()
-    });
+    this.props.getMyUserId()
+    this.props.getMyUserProfile()
+    this.props.getCurrentTopics()
+    this.props.loadDirectChats()
+    // this.willFocus = this.props.navigation.addListener('willFocus', () => {
+    //   this.props.getMyUserId()
+    //   this.props.getMyUserProfile()
+    //   this.props.getCurrentTopics()
+    //   this.props.loadDirectChats()
+    // });
 
     this.onNetworkErrorEvent = DeviceEventEmitter.addListener('onNetworkError', function(e) {
       console.log('onNetworkError')
