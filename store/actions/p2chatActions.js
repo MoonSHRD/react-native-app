@@ -17,7 +17,7 @@ export function getCurrentTopics() {
 
 export function subcribeToTopic(topic) {
     return (dispatch) =>  {
-        const promise = P2Chat.subcribeToTopic(topic)
+        const promise = P2Chat.subscribeToTopic(topic)
         promise.then((data) => {
             console.log(data)
         },

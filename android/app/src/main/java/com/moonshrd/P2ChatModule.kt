@@ -19,7 +19,7 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
     }
 
     @ReactMethod
-    fun subcribeToTopic(topic: String, promise: Promise) {
+    fun subscribeToTopic(topic: String, promise: Promise) {
         MainApplication.getP2ChatService().subscribeToTopic(topic)
         promise.resolve(true)
     }
