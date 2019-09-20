@@ -7,7 +7,6 @@ import { Overlay, Avatar } from 'react-native-elements';
 import { theme } from './constants';
 import { createRootNavigator } from "./navigation/router";
 import { initAppWithRealm } from './store/actions/loginActions';
-import { getCurrentTopics, getAllMatches } from './store/actions/p2chatActions';
 const { width, height } = Dimensions.get('window');
 
 
@@ -203,7 +202,6 @@ const styles = StyleSheet.create({
 function mapStateToProps (state) {
   return {
     login: state.login,
-    p2chat: state.p2chat,
   }
 }
 
@@ -211,7 +209,6 @@ function mapDispatchToProps (dispatch) {
   return {
     initApplication: () => dispatch(initAppWithRealm()),
     getCurrentTopics: () => dispatch(getCurrentTopics()),
-    getAllMatches: () => dispatch(getAllMatches()),
   }
 }
 

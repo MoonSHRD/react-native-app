@@ -213,23 +213,13 @@ class Profile extends Component {
       console.log('Приглашение от ' + userIdName)
       if (userName == 'Приглашение от ' + userIdName || userName == 'Invite from ' + userIdName) { 
             console.log('invite has to be sended')
-            Alert.alert(
-                'Success!',
-                'Invite was successfully handled',
-                [
-                {
-                    text: 'Continue',
-                }
-                ],
-                { cancelable: true }
-            )
-            // const promise = MatrixClient.acceptInvite()
-            // promise.then((data) => {
-            //     console.log(data)
-            // },
-            // (error) => {
-            //     console.log(error)
-            // })
+            const promise = MatrixClient.acceptInvite(roomId)
+            promise.then((data) => {
+                console.log(data)
+            },
+            (error) => {
+                console.log(error)
+            })
       }
   }
 
@@ -451,7 +441,7 @@ class Profile extends Component {
   componentDidMount() {
     this.setState({roomId: this.props.navigation.getParam('roomId', '')})
     this.setHeaderParams()
-    // this.loadAllTags()
+    this.loadAllTags()
     this.willFocus = this.props.navigation.addListener('willFocus', async () => {
         const userName = await this.props.navigation.getParam('userName', 'userName')
         await (userName != 'userName')
@@ -491,25 +481,28 @@ filterItems(array, search) {
 
 loadAllTags = () => {
     this.props.getCurrentTopics()
-    allTags = new Object()
-    this.props.p2chat.topics.map((data) => {
-        allTags.name = data
 
-        return allTags
-    })
-    this.setState({tags: allTags})
+    if  (this.props.p2chat.topics.length != 0) {
+        allTags = new Array()
+        this.props.p2chat.topics.map((data, i) => {
+            tag = new Object()
+            tag.name = data.valueOf(i)
+    
+            this.setState({tags: this.state.tags.concat(tag)})    
+        })
+    }
 }
 
 subscribeOnThis = async (topic, index) => {
     await console.log('pressed topic ' +  topic + ' ' + index) 
     const promise = await this.props.subcribeToTopic(topic)
+    newTag = new Object()
+    newTag.name = topic
+    this.setState({
+        tags: this.state.tags.concat(newTag)
+    })    
     await promise.then((data) => {
         console.log(data)
-        newTag = new Object()
-        newTag.name = topic
-        this.setState({
-            tags: this.state.tags.concat(newTag)
-        })
     },
     (error) => {
         console.log(error)
@@ -519,11 +512,11 @@ subscribeOnThis = async (topic, index) => {
 unsubscribeFromThis = async (topic) => {
     await console.log('pressed topic' +  topic)
     const promise = this.props.unsubscribeFromTopic(topic)
+    this.setState({
+        tags: this.state.tags.filter(tag => tag.name !== topic)
+    })    
     await promise.then((data) => {
         console.log(data)
-        this.setState({
-           tags: this.state.tags.filter(tag => tag.name !== topic)
-        })
     },
     (error) => {
         console.log(error)
@@ -768,34 +761,25 @@ unsubscribeFromThis = async (topic) => {
                     null
                 }
                 {
-                    this.state.tags
+                    this.state.tags.length === 0
                     ?
+                    null
+                    :
                     <Block>
                         <Text subhead gray style={{marginTop:20}}>My Tags</Text>
                         <Block style={styles.tagContainer}>
                         {
                             this.state.tags.map((l,i) => (
-                                    l.matched
-                                    ?
                                     <Button
                                         key={i}
                                         style={styles.matchedTag}
                                         onPress={() => this.unsubscribeFromThis(l.name)}>
                                         <Text caption white center>{l.name}</Text>
                                     </Button>
-                                    :
-                                    <Button
-                                        key={i}
-                                        style={styles.dismatchedTag}
-                                        onPress={() => this.unsubscribeFromThis(l.name)}>
-                                        <Text caption blue center>{l.name}</Text>
-                                    </Button>
                             ))
                         }
                         </Block>
                     </Block>    
-                    :
-                    null
                 }
                 <Input
                     error={hasErrors('tags')}
