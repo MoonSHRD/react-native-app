@@ -10,15 +10,10 @@ import org.matrix.androidsdk.core.callback.ApiCallback
 import org.matrix.androidsdk.core.model.MatrixError
 import org.matrix.androidsdk.data.Room
 import org.matrix.androidsdk.rest.model.User
-import javax.inject.Inject
 
 object MatrixSdkHelper {
-    @Inject lateinit var matrixInstance: Matrix
-    @Inject lateinit var gson: Gson
-
-    init {
-        MainApplication.getComponent().inject(this)
-    }
+    val matrixInstance = Matrix.getInstance(MainApplication.getReactContext())
+    val gson: Gson = Gson()
 
     fun getUserData(userID: String): CompletableFuture<UserModel> {
         val result = CompletableFuture<UserModel>()

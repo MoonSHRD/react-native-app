@@ -16,5 +16,4 @@ interface ApplicationComponent {
     fun inject(matrixLoginClientModule: MatrixLoginClientModule)
     fun inject(p2chatService: P2ChatService)
     fun inject(p2ChatModule: P2ChatModule)
-    fun inject(matrixSdkHelper: MatrixSdkHelper)
 }
