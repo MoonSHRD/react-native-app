@@ -11,7 +11,6 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
 import com.google.gson.JsonObject;
-import com.moonshrd.di.components.ApplicationComponent;
 import com.moonshrd.utils.TopicStorage;
 import com.moonshrd.utils.matrix.LoginHandler;
 import com.moonshrd.utils.matrix.Matrix;
@@ -42,7 +41,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
 
     MatrixLoginClientModule(@Nonnull ReactApplicationContext reactContext) {
         super(reactContext);
-        MainApplication.getComponent().injectsMatrixLoginModule(this);
+        MainApplication.getComponent().inject(this);
     }
 
     @Nonnull

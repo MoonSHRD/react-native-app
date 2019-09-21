@@ -1,12 +1,10 @@
 package com.moonshrd
 
-import com.facebook.react.bridge.Promise
-import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.bridge.ReactContextBaseJavaModule
-import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.bridge.*
 import com.google.gson.Gson
 import com.moonshrd.models.LocalChat
-import com.moonshrd.models.Message
+import com.moonshrd.models.MessageModel
+import com.moonshrd.models.UserModel
 import com.moonshrd.repository.LocalChatsRepository
 import com.moonshrd.utils.TopicStorage
 import com.moonshrd.utils.matrix.Matrix
@@ -19,7 +17,7 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
     @Inject lateinit var matrixInstance: Matrix
 
     init {
-        MainApplication.getComponent().injectsP2ChatModule(this)
+        MainApplication.getComponent().inject(this)
     }
 
     override fun getName(): String {
@@ -51,8 +49,22 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
     @ReactMethod
     fun sendMessage(topic: String, messageText: String, promise: Promise) {
         MainApplication.getP2ChatService().sendMessage(topic, messageText)
-        val from = matrixInstance.defaultSession?.myUserId ?: ""
-        LocalChatsRepository.getLocalChat(topic)!!.putMessage(Message(UUID.randomUUID().toString(), messageText, from, topic, System.currentTimeMillis()))
+        val myId = matrixInstance.defaultSession?.myUserId ?: ""
+        val myName = matrixInstance.defaultSession?.myUser!!.displayname ?: ""
+        val myAvatarUrl = matrixInstance.defaultSession?.contentManager!!.getDownloadableUrl(matrixInstance.defaultSession?.dataHandler!!.myUser.avatarUrl,false)
+        LocalChatsRepository.getLocalChat(topic)!!.putMessage(MessageModel(
+                UUID.randomUUID().toString(),
+                messageText,
+                myId,
+                topic,
+                System.currentTimeMillis(),
+                UserModel(
+                        myId,
+                        myName,
+                        myAvatarUrl
+                )
+        ))
+
         promise.resolve(true)
     }
 

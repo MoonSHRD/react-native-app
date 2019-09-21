@@ -9,9 +9,11 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.moonshrd.MainApplication
 import com.moonshrd.models.LocalChat
-import com.moonshrd.models.Message
+import com.moonshrd.models.MessageModel
+import com.moonshrd.models.UserModel
 import com.moonshrd.repository.LocalChatsRepository
 import com.moonshrd.utils.TopicStorage
+import com.moonshrd.utils.matrix.Matrix
 import com.moonshrd.utils.sendRNEvent
 import com.orhanobut.logger.Logger
 import p2mobile.P2mobile
@@ -29,6 +31,7 @@ class P2ChatService : Service() {
 
     @Inject lateinit var gson: Gson
     @Inject lateinit var topicStorage: TopicStorage
+    @Inject lateinit var matrixInstance: Matrix
     private val binder = P2ChatServiceBinder()
     private var scheduledExecutorService: ScheduledExecutorService? = null
 
@@ -45,7 +48,7 @@ class P2ChatService : Service() {
         }
 
     override fun onCreate() {
-        MainApplication.getComponent().injectsP2ChatService(this)
+        MainApplication.getComponent().inject(this)
     }
 
     override fun onBind(intent: Intent): IBinder? {
@@ -87,9 +90,11 @@ class P2ChatService : Service() {
     private fun getMessage() {
         val message = P2mobile.getMessages()
         if (message.isNotEmpty()) {
-            val messageObject = gson.fromJson(message, Message::class.java)
+            val messageObject = gson.fromJson(message, MessageModel::class.java)
             messageObject.timestamp = System.currentTimeMillis()
             messageObject.id = UUID.randomUUID().toString()
+            val user = matrixInstance.defaultSession?.dataHandler!!.getUser(messageObject.from) ?: null
+            messageObject.user = UserModel(messageObject.from, user?.displayname, user?.avatarUrl)
             Logger.d("New message! [${messageObject.topic}] ${messageObject.from} > ${messageObject.body})")
             LocalChatsRepository.getLocalChat(messageObject.topic)!!.putMessage(messageObject)
             val writableMap = Arguments.createMap()

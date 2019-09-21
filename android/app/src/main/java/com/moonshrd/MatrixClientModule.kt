@@ -1,7 +1,6 @@
 package com.moonshrd
 
 import android.util.Base64
-import android.util.Log
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
@@ -10,6 +9,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.moonshrd.models.UserModel
 import com.moonshrd.utils.matrix.Matrix
+import com.moonshrd.utils.matrix.MatrixSdkHelper
 import com.moonshrd.utils.sendEventWithOneStringArg
 import java9.util.concurrent.CompletableFuture
 import kotlinx.coroutines.GlobalScope
@@ -23,7 +23,6 @@ import org.matrix.androidsdk.data.RoomSummary
 import org.matrix.androidsdk.data.timeline.EventTimeline
 import org.matrix.androidsdk.listeners.IMXMediaUploadListener
 import org.matrix.androidsdk.rest.model.Event
-import org.matrix.androidsdk.rest.model.User
 import org.matrix.androidsdk.rest.model.search.SearchUsersResponse
 import java.io.ByteArrayInputStream
 import java.net.URLConnection.guessContentTypeFromStream
@@ -41,7 +40,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
     lateinit var matrixInstance: Matrix
 
     init {
-        MainApplication.getComponent().injectsMatrixClientModule(this)
+        MainApplication.getComponent().inject(this)
     }
 
     override fun getName(): String {
@@ -114,105 +113,20 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     @ReactMethod
     fun getUserById(userID: String, promise: Promise) {
-      getUserData(userID,promise)
-    }
-
-    private fun getUserData(userID: String, promise: Promise){
         if (!isSessionExists(promise)) {
             return
         }
 
-        val userName = CompletableFuture<String?>()
-        val userAvatarUrl = CompletableFuture<String?>()
-        val userIsActive = CompletableFuture<Boolean?>()
-        val userLastSeen = CompletableFuture<Long?>()
+        val future = MatrixSdkHelper.getUserData(userID)
 
-        val directChats = matrixInstance.defaultSession.dataHandler.store.rooms.filter {
-            it.isDirect
+        future.thenAccept {
+            promise.resolve(gson.toJson(it))
         }
+        future.exceptionally {
+            promise.reject(it)
 
-        val roomId = getRoomId(directChats,userID)
-
-        matrixInstance.defaultSession.presenceApiClient.getPresence(userID,object : ApiCallback<User>{
-            override fun onSuccess(info: User?) {
-                userIsActive.complete(info?.isActive)
-                userLastSeen.complete(info?.lastActiveAgo)
-            }
-
-            override fun onUnexpectedError(e: java.lang.Exception?) {
-                userIsActive.complete(null)
-                userLastSeen.complete(null)
-            }
-
-            override fun onMatrixError(e: MatrixError?) {
-                userIsActive.complete(null)
-                userLastSeen.complete(null)
-            }
-
-            override fun onNetworkError(e: java.lang.Exception?) {
-                userIsActive.complete(null)
-                userLastSeen.complete(null)
-            }
-        })
-
-        matrixInstance.defaultSession.profileApiClient.displayname(userID, object : ApiCallback<String> {
-            override fun onSuccess(info: String?) {
-                userName.complete(info)
-            }
-
-            override fun onUnexpectedError(e: Exception?) {
-                promise.reject(e)
-                userName.complete(null)
-            }
-
-            override fun onMatrixError(e: MatrixError?) {
-                //promise.reject(RuntimeException(e!!.error))
-                userName.complete("")
-            }
-
-            override fun onNetworkError(e: Exception?) {
-                promise.reject(e)
-                userName.complete(null)
-            }
-        })
-
-        matrixInstance.defaultSession.profileApiClient.avatarUrl(userID, object : ApiCallback<String> {
-            override fun onSuccess(info: String?) {
-                userAvatarUrl.complete(info)
-            }
-
-            override fun onUnexpectedError(e: Exception?) {
-                promise.reject(e)
-                userAvatarUrl.complete(null)
-            }
-
-            override fun onMatrixError(e: MatrixError?) {
-                //promise.reject(RuntimeException(e!!.error))
-                userAvatarUrl.complete(null)
-            }
-
-            override fun onNetworkError(e: Exception?) {
-                promise.reject(e)
-                userAvatarUrl.complete(null)
-            }
-        })
-
-        GlobalScope.launch {
-            val name = userName.get()
-            val avatarUrl = userAvatarUrl.get()
-            val isActive = userIsActive.get()
-            val lastSeen = userLastSeen.get()
-            promise.resolve(gson.toJson(UserModel(userID, name ?: "", avatarUrl ?: "", lastSeen, isActive, roomId = roomId)))
+            UserModel("", "", "") // crunch
         }
-    }
-
-    private fun getRoomId(rooms:List<Room>, useriD: String):String?{
-        for( i in rooms.indices){
-            if(rooms[i].getMember(useriD)!=null){
-                return rooms[i].roomId
-            }
-        }
-        return null
     }
 
     @ReactMethod
@@ -245,7 +159,15 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         }
 
         if (isDirectChatExists(participantUserId)) {
-            getUserData(participantUserId,promise)
+            val future = MatrixSdkHelper.getUserData(participantUserId)
+            future.thenAccept {
+                promise.resolve(gson.toJson(it))
+            }
+            future.exceptionally {
+                promise.reject(it)
+
+                UserModel("", "", "") // crunch
+            }
             return
         }
 
