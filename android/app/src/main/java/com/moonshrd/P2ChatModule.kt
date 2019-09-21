@@ -1,6 +1,9 @@
 package com.moonshrd
 
-import com.facebook.react.bridge.*
+import com.facebook.react.bridge.Promise
+import com.facebook.react.bridge.ReactApplicationContext
+import com.facebook.react.bridge.ReactContextBaseJavaModule
+import com.facebook.react.bridge.ReactMethod
 import com.google.gson.Gson
 import com.moonshrd.models.LocalChat
 import com.moonshrd.models.MessageModel
@@ -8,8 +11,10 @@ import com.moonshrd.models.UserModel
 import com.moonshrd.repository.LocalChatsRepository
 import com.moonshrd.utils.TopicStorage
 import com.moonshrd.utils.matrix.Matrix
+import com.moonshrd.utils.matrix.MatrixSdkHelper
 import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
     @Inject lateinit var gson: Gson
@@ -69,8 +74,13 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
     }
 
     @ReactMethod
-    fun getLocalChatMembersByTopic(topic: String, promise: Promise) {
-        promise.resolve(gson.toJson(LocalChatsRepository.getLocalChat(topic)!!.getMembers()))
+    fun getLocalChatMembers(topic: String, promise: Promise) {
+        val members = LocalChatsRepository.getLocalChat(topic)!!.getMembers()
+        val users = ArrayList<UserModel>()
+        members.forEach {
+            users.add(MatrixSdkHelper.getUserData(it).get())
+        }
+        promise.resolve(gson.toJson(users))
     }
 
     @ReactMethod
