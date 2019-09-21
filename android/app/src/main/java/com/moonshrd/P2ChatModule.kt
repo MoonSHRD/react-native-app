@@ -5,10 +5,12 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.google.gson.Gson
+import com.moonshrd.utils.TopicStorage
 import javax.inject.Inject
 
 class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
     @Inject lateinit var gson: Gson
+    @Inject lateinit var topicStorage: TopicStorage
 
     init {
         MainApplication.getComponent().injectsP2ChatModule(this)
@@ -21,12 +23,14 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
     @ReactMethod
     fun subscribeToTopic(topic: String, promise: Promise) {
         MainApplication.getP2ChatService().subscribeToTopic(topic)
+        topicStorage.addTopic(topic)
         promise.resolve(topic)
     }
 
     @ReactMethod
     fun unsubscribeFromTopic(topic: String, promise: Promise) {
         MainApplication.getP2ChatService().unsubscribeFromTopic(topic)
+        topicStorage.removeTopic(topic)
         promise.resolve(true)
     }
 
