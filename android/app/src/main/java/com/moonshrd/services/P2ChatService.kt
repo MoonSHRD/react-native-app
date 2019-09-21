@@ -10,6 +10,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.moonshrd.MainApplication
 import com.moonshrd.models.Message
+import com.moonshrd.utils.TopicStorage
 import com.moonshrd.utils.sendRNEvent
 import com.orhanobut.logger.Logger
 import p2mobile.P2mobile
@@ -25,8 +26,8 @@ class P2ChatService : Service() {
     private val newMatchEventName = "NewMatchEvent"
     private val newMessageEventName = "NewMessageEvent"
 
-    @Inject
-    lateinit var gson: Gson
+    @Inject lateinit var gson: Gson
+    @Inject lateinit var topicStorage: TopicStorage
     private val binder = P2ChatServiceBinder()
     private var scheduledExecutorService: ScheduledExecutorService? = null
 
@@ -74,6 +75,10 @@ class P2ChatService : Service() {
             }
         }, 0, 1, TimeUnit.SECONDS)
         isServiceRunning = true
+        for(topic in topicStorage.getTopicList()) {
+            subscribeToTopic(topic)
+        }
+        Logger.i("Successfully subscribed to all topics which I have.")
     }
 
 

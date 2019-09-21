@@ -11,6 +11,8 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
 import com.google.gson.JsonObject;
+import com.moonshrd.di.components.ApplicationComponent;
+import com.moonshrd.utils.TopicStorage;
 import com.moonshrd.utils.matrix.LoginHandler;
 import com.moonshrd.utils.matrix.Matrix;
 import com.moonshrd.utils.matrix.RegistrationManager;
@@ -32,12 +34,15 @@ import org.matrix.androidsdk.sync.EventsThreadListener;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
 
 public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
     private static String LOG_TAG = MatrixLoginClientModule.class.getSimpleName();
+    @Inject TopicStorage topicStorage;
 
     MatrixLoginClientModule(@Nonnull ReactApplicationContext reactContext) {
         super(reactContext);
+        MainApplication.getComponent().injectsMatrixLoginModule(this);
     }
 
     @Nonnull
@@ -150,6 +155,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
         matrixInstance.clearSessions(getReactApplicationContext(), true, null);
         matrixInstance.getLoginStorage().clear();
         MainApplication.getP2ChatService().setMatrixID("");
+        topicStorage.clear();
     }
 
     private void getRegFlowsAndRegister(HomeServerConnectionConfig hsConfig, RegistrationManager registrationManager, Promise promise) {
