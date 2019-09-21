@@ -10,6 +10,7 @@ import { Text, Block } from '../components';
 
 import {connect} from 'react-redux';
 import { getContactList, searchBar, changeContactList, clearSearchBar, selectContact } from '../store/actions/contactsActions';
+import { getAllMatches } from '../store/actions/p2chatActions';
 
 const { width, height } = Dimensions.get('window');
 
@@ -81,6 +82,7 @@ class MatchesList extends Component {
     this.setHeaderParams()
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
       this.props.getDirectChats();
+      this.props.getAllMatches()
     });
   }
 
@@ -91,25 +93,28 @@ class MatchesList extends Component {
   }
 
   parseAvatarUrl(props) {
-    if (props != '') {
+    if (props != null) {
+      if (props != '') {
         let parts = props.split('mxc://', 2);
         let urlWithoutMxc  = parts[1];
         let urlParts = urlWithoutMxc.split('/', 2)
         let firstPart = urlParts[0]
         let secondPart = urlParts[1] 
         let serverUrl = 'https://matrix.moonshard.tech/_matrix/media/r0/download/'
-        console.log(serverUrl + firstPart + '/' + secondPart)
         return serverUrl + firstPart + '/' + secondPart    
+      }
     }
 }
 
 parseUserId(props) {
-  if (props != '') {
-    let parts = props.split('@', 2);
-    let userId  = parts[1];
-    let userIdParts = userId.split(':', 2)
-    let firstPart = userIdParts[0]
-    return this.capitalize(firstPart)
+  if (props != null) {
+    if (props != '') {
+      let parts = props.split('@', 2);
+      let userId  = parts[1];
+      let userIdParts = userId.split(':', 2)
+      let firstPart = userIdParts[0]
+      return this.capitalize(firstPart)
+    }
   }
 }
 
@@ -198,7 +203,7 @@ parseUserId(props) {
             inputStyle={this.props.appState.nightTheme ? styles.darkSearchInputText : styles.searchInputText}
           />
         }
-        <View>
+        <View style={{marginBottom: 110,}}>
           {
             searchChanged
             ?
@@ -211,6 +216,41 @@ parseUserId(props) {
                 this.props.contacts.searchList.map((l, i) => (
                   <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
                   <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
+                  {
+                    l.name[0] == '@'
+                    ?
+                    <ListItem
+                      key={i}
+                      leftAvatar={
+                        (l.avatarUrl == "")
+                        ?
+                        { title: l.name[1], titleStyle:{textTransform: 'capitalize'} }
+                        :
+                        { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
+                      }
+                      title={
+                        l.name[0] == '@'
+                        ?
+                        this.parseUserId(l.name)
+                        :
+                        this.capitalize(l.name)
+                      }
+                      titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                      subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>}
+                      subtitleStyle={styles.subtitle}
+                      containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                      onPress={() => {
+                        navigation.navigate('Profile', {
+                          userName: l.name,
+                          userIdName: this.parseUserId(l.userId),
+                          userId: l.userId,
+                          avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                          roomId: l.roomId,
+                          type: "match",
+                        })
+                      }}  
+                    />
+                    :
                     <ListItem
                       key={i}
                       leftAvatar={
@@ -236,6 +276,7 @@ parseUserId(props) {
                         })
                       }}  
                     />
+                  }
                     </BoxShadow>
                     </View>
                 ))
@@ -251,6 +292,67 @@ parseUserId(props) {
               this.props.contacts.contactList.map((l, i) => (
                 <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
                 <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
+                {
+                  l.name[0] == '@'
+                  ?
+                  <ListItem
+                    key={i}
+                    leftAvatar={
+                      (l.avatarUrl == "")
+                      ?
+                      { title: l.name[1], titleStyle:{textTransform: 'capitalize'} }
+                      :
+                      { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
+                    }
+                    title={
+                      l.name[0] == '@'
+                      ?
+                      this.parseUserId(l.name)
+                      :
+                      this.capitalize(l.name)
+                    }
+                  titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                    subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>}
+                    subtitleStyle={styles.subtitle}
+                    containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                    onPress={() => {
+                      navigation.navigate('Profile', {
+                        userName: l.name,
+                        userIdName: this.parseUserId(l.userId),
+                        userId: l.userId,
+                        avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                        roomId: l.roomId,
+                        type: "match",
+                      })
+                    }}  
+                  />
+                  :
+                  <ListItem
+                    key={i}
+                    leftAvatar={
+                      (l.avatarUrl == "")
+                      ?
+                      { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
+                      :
+                      { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
+                    }
+                    title={this.capitalize(l.name)}
+                    titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                    subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>}
+                    subtitleStyle={styles.subtitle}
+                    containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                    onPress={() => {
+                      navigation.navigate('Profile', {
+                        userName: l.name,
+                        userIdName: this.parseUserId(l.userId),
+                        userId: l.userId,
+                        avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                        roomId: l.roomId,
+                        type: "match",
+                      })
+                    }}  
+                  />
+                }
                   <ListItem
                     key={i}
                     leftAvatar={
@@ -454,6 +556,7 @@ function mapDispatchToProps (dispatch) {
     updateSearchList: (data) => dispatch(changeContactList(data)),
     clearSearchBar: () => dispatch(clearSearchBar()),
     selectContact: (data) => dispatch(selectContact(data)),
+    getAllMatches: () => dispatch(getAllMatches()),
   }
 }
 

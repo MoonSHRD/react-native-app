@@ -316,38 +316,41 @@ class Profile extends Component {
     await this.loadMyAvatar()
   }
 
-  createDirectChatWithUser = async (userId) => {
-    const promise = MatrixClient.createDirectChat(userId)
-    promise.then((data) => {
-        console.log(data)
-        jsonData = JSON.parse(data)
-
-        this.setState({roomId: jsonData.roomId})
-        console.log(data)
-      },
-      (error) => {
-        console.log(error);
-      }
-    )
-  }
-
   goToChatScreen = async (navigation) => {
-    if (this.props.contacts.contact.roomId != '') {
+    if (this.props.contacts.contact.roomId != null) {
         roomId = this.props.contacts.contact.roomId
-    } 
-    userId = this.props.contacts.contact.userId,
-    await this.createDirectChatWithUser(userId)
+        await this.props.navigation.navigate('Chat', {
+            userName: this.capitalize(this.props.contacts.contact.name),
+            userIdName: this.parseUserId(this.props.contacts.contact.userId),
+            userId: this.props.contacts.contact.userId,
+            avatarUrl: this.props.contacts.contact.avatarUrl,
+            avatarLink: this.parseAvatarUrl(this.props.contacts.contact.avatarUrl),
+            isActive: this.props.contacts.contact.isActive,
+            lastSeen: this.props.contacts.contact.lastSeen,
+            roomId: roomId
+        })        
+    } else {
+        userId = this.props.contacts.contact.userId
+        const promise = MatrixClient.createDirectChat(userId)
+        promise.then(async (data) => {
+            await console.log(data)
+            await this.props.navigation.navigate('Chat', {
+                userName: this.capitalize(this.props.contacts.contact.name),
+                userIdName: this.parseUserId(this.props.contacts.contact.userId),
+                userId: this.props.contacts.contact.userId,
+                avatarUrl: this.props.contacts.contact.avatarUrl,
+                avatarLink: this.parseAvatarUrl(this.props.contacts.contact.avatarUrl),
+                isActive: this.props.contacts.contact.isActive,
+                lastSeen: this.props.contacts.contact.lastSeen,
+                roomId: data
+            })
+          },
+          (error) => {
+            console.log(error);
+          }
+        )    
+    }
 
-    await this.props.navigation.navigate('Chat', {
-        userName: this.capitalize(this.props.contacts.contact.name),
-        userIdName: this.parseUserId(this.props.contacts.contact.userId),
-        userId: this.props.contacts.contact.userId,
-        avatarUrl: this.props.contacts.contact.avatarUrl,
-        avatarLink: this.parseAvatarUrl(this.props.contacts.contact.avatarUrl),
-        isActive: this.props.contacts.contact.isActive,
-        lastSeen: this.props.contacts.contact.lastSeen,
-        roomId: roomId
-    })    
   }
 
   setHeaderParams = () => {
@@ -555,7 +558,7 @@ unsubscribeFromThis = async (topic) => {
             {
                 this.props.navigation.getParam('from', '') != 'search'
                 ?
-                <Viev>
+                <Block>
                     {
                         this.props.contacts.contact.avatarUrl != ''
                         ?
@@ -581,11 +584,11 @@ unsubscribeFromThis = async (topic) => {
                             avatarStyle={styles.avatarImage}
                         />
                     } 
-                </Viev>   
+                </Block>   
                 :
-                <View>
+                <Block>
                 {
-                    this.props.navigation.getParam('avatarLink', '') != ''
+                    this.props.contacts.contact.avatarUrl != ''
                     ?
                     <Avatar 
                         rounded
@@ -598,18 +601,12 @@ unsubscribeFromThis = async (topic) => {
                     :
                     <Avatar 
                         rounded
-                        title={
-                            this.props.contacts.contact.name != ''
-                            ?
-                            this.capitalize(this.props.contacts.contact.name[0])
-                            :
-                            this.state.name[0]
-                        }
+                        title={this.capitalize(this.props.contacts.contact.name[0])}
                         containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
                         avatarStyle={styles.avatarImage}
                     />
                 }
-                </View>
+                </Block>
             }
             </Block>
             <Block style={styles.profileContainer}>

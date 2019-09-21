@@ -101,7 +101,8 @@ class ChatList extends Component {
   }
 
   parseAvatarUrl(props) {
-    if (props != '') {
+    if (props != null) {
+      if (props != '') {
         let parts = props.split('mxc://', 2);
         let urlWithoutMxc  = parts[1];
         let urlParts = urlWithoutMxc.split('/', 2)
@@ -109,10 +110,12 @@ class ChatList extends Component {
         let secondPart = urlParts[1] 
         let serverUrl = 'https://matrix.moonshard.tech/_matrix/media/r0/download/'
         return serverUrl + firstPart + '/' + secondPart    
+      }
     }
-  }
+}
 
-  parseUserId(props) {
+parseUserId(props) {
+  if (props != null) {
     if (props != '') {
       let parts = props.split('@', 2);
       let userId  = parts[1];
@@ -121,6 +124,7 @@ class ChatList extends Component {
       return this.capitalize(firstPart)
     }
   }
+}
 
   updateSearch = async(text) => {
     await this.setState({ search: text , searchChanged: true});
@@ -207,7 +211,7 @@ class ChatList extends Component {
             inputStyle={this.props.appState.nightTheme ? styles.darkSearchInputText : styles.searchInputText}
           />
         }
-        <View style={{marginTop: 5}}>
+        <View style={{marginBottom: 110, marginTop: 5}}>
         {
           searchChanged
           ?
@@ -341,7 +345,7 @@ class ChatList extends Component {
                   onPress={(navigation) => {
                     const myUserId = this.props.contacts.myUserID
                     this.props.navigation.navigate('Chat', {
-                      userName: this.capitalize(l.name),
+                      userName: this.parseUserId(this.capitalize(l.name)),
                       userIdName: this.parseUserId(l.userId),
                       userId: l.userId,
                       avatarUrl: l.avatarUrl,

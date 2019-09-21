@@ -57,7 +57,7 @@ class Chat extends React.Component {
                           containerStyle={styles.avatar}
                           avatarStyle={styles.avatarImage}
                           titleStyle={{fontSize: 12}}
-                          title={userIdName[0]}
+                          title={userName[0]}
                         />
                   }
                     <Block style={styles.nameContainer}>

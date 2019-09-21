@@ -43,8 +43,10 @@ export function getAllMatches() {
     return (dispatch) => {
         const promise = P2Chat.getAllMatches()
         promise.then((data) => {
+            console.log(data)
             jsonData = JSON.parse(data)
             dispatch(getMatches(jsonData))
+            console.log(jsonData)
         },
         (error) => {
             console.log(error);

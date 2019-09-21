@@ -64,7 +64,8 @@ class NewChat extends Component {
   }
 
   parseAvatarUrl(props) {
-    if (props != '') {
+    if (props != null) {
+      if (props != '') {
         let parts = props.split('mxc://', 2);
         let urlWithoutMxc  = parts[1];
         let urlParts = urlWithoutMxc.split('/', 2)
@@ -72,10 +73,12 @@ class NewChat extends Component {
         let secondPart = urlParts[1] 
         let serverUrl = 'https://matrix.moonshard.tech/_matrix/media/r0/download/'
         return serverUrl + firstPart + '/' + secondPart    
+      }
     }
-  }
+}
 
-  parseUserId(props) {
+parseUserId(props) {
+  if (props != null) {
     if (props != '') {
       let parts = props.split('@', 2);
       let userId  = parts[1];
@@ -84,6 +87,7 @@ class NewChat extends Component {
       return this.capitalize(firstPart)
     }
   }
+}
 
   componentDidMount() {
     this.setHeaderParams()
@@ -182,7 +186,7 @@ class NewChat extends Component {
             inputStyle={this.props.appState.nightTheme ? styles.darkSearchInputText : styles.searchInputText}
           />
         }
-        <View>
+        <View style={{marginBottom: 110,}}>
           {
             searchChanged
             ?
@@ -195,6 +199,44 @@ class NewChat extends Component {
                 this.props.contacts.searchList.map((l, i) => (
                   <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
                   <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
+                  {
+                    l.name[0] == '@'
+                    ?
+                    <ListItem
+                      key={i}
+                      leftAvatar={
+                        (l.avatarUrl == "")
+                        ?
+                        { title: l.name[1], titleStyle:{textTransform: 'capitalize'} }
+                        :
+                        { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
+                      }
+                      title={
+                        l.name[0] == '@'
+                        ?
+                        this.parseUserId(l.name)
+                        :
+                        this.capitalize(l.name)
+                      }
+                      titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                      subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>}
+                      subtitleStyle={styles.subtitle}
+                      containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                      onPress={() => {
+                        this.props.createDirectChat(l.userId)
+                        this.props.navigation.navigate('Chat', {
+                          userName: this.parseUserId(this.capitalize(l.name)),
+                          userIdName: this.parseUserId(l.userId),
+                          userId: l.userId,
+                          avatarUrl: this.parseAvatarUrl(l.avatarUrl),
+                          isActive: l.isActive,
+                          lastSeen: l.lastSeen,
+                          previousScreen: 'NewChat',
+                          roomId: l.roomId,
+                        })  
+                      }}  
+                    />
+                    :
                     <ListItem
                       key={i}
                       leftAvatar={
@@ -204,7 +246,13 @@ class NewChat extends Component {
                         :
                         { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
                       }
-                      title={this.capitalize(l.name)}
+                      title={
+                        l.name[0] == '@'
+                        ?
+                        this.parseUserId(l.name)
+                        :
+                        this.capitalize(l.name)
+                      }
                       titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
                       subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>}
                       subtitleStyle={styles.subtitle}
@@ -218,10 +266,12 @@ class NewChat extends Component {
                           avatarUrl: this.parseAvatarUrl(l.avatarUrl),
                           isActive: l.isActive,
                           lastSeen: l.lastSeen,
-                          previousScreen: 'NewChat'
+                          previousScreen: 'NewChat',
+                          roomId: l.roomId,
                           })  
                       }}  
                     />
+                  }
                     </BoxShadow>
                     </View>
                 ))
@@ -237,6 +287,45 @@ class NewChat extends Component {
               this.props.contacts.contactList.map((l, i) => (
                 <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
                 <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
+                {
+                  l.name[0] == '@'
+                  ?
+                  <ListItem
+                    key={i}
+                    leftAvatar={
+                      (l.avatarUrl == "")
+                      ?
+                      { title: l.name[1], titleStyle:{textTransform: 'capitalize'} }
+                      :
+                      { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
+                    }
+                    title={
+                      l.name[0] == '@'
+                      ?
+                      this.parseUserId(l.name)
+                      :
+                      this.capitalize(l.name)
+                    }
+                    titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                    subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen} interval={60000}/></Text>}
+                    subtitleStyle={styles.subtitle}
+                    containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                    onPress={() => {
+                      this.props.createDirectChat(l.userId)
+                      this.props.navigation.navigate('Chat', {
+                        userName: this.parseUserId(this.capitalize(l.name)),
+                        userIdName: this.parseUserId(l.userId),
+                        userId: l.userId,
+                        avatarUrl: l.avatarUrl,
+                        avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                        isActive: l.isActive,
+                        lastSeen: l.lastSeen,
+                        previousScreen: 'NewChat',
+                        roomId: l.roomId,
+                        })
+                    }}
+                  />
+                  :
                   <ListItem
                     key={i}
                     leftAvatar={
@@ -246,7 +335,13 @@ class NewChat extends Component {
                       :
                       { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
                     }
-                    title={this.capitalize(l.name)}
+                    title={
+                      l.name[0] == '@'
+                      ?
+                      this.parseUserId(l.name)
+                      :
+                      this.capitalize(l.name)
+                    }
                     titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
                     subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen} interval={60000}/></Text>}
                     subtitleStyle={styles.subtitle}
@@ -260,10 +355,12 @@ class NewChat extends Component {
                         avatarUrl: this.parseAvatarUrl(l.avatarUrl),
                         isActive: l.isActive,
                         lastSeen: l.lastSeen,
-                        previousScreen: 'NewChat'
+                        previousScreen: 'NewChat',
+                        roomId: l.roomId,
                         })
                     }}
                   />
+                }
                   </BoxShadow>
                   </View>
               ))

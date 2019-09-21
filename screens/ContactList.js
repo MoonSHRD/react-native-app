@@ -140,7 +140,8 @@ class ContactList extends Component {
   }
 
   parseAvatarUrl(props) {
-    if (props != '') {
+    if (props != null) {
+      if (props != '') {
         let parts = props.split('mxc://', 2);
         let urlWithoutMxc  = parts[1];
         let urlParts = urlWithoutMxc.split('/', 2)
@@ -148,16 +149,19 @@ class ContactList extends Component {
         let secondPart = urlParts[1] 
         let serverUrl = 'https://matrix.moonshard.tech/_matrix/media/r0/download/'
         return serverUrl + firstPart + '/' + secondPart    
+      }
     }
 }
 
 parseUserId(props) {
-  if (props != '') {
-    let parts = props.split('@', 2);
-    let userId  = parts[1];
-    let userIdParts = userId.split(':', 2)
-    let firstPart = userIdParts[0]
-    return this.capitalize(firstPart)
+  if (props != null) {
+    if (props != '') {
+      let parts = props.split('@', 2);
+      let userId  = parts[1];
+      let userIdParts = userId.split(':', 2)
+      let firstPart = userIdParts[0]
+      return this.capitalize(firstPart)
+    }
   }
 }
 
@@ -165,7 +169,8 @@ parseUserId(props) {
     const { navigation } = this.props;
     const { loading, errors, searchChanged } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
-    const scrollEnabled = this.state.screenHeight > height - 100;
+    const scrollEnabled = this.state.screenHeight > height - 200;
+    console.log(this.state.screenHeight)
 
     const shadowOpt = {
       width: width - 16,
@@ -220,7 +225,7 @@ parseUserId(props) {
             inputStyle={this.props.appState.nightTheme ? styles.darkSearchInputText : styles.searchInputText}
           />
         }
-        <View>
+        <View style={{marginBottom: 110,}}>
           <ListItem
             title="Find matches on this place"
             titleStyle={this.props.appState.nightTheme ? styles.grayTitle : styles.title}
@@ -309,7 +314,7 @@ parseUserId(props) {
                       containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
                       onPress={() => {
                         navigation.navigate('Profile', {
-                          userName: l.name,
+                          userName: this.parseUserId(this.capitalize(l.name)),
                           userIdName: this.parseUserId(l.userId),
                           userId: l.userId,
                           avatarLink: this.parseAvatarUrl(l.avatarUrl),
