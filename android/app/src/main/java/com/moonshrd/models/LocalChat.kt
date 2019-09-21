@@ -28,6 +28,7 @@ class LocalChat {
             val previousValue = iterator.previous()
             if(previousValue.key == paginationToken && !foundFromFlag) {
                 foundFromFlag = true
+                continue
             }
 
             if(foundFromFlag) {
