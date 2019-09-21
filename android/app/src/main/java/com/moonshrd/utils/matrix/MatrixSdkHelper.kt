@@ -119,6 +119,68 @@ object MatrixSdkHelper {
         return result
     }
 
+    fun getMinimalUserData(userID: String): CompletableFuture<UserModel> {
+        val result = CompletableFuture<UserModel>()
+        val userName = CompletableFuture<String?>()
+        val userAvatarUrl = CompletableFuture<String?>()
+
+        if(matrixInstance.defaultSession != null) {
+            matrixInstance.defaultSession.profileApiClient.displayname(userID, object : ApiCallback<String> {
+                override fun onSuccess(info: String?) {
+                    userName.complete(info)
+                }
+
+                override fun onUnexpectedError(e: Exception?) {
+                    result.completeExceptionally(e)
+                    userName.complete(null)
+                }
+
+                override fun onMatrixError(e: MatrixError?) {
+                    userName.complete(null)
+                }
+
+                override fun onNetworkError(e: Exception?) {
+                    result.completeExceptionally(e)
+                    userName.complete(null)
+                }
+            })
+
+            matrixInstance.defaultSession.profileApiClient.avatarUrl(userID, object : ApiCallback<String> {
+                override fun onSuccess(info: String?) {
+                    userAvatarUrl.complete(info)
+                }
+
+                override fun onUnexpectedError(e: Exception?) {
+                    userAvatarUrl.complete(null)
+                }
+
+                override fun onMatrixError(e: MatrixError?) {
+                    userAvatarUrl.complete(null)
+                }
+
+                override fun onNetworkError(e: Exception?) {
+                    userAvatarUrl.complete(null)
+                }
+            })
+
+            GlobalScope.launch {
+                val name = userName.get()
+                val avatarUrl = userAvatarUrl.get()
+                result.complete(
+                        UserModel(
+                                userID,
+                                name ?: "",
+                                avatarUrl ?: ""
+                        )
+                )
+            }
+        } else {
+            result.completeExceptionally(Exception("Matrix is not available!"))
+        }
+
+        return result
+    }
+
     private fun getRoomId(rooms:List<Room>, userID: String): String? {
         for(i in rooms.indices){
             if(rooms[i].getMember(userID) != null){

@@ -14,6 +14,7 @@ import com.moonshrd.models.UserModel
 import com.moonshrd.repository.LocalChatsRepository
 import com.moonshrd.utils.TopicStorage
 import com.moonshrd.utils.matrix.Matrix
+import com.moonshrd.utils.matrix.MatrixSdkHelper
 import com.moonshrd.utils.sendRNEvent
 import com.orhanobut.logger.Logger
 import p2mobile.P2mobile
@@ -93,8 +94,9 @@ class P2ChatService : Service() {
             val messageObject = gson.fromJson(message, MessageModel::class.java)
             messageObject.timestamp = System.currentTimeMillis()
             messageObject.id = UUID.randomUUID().toString()
-            val user = matrixInstance.defaultSession?.dataHandler!!.getUser(messageObject.from) ?: null
-            messageObject.user = UserModel(messageObject.from, user?.displayname, user?.avatarUrl)
+            val future = MatrixSdkHelper.getMinimalUserData(messageObject.from)
+            val user = future.get() // FIXME may be blocking
+            messageObject.user = UserModel(messageObject.from, user.name, user.avatarUrl)
             Logger.d("New message! [${messageObject.topic}] ${messageObject.from} > ${messageObject.body})")
             LocalChatsRepository.getLocalChat(messageObject.topic)!!.putMessage(messageObject)
             val writableMap = Arguments.createMap()
