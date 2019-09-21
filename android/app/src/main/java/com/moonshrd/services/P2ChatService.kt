@@ -4,12 +4,13 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
-import android.util.Log
 import com.facebook.react.bridge.Arguments
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.moonshrd.MainApplication
+import com.moonshrd.models.LocalChat
 import com.moonshrd.models.Message
+import com.moonshrd.repository.LocalChatsRepository
 import com.moonshrd.utils.TopicStorage
 import com.moonshrd.utils.sendRNEvent
 import com.orhanobut.logger.Logger
@@ -77,6 +78,7 @@ class P2ChatService : Service() {
         isServiceRunning = true
         for(topic in topicStorage.getTopicList()) {
             subscribeToTopic(topic)
+            LocalChatsRepository.addLocalChat(topic, LocalChat())
         }
         Logger.i("Successfully subscribed to all topics which I have.")
     }
@@ -86,12 +88,12 @@ class P2ChatService : Service() {
         val message = P2mobile.getMessages()
         if (message.isNotEmpty()) {
             val messageObject = gson.fromJson(message, Message::class.java)
+            messageObject.timestamp = System.currentTimeMillis()
+            messageObject.id = UUID.randomUUID().toString()
             Logger.d("New message! [${messageObject.topic}] ${messageObject.from} > ${messageObject.body})")
-
+            LocalChatsRepository.getLocalChat(messageObject.topic)!!.putMessage(messageObject)
             val writableMap = Arguments.createMap()
-            writableMap.putString("topic", messageObject.topic)
-            writableMap.putString("from", messageObject.from)
-            writableMap.putString("body", messageObject.body)
+            writableMap.putString("message", gson.toJson(messageObject))
             sendRNEvent(MainApplication.getReactContext(), newMessageEventName, writableMap)
         }
     }
@@ -111,6 +113,7 @@ class P2ChatService : Service() {
                 if(mEntry.key.isNotEmpty()) { // TODO move empty mxid filtering to native (golang) part
                     mEntry.value.forEach {
                         writableArray.pushString(it)
+                        LocalChatsRepository.getLocalChat(it)!!.putMember(mEntry.key)
                     }
                     writableMap.putArray(mEntry.key, writableArray)
                 } else {
@@ -126,7 +129,7 @@ class P2ChatService : Service() {
     }
 
     /**
-     * @return Pair of "Topic: MatrixIDs"
+     * @return Pair of "Topic: MatrixID[]"
      */
     fun getAllMatches(): Map<String, List<String>>? {
         if (isServiceRunning) {

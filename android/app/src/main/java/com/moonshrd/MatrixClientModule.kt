@@ -424,7 +424,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
     }
 
     @ReactMethod
-    private fun getHistoryMessage(roomId:String,tokenMessageEnd:String, promise: Promise){
+    private fun getHistoryMessage(roomId: String, tokenMessageEnd: String, promise: Promise){
         val room = matrixInstance.defaultSession.dataHandler.getRoom(roomId)
 
         matrixInstance.defaultSession.roomsApiClient.getRoomMessagesFrom(room.roomId, tokenMessageEnd, EventTimeline.Direction.BACKWARDS, 15,null, object : ApiCallback<TokensChunkEvents> {
