@@ -39,6 +39,10 @@ class LocalChat {
         return messagesChunk
     }
 
+    fun getLastMessage(): MessageModel {
+        return LinkedList(messages.entries).last().value
+    }
+
     fun putMember(id: String) {
         members.add(id)
     }

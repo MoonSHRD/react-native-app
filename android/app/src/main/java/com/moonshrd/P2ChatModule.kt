@@ -6,6 +6,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.google.gson.Gson
 import com.moonshrd.models.LocalChat
+import com.moonshrd.models.LocalChatModel
 import com.moonshrd.models.MessageModel
 import com.moonshrd.models.UserModel
 import com.moonshrd.repository.LocalChatsRepository
@@ -91,5 +92,16 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
         map["end"] = messages.last().id
         map["messages"] = messages
         promise.resolve(gson.toJson(map))
+    }
+
+    @ReactMethod
+    fun getLocalChats(promise: Promise) {
+        val localChats = ArrayList<LocalChatModel>()
+        LocalChatsRepository.getAllLocalChats().entries.forEach {
+            val lastMessage = it.value.getLastMessage()
+            localChats.add(LocalChatModel(it.key, lastMessage.body, lastMessage.timestamp))
+        }
+
+        promise.resolve(gson.toJson(localChats))
     }
 }
