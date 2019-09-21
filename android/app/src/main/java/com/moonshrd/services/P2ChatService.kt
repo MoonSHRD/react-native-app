@@ -135,6 +135,8 @@ class P2ChatService : Service() {
     fun setMatrixID(matrixID: String) {
         if(isServiceRunning) {
             P2mobile.setMatrixID(matrixID)
+        } else {
+            onServiceIsNotRunning()
         }
     }
 
@@ -146,22 +148,25 @@ class P2ChatService : Service() {
     fun sendMessage(topic: String, text: String) {
         if (isServiceRunning) {
             P2mobile.publishMessage(topic, text + "\n")
+        } else {
+            onServiceIsNotRunning()
         }
-        onServiceIsNotRunning()
     }
 
     fun subscribeToTopic(topic: String) {
         if (isServiceRunning) {
             P2mobile.subscribeToTopic(topic)
+        } else {
+            onServiceIsNotRunning()
         }
-        onServiceIsNotRunning()
     }
 
     fun unsubscribeFromTopic(topic: String) {
         if (isServiceRunning) {
             P2mobile.unsubscribeFromTopic(topic)
+        } else {
+            onServiceIsNotRunning()
         }
-        onServiceIsNotRunning()
     }
 
     private fun onServiceIsNotRunning() {
