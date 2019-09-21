@@ -21,7 +21,7 @@ class LocalChat {
      */
     fun getHistoryMessages(paginationToken: String): List<Message> {
         val messagesChunk = ArrayList<Message>()
-        val iterator = LinkedList(messages.entries).listIterator()
+        val iterator = LinkedList(messages.entries).listIterator(messages.entries.size-1)
         var foundFromFlag = false // flag to indicate when we found message before which we should collect historical messages
         var messageCount = 0
         while(iterator.hasPrevious() && messageCount < 15) {
