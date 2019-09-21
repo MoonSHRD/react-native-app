@@ -63,6 +63,11 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
 
     @ReactMethod
     fun loadMoreMessages(topic: String, paginationToken: String, promise: Promise) {
-        promise.resolve(gson.toJson(LocalChatsRepository.getLocalChat(topic)!!.getHistoryMessages(paginationToken)))
+        val messages = LocalChatsRepository.getLocalChat(topic)!!.getHistoryMessages(paginationToken)
+        val map = HashMap<String, Any>()
+        map["start"] = messages.first().id
+        map["end"] = messages.last().id
+        map["messages"] = messages
+        promise.resolve(gson.toJson(map))
     }
 }
