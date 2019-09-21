@@ -123,10 +123,11 @@ class P2ChatService : Service() {
     /**
      * @return Pair of "Topic: MatrixIDs"
      */
-    fun getAllMatches(): Map<String, List<String>> {
+    fun getAllMatches(): Map<String, List<String>>? {
         if (isServiceRunning) {
             val matchesMapType = object : TypeToken<Map<String, List<String>>>() {}.type
-            return gson.fromJson(P2mobile.getAllMatches(), matchesMapType)
+            val matchesJson = P2mobile.getAllMatches()
+            return gson.fromJson(matchesJson, matchesMapType)
         }
         return Collections.emptyMap()
     }

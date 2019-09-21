@@ -38,7 +38,8 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
 
     @ReactMethod
     fun getAllMatches(promise: Promise) {
-        promise.resolve(gson.toJson(MainApplication.getP2ChatService().getAllMatches()))
+        val matchesMap = MainApplication.getP2ChatService().getAllMatches()
+        promise.resolve(if (matchesMap != null) gson.toJson(matchesMap) else "")
     }
 
     @ReactMethod
