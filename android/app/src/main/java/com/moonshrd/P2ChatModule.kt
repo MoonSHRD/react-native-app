@@ -101,7 +101,7 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
         val localChats = ArrayList<LocalChatModel>()
         LocalChatsRepository.getAllLocalChats().entries.forEach {
             val lastMessage = it.value.getLastMessage()
-            localChats.add(LocalChatModel(it.key, lastMessage.body, lastMessage.id, lastMessage.timestamp))
+            localChats.add(LocalChatModel(it.key, lastMessage?.body ?: "", lastMessage?.id ?: "", lastMessage?.timestamp ?: 0))
         }
         promise.resolve(gson.toJson(localChats))
     }
