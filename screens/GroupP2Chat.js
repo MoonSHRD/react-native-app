@@ -14,7 +14,7 @@ import { getMyUserId } from '../store/actions/contactsActions';
 const { width, height } = Dimensions.get('window');
 
 
-class Chat extends React.Component {
+class GroupP2Chat extends React.Component {
     static navigationOptions = ({ navigation }) => {
         const chatName = navigation.getParam('chatName', '')
         return {
@@ -61,7 +61,7 @@ class Chat extends React.Component {
                         theme.colors.blue
                     }
                     onPress={() => {
-                        navigation.navigate('P2ChatMembers', {
+                        navigation.navigate('P2ChatListMembers', {
                             chatName: chatName,
                         })
                     }}  
@@ -94,7 +94,7 @@ class Chat extends React.Component {
 
   componentDidMount = async () => {
       await this.props.getMyUserId()
-      await this.getMessageHistory()
+      // await this.getMessageHistory()
     //   var self = this;
     //   const { chat, setNewMessage, pushNewMessage, pushNewMessageSuccess, pushNewMessageToHistory, resetNewMessage } = this.props;
     //   this.eventMessage = DeviceEventEmitter.addListener('eventMessage', function(e) {
@@ -388,4 +388,4 @@ function mapStateToProps (state) {
   export default connect(
     mapStateToProps,
     mapDispatchToProps
-  )(Chat)
+  )(GroupP2Chat)
