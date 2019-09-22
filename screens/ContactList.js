@@ -170,7 +170,6 @@ parseUserId(props) {
     const { loading, errors, searchChanged } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
     const scrollEnabled = this.state.screenHeight > height - 200;
-    console.log(this.state.screenHeight)
 
     const shadowOpt = {
       width: width - 16,

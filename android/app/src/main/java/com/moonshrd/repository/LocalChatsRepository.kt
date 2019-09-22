@@ -8,7 +8,7 @@ object LocalChatsRepository {
     private val localChats = HashMap<String, LocalChat>()
 
     fun getAllLocalChats(): Map<String, LocalChat> {
-        return Collections.unmodifiableMap(localChats)
+        return localChats
     }
 
     fun addLocalChat(topic: String, localChat: LocalChat) {

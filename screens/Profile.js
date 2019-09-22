@@ -515,11 +515,11 @@ subscribeOnThis = async (topic, index) => {
 unsubscribeFromThis = async (topic) => {
     await console.log('pressed topic' +  topic)
     const promise = this.props.unsubscribeFromTopic(topic)
+    this.setState({
+        tags: this.state.tags.filter(tag => tag.name !== topic)
+    })        
     await promise.then((data) => {
         console.log(data)
-        this.setState({
-            tags: this.state.tags.filter(tag => tag.name !== topic)
-        })        
     },
     (error) => {
         console.log(error)
@@ -546,6 +546,7 @@ unsubscribeFromThis = async (topic) => {
             onContentSizeChange={this.onContentSizeChange}
             style={this.props.appState.nightTheme ? styles.darkBackground : styles.background}
         >
+        <View style={{marginBottom: 110,}}>
         {
             (userIdName != '')
             ?
@@ -867,6 +868,7 @@ unsubscribeFromThis = async (topic) => {
             </Block>
         </Block>
         }
+        </View>
         </ScrollView>
       </KeyboardAvoidingView>
     )

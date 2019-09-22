@@ -18,7 +18,7 @@ class TopicStorage(private val context: Context) {
         val topicArrJson = JSONArray(topicArrJsonStr)
         val topics = ArrayList<String>(topicArrJson.length())
 
-        for(i in 0..topicArrJson.length()) {
+        for(i in 0..topicArrJson.length()-1) {
             topics.add(topicArrJson.getString(i))
         }
 
