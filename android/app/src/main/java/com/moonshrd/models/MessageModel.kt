@@ -2,7 +2,7 @@ package com.moonshrd.models
 
 import com.google.gson.annotations.SerializedName
 
-class MessageModel(
+data class MessageModel(
     @SerializedName("Id")
     var id: String,
     @SerializedName("Body")
@@ -14,7 +14,8 @@ class MessageModel(
     @SerializedName("Timestamp")
     var timestamp: Long = 0,
     @SerializedName("User")
-    var user: UserModel?)
+    var user: UserModel?
+)
 
 
 
