@@ -40,8 +40,8 @@ class LocalChat {
     }
 
     fun getLastMessage(): MessageModel {
-        //return LinkedList(messages.entries).last().value
-        return MessageModel("test","test","test","test",0,null)
+        return LinkedList(messages.entries).last().value
+        //return MessageModel("test","test","test","test",0,null)
     }
 
     fun putMember(id: String) {
