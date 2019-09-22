@@ -77,9 +77,9 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
 
     @ReactMethod
     fun getLocalChatMembers(topic: String, promise: Promise) {
-        val members = LocalChatsRepository.getLocalChat(topic)!!.getMembers()
+        val members = LocalChatsRepository.getLocalChat(topic)?.getMembers()
         val users = ArrayList<UserModel>()
-        members.forEach {
+        members?.forEach {
             users.add(MatrixSdkHelper.getUserData(it).get())
         }
         promise.resolve(gson.toJson(users))

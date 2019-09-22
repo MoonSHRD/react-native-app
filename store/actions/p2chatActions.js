@@ -57,6 +57,7 @@ export function unsubscribeFromTopic(topic) {
 
 export function getAllP2Chats() {
     return (dispatch) => {
+        console.log('122')
         const promise = P2Chat.getLocalChats()
         promise.then((data) => {
             console.log(data)

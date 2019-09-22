@@ -82,7 +82,6 @@ class MatchesList extends Component {
     this.setHeaderParams()
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
       this.props.getDirectChats();
-      // this.props.getAllMatches()
     });
   }
 

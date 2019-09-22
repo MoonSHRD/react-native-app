@@ -11,7 +11,7 @@ import { Text, Block } from '../components';
 
 import {connect} from 'react-redux';
 import { getContactList, searchBar, changeContactList, clearSearchBar, getMyUserId } from '../store/actions/contactsActions';
-import { getAllP2Chats } from '../store/actions/p2chatActions';
+import { getAllP2Chats, getChatMembers } from '../store/actions/p2chatActions';
 
 
 const { width, height } = Dimensions.get('window');
@@ -81,12 +81,10 @@ class ChatList extends Component {
 
   componentDidMount() {
     this.setHeaderParams()
-    this.props.getAllP2Chats()
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
-      if (!this.props.contacts.alreadyLoaded) {
         this.props.loadDirectChats()
-        // this.props.getAllP2Chats()
-      }
+        this.props.getAllP2Chats()
+        this.props.getChatMembers('Crypto')
       this.props.getMyUserId()
     });
   }
@@ -641,6 +639,7 @@ function mapDispatchToProps (dispatch) {
     changeContactList: (data) => dispatch(changeContactList(data)),
     clearSearchBar: () => dispatch(clearSearchBar()),
     getAllP2Chats: () => dispatch(getAllP2Chats()),
+    getChatMembers: () => dispatch(getChatMembers())
   }
 }
 
