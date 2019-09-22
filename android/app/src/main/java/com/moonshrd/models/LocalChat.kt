@@ -26,7 +26,7 @@ class LocalChat {
         var messageCount = 0
         while(iterator.hasPrevious() && messageCount < 15) {
             val previousValue = iterator.previous()
-            if(previousValue.key == paginationToken && !foundFromFlag) {
+            if(previousValue.key == paginationToken && !foundFromFlag || paginationToken == "" && !foundFromFlag) {
                 foundFromFlag = true
                 continue
             }
