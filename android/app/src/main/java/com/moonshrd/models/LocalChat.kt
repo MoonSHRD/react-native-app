@@ -19,24 +19,27 @@ class LocalChat {
     /**
      * Get 15 messages before paginationToken
      */
-    fun getHistoryMessages(paginationToken: String): List<MessageModel> {
-        val messagesChunk = ArrayList<MessageModel>()
-        val iterator = LinkedList(messages.entries).listIterator(messages.entries.size-1)
-        var foundFromFlag = false // flag to indicate when we found message before which we should collect historical messages
-        var messageCount = 0
-        while(iterator.hasPrevious() && messageCount < 15) {
-            val previousValue = iterator.previous()
-            if(previousValue.key == paginationToken && !foundFromFlag || paginationToken == "" && !foundFromFlag) {
-                foundFromFlag = true
-                continue
-            }
+    fun getHistoryMessages(paginationToken: String): List<MessageModel>? {
+        if(messages.isNotEmpty()) {
+            val messagesChunk = ArrayList<MessageModel>()
+            val iterator = LinkedList(messages.entries).listIterator(messages.entries.size-1)
+            var foundFromFlag = false // flag to indicate when we found message before which we should collect historical messages
+            var messageCount = 0
+            while(iterator.hasPrevious() && messageCount < 15) {
+                val previousValue = iterator.previous()
+                if(previousValue.key == paginationToken && !foundFromFlag || paginationToken == "" && !foundFromFlag) {
+                    foundFromFlag = true
+                    continue
+                }
 
-            if(foundFromFlag) {
-                messagesChunk.add(previousValue.value)
-                messageCount++
+                if(foundFromFlag) {
+                    messagesChunk.add(previousValue.value)
+                    messageCount++
+                }
             }
+            return messagesChunk
         }
-        return messagesChunk
+        return null
     }
 
     fun getLastMessage(): MessageModel? {
