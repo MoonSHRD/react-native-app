@@ -1,5 +1,6 @@
 package com.moonshrd
 
+import android.util.Log
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
@@ -96,12 +97,12 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
 
     @ReactMethod
     fun getLocalChats(promise: Promise) {
+        Log.d("test","test")
         val localChats = ArrayList<LocalChatModel>()
         LocalChatsRepository.getAllLocalChats().entries.forEach {
             val lastMessage = it.value.getLastMessage()
             localChats.add(LocalChatModel(it.key, lastMessage.body, lastMessage.timestamp))
         }
-
         promise.resolve(gson.toJson(localChats))
     }
 }

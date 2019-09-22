@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.IBinder;
 
 import com.BV.LinearGradient.LinearGradientPackage;
@@ -14,7 +15,7 @@ import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.FormatStrategy;
 import com.orhanobut.logger.Logger;
 import com.orhanobut.logger.PrettyFormatStrategy;
-import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
+
 import com.reactnative.ivpusic.imagepicker.PickerPackage;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.ReactNativeHost;
@@ -27,6 +28,7 @@ import com.moonshrd.di.components.DaggerApplicationComponent;
 import com.moonshrd.di.modules.ApplicationModule;
 import com.moonshrd.services.P2ChatService;
 import com.oblador.vectoricons.VectorIconsPackage;
+import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
 
 
 import org.matrix.androidsdk.MXSession;
@@ -88,6 +90,7 @@ public class MainApplication extends Application implements ReactApplication {
                 .build();
 
         SoLoader.init(this, /* native exopackage */ false);
+
 
         getApplicationContext().startService(new Intent(getApplicationContext(), P2ChatService.class));
         reactContext = mReactNativeHost.getReactInstanceManager().getCurrentReactContext();
