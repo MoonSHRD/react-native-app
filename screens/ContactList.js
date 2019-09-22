@@ -93,6 +93,20 @@ class ContactList extends Component {
     this.successSearch = DeviceEventEmitter.addListener('onSuccess', (e) => {
         console.log('onSuccess')
     })
+    this.newMatchEvent = DeviceEventEmitter.addListener('NewMatchEvent', function(e) {
+      console.log('NewMatchEvent')
+      Alert.alert(
+        'Success!',
+        'Your match was successful',
+        [
+        {
+            text: 'Continue', onPress: () => {}
+        }
+        ],
+        { cancelable: false }
+      )  
+    })
+    
   }
 
   componentDidUpdate(prevProps) {

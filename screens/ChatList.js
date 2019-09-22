@@ -11,7 +11,7 @@ import { Text, Block } from '../components';
 
 import {connect} from 'react-redux';
 import { getContactList, searchBar, changeContactList, clearSearchBar, getMyUserId } from '../store/actions/contactsActions';
-import { getAllP2Chats, getChatMembers } from '../store/actions/p2chatActions';
+import { getAllP2Chats } from '../store/actions/p2chatActions';
 
 
 const { width, height } = Dimensions.get('window');
@@ -84,7 +84,6 @@ class ChatList extends Component {
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
         this.props.loadDirectChats()
         this.props.getAllP2Chats()
-        this.props.getChatMembers('Crypto')
       this.props.getMyUserId()
     });
   }
@@ -211,7 +210,7 @@ parseUserId(props) {
             inputStyle={this.props.appState.nightTheme ? styles.darkSearchInputText : styles.searchInputText}
           />
         }
-        <View style={{marginBottom: 110, marginTop: 5}}>
+        <View style={{marginBottom: 130, marginTop: 5}}>
         {
           searchChanged
           ?
@@ -304,6 +303,39 @@ parseUserId(props) {
           }
           </Block>
           :
+          <Block>
+            <Block>
+            {
+              this.props.p2chat.p2chats.length > 0
+              ?
+              this.props.p2chat.p2chats.map((l, i) => (
+                <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
+                <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
+                <ListItem
+                  key={i}
+                  leftAvatar={{ title: l.name[0], titleStyle:{textTransform: 'capitalize'}, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }}
+                  title={this.capitalize(l.name)}
+                  titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                  rightTitle={
+                    <Moment element={Text} calendar={calendarStrings} style={styles.dateTag}>{new Date(l.lastMessageDate)}</Moment>
+                  }
+                  rightTitleStyle={styles.dateTag}
+                  subtitle={l.lastMessage}
+                  subtitleStyle={styles.subtitle}
+                  containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                  onPress={(navigation) => {
+                    this.props.navigation.navigate('GroupP2Chat', {
+                      chatName: l.name,
+                    })
+                  }}  
+                  />  
+                  </BoxShadow>
+                  </View>
+              ))
+              :
+              null
+            }
+            </Block>
           <Block>
           {
             this.props.contacts.contactList.map((l, i) => (
@@ -481,6 +513,7 @@ parseUserId(props) {
             ))
           }  
           </Block>
+          </Block>
         }
         </View>
       </ScrollView>
@@ -628,6 +661,7 @@ function mapStateToProps (state) {
   return {
     contacts: state.contacts,
     appState: state.appState,
+    p2chat: state.p2chat,
   }
 }
 
@@ -639,7 +673,6 @@ function mapDispatchToProps (dispatch) {
     changeContactList: (data) => dispatch(changeContactList(data)),
     clearSearchBar: () => dispatch(clearSearchBar()),
     getAllP2Chats: () => dispatch(getAllP2Chats()),
-    getChatMembers: () => dispatch(getChatMembers())
   }
 }
 

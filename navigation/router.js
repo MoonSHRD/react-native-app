@@ -13,6 +13,7 @@ import EmailConfirm from '../screens/EmailConfirm';
 import ContactList from "../screens/ContactList";
 import ChatList from "../screens/ChatList";
 import Chat from "../screens/Chat";
+import GroupP2Chat from "../screens/GroupP2Chat";
 import Settings from "../screens/Settings";
 import MatchesList from "../screens/MatchesList";
 import NewChat from "../screens/NewChat";
@@ -161,6 +162,13 @@ const SignedIn = createStackNavigator({
   },
   Chat: {
     screen: Chat,
+    navigationOptions: {
+      visible: false,
+      headerVisible: true,
+    }
+  },
+  GroupP2Chat: {
+    screen: GroupP2Chat,
     navigationOptions: {
       visible: false,
       headerVisible: true,

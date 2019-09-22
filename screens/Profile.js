@@ -184,6 +184,9 @@ class Profile extends Component {
         {
             name: 'Hip Hop',
         },
+        {
+            name: 'Test',
+        }
       ]
   }
 
