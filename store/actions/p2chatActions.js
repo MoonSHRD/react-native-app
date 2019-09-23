@@ -113,15 +113,15 @@ export function getP2ChatMessageHistory(topic) {
                 message.user = user
 
                 user._id = data.fromMatrixID
-                user.matrixUser = new Object()
-                user.matrixUser.avatarUrl = data.User.avatarUrl
-                user.matrixUser.isActive = data.User.isActive
-                user.matrixUser.lastMessage = data.User.lastMessage
-                user.matrixUser.lastMessageDate = data.User.lastMessageDate
-                user.matrixUser.lastMessageState = data.User.lastMessageState
-                user.matrixUser.name = data.User.name
-                user.matrixUser.unreadMessagesCount = data.User.unreadMessagesCount
-                user.matrixUser.userId = data.User.userId
+                // user.matrixUser = new Object()
+                // user.matrixUser.avatarUrl = data.User.avatarUrl
+                // user.matrixUser.isActive = data.User.isActive
+                // user.matrixUser.lastMessage = data.User.lastMessage
+                // user.matrixUser.lastMessageDate = data.User.lastMessageDate
+                // user.matrixUser.lastMessageState = data.User.lastMessageState
+                // user.matrixUser.name = data.User.name
+                // user.matrixUser.unreadMessagesCount = data.User.unreadMessagesCount
+                // user.matrixUser.userId = data.User.userId
 
               return message
             })    
@@ -162,15 +162,15 @@ export function getP2ChatUpdatedMessageHistory(topic, token) {
                 message.user = user
 
                 user._id = data.fromMatrixID
-                user.matrixUser = new Object()
-                user.matrixUser.avatarUrl = data.User.avatarUrl
-                user.matrixUser.isActive = data.User.isActive
-                user.matrixUser.lastMessage = data.User.lastMessage
-                user.matrixUser.lastMessageDate = data.User.lastMessageDate
-                user.matrixUser.lastMessageState = data.User.lastMessageState
-                user.matrixUser.name = data.User.name
-                user.matrixUser.unreadMessagesCount = data.User.unreadMessagesCount
-                user.matrixUser.userId = data.User.userId
+                // user.matrixUser = new Object()
+                // user.matrixUser.avatarUrl = data.User.avatarUrl
+                // user.matrixUser.isActive = data.User.isActive
+                // user.matrixUser.lastMessage = data.User.lastMessage
+                // user.matrixUser.lastMessageDate = data.User.lastMessageDate
+                // user.matrixUser.lastMessageState = data.User.lastMessageState
+                // user.matrixUser.name = data.User.name
+                // user.matrixUser.unreadMessagesCount = data.User.unreadMessagesCount
+                // user.matrixUser.userId = data.User.userId
 
               return message
             })    
