@@ -114,18 +114,7 @@ export function getP2ChatMessageHistory(topic, callback) {
             })    
             dispatch(getMessageHistory())
             dispatch(setEnd(jsonData.end))
-
-            console.log(jsonData.end)
-            console.log('end setted successfully')
-
             dispatch(setStart(jsonData.start))
-            
-            console.log(jsonData.start)
-            console.log('start setted successfully')
-            console.log('parsed data from p2chat:')
-            console.log(jsonData) 
-            console.log('parsed data to group chat page:')
-            console.log(messageHistory)   
             dispatch(getMessageHistorySuccess(messageHistory))
             callback(messageHistory)
         },

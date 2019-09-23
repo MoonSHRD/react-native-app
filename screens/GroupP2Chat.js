@@ -126,20 +126,19 @@ class GroupP2Chat extends React.Component {
       })
     }
 
-  getMessageHistory() {
-    const chatName = this.props.navigation.getParam('chatName', '')
-    this.props.getP2ChatMessageHistory(chatName, (messages) => {
-      console.log('messages was imported successfully')
-      console.log(messages)
-      const newMessages = messages.messages
-      this.setState((previousState) => {
-        return {
-          messages: GiftedChat.append(previousState.messages, newMessages),
-        };
+    getMessageHistory() {
+      const chatName = this.props.navigation.getParam('chatName', '')
+      this.props.getP2ChatMessageHistory(chatName, (messages) => {
+        console.log(messages)
+        const newMessages = messages.messages
+        this.setState((previousState) => {
+          return {
+            messages: GiftedChat.append(previousState.messages, newMessages),
+          };
+        });
       });
-    });
-  }
-
+    }
+  
   capitalize(props) {
     let text = props.slice(0,1).toUpperCase() + props.slice(1, props.length);
     return text
@@ -393,7 +392,7 @@ function mapStateToProps (state) {
         getMyUserId: () => dispatch(getMyUserId()),
         sendMessage: (topic, message) => dispatch(sendMessage(topic, message)),
         handleMessageChange: (text) => dispatch(handleMessageChange(text)),
-        getP2ChatMessageHistory: (topic) => dispatch(getP2ChatMessageHistory(topic)),
+        getP2ChatMessageHistory: (topic, callback) => dispatch(getP2ChatMessageHistory(topic, callback)),
         getP2ChatUpdatedMessageHistory: (topic, token) => dispatch(getP2ChatUpdatedMessageHistory(topic, token)),
         setNewMessage: (data) => dispatch(setNewMessage(data)),
         pushNewMessage: () => dispatch(pushNewMessage()),
