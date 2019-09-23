@@ -60,7 +60,6 @@ export function getChatMembers(topic) {
         const promise = P2Chat.getLocalChatMembers(topic)
         promise.then((data) => {
             console.log('get chat members')
-            console.log('get chat members')
             console.log(data)
             jsonData = JSON.parse(data)
             console.log(jsonData)
@@ -180,7 +179,7 @@ export function getAllChatsFailure() {
     }
 }
 
-export function getAllChatMembers() {
+export function getAllChatMembers(data) {
     return {
         type: GET_CHAT_MEMBERS,
         data
