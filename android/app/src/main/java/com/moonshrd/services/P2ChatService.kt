@@ -9,12 +9,14 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.moonshrd.MainApplication
 import com.moonshrd.models.LocalChat
+import com.moonshrd.models.MatchModel
 import com.moonshrd.models.MessageModel
 import com.moonshrd.models.UserModel
 import com.moonshrd.repository.LocalChatsRepository
 import com.moonshrd.utils.TopicStorage
 import com.moonshrd.utils.matrix.Matrix
 import com.moonshrd.utils.matrix.MatrixSdkHelper
+import com.moonshrd.utils.sendEventWithOneStringArg
 import com.moonshrd.utils.sendRNEvent
 import com.orhanobut.logger.Logger
 import p2mobile.P2mobile
@@ -30,9 +32,12 @@ class P2ChatService : Service() {
     private val newMatchEventName = "NewMatchEvent"
     private val newMessageEventName = "NewMessageEvent"
 
-    @Inject lateinit var gson: Gson
-    @Inject lateinit var topicStorage: TopicStorage
-    @Inject lateinit var matrixInstance: Matrix
+    @Inject
+    lateinit var gson: Gson
+    @Inject
+    lateinit var topicStorage: TopicStorage
+    @Inject
+    lateinit var matrixInstance: Matrix
     private val binder = P2ChatServiceBinder()
     private var scheduledExecutorService: ScheduledExecutorService? = null
 
@@ -80,7 +85,7 @@ class P2ChatService : Service() {
             }
         }, 0, 1, TimeUnit.SECONDS)
         isServiceRunning = true
-        for(topic in topicStorage.getTopicList()) {
+        for (topic in topicStorage.getTopicList()) {
             subscribeToTopic(topic)
             LocalChatsRepository.addLocalChat(topic, LocalChat())
         }
@@ -108,29 +113,12 @@ class P2ChatService : Service() {
     private fun getMatch() {
         val newMatch = P2mobile.getNewMatch()
         if (newMatch.isNotEmpty()) {
-            val matchMapType = object : TypeToken<Map<String, List<String>>>() {}.type
-            val match: Map<String, List<String>> = gson.fromJson(newMatch, matchMapType) // Pair of "MatrixID: Topics"
-
-            val writableMap = Arguments.createMap()
-            val writableArray = Arguments.createArray()
-
-            var isValidMatch = true
-
-            match.map { mEntry ->
-                if(mEntry.key.isNotEmpty()) { // TODO move empty mxid filtering to native (golang) part
-                    mEntry.value.forEach {
-                        writableArray.pushString(it)
-                        LocalChatsRepository.getLocalChat(it)!!.putMember(mEntry.key)
-                    }
-                    writableMap.putArray(mEntry.key, writableArray)
-                } else {
-                    isValidMatch = false
-                    return@map
-                }
-            }
-
-            if(isValidMatch) {
-                sendRNEvent(MainApplication.getReactContext(), newMatchEventName, writableMap)
+            val match = gson.fromJson(newMatch, MatchModel::class.java)
+            if (match.isValid) {
+                LocalChatsRepository.getLocalChat(match.topic)!!.putMember(match.matrixID)
+                sendEventWithOneStringArg(MainApplication.getReactContext(), newMatchEventName, "match", newMatch)
+            } else {
+                LocalChatsRepository.getLocalChat(match.topic)!!.removeMember(match.matrixID)
             }
         }
     }
@@ -148,7 +136,7 @@ class P2ChatService : Service() {
     }
 
     fun setMatrixID(matrixID: String) {
-        if(isServiceRunning) {
+        if (isServiceRunning) {
             P2mobile.setMatrixID(matrixID)
         } else {
             onServiceIsNotRunning()

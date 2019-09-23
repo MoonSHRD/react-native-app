@@ -88,7 +88,7 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
     }
 
     @ReactMethod
-    fun loadMoreMessages(topic: String, paginationToken: String, promise: Promise) {
+    fun loadMoreMessages(topic: String, paginationToken: String?, promise: Promise) {
         val messages = LocalChatsRepository.getLocalChat(topic)!!.getHistoryMessages(paginationToken)
         val map = HashMap<String, Any?>()
         map["start"] = messages?.first()?.id

@@ -54,6 +54,10 @@ class LocalChat {
         members.add(id)
     }
 
+    fun removeMember(id: String) {
+        members.remove(id)
+    }
+
     fun getMembers(): List<String> {
         return members
     }
