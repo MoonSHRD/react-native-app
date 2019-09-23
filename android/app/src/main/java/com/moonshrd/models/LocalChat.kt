@@ -20,24 +20,39 @@ class LocalChat {
      * Get 15 messages before paginationToken
      */
     fun getHistoryMessages(paginationToken: String?): List<MessageModel>? {
-        if(messages.isNotEmpty()) {
+        if(paginationToken==null){
             val messagesChunk = ArrayList<MessageModel>()
-            val iterator = LinkedList(messages.entries).listIterator(messages.entries.size-1)
-            var foundFromFlag = false // flag to indicate when we found message before which we should collect historical messages
             var messageCount = 0
-            while(iterator.hasPrevious() && messageCount < 15) {
-                val previousValue = iterator.previous()
-                if(previousValue.key == paginationToken && !foundFromFlag || paginationToken == null && !foundFromFlag) {
-                    foundFromFlag = true
-                    continue
-                }
 
-                if(foundFromFlag) {
-                    messagesChunk.add(previousValue.value)
+            for ((key, value) in messages) {
+                if(messageCount==16){
+                 break
+                }else{
+                    messagesChunk.add(value)
                     messageCount++
                 }
             }
             return messagesChunk
+        }else{
+            if(messages.isNotEmpty()) {
+                val messagesChunk = ArrayList<MessageModel>()
+                val iterator = LinkedList(messages.entries).listIterator(messages.entries.size-1)
+                var foundFromFlag = false // flag to indicate when we found message before which we should collect historical messages
+                var messageCount = 0
+                while(iterator.hasPrevious() && messageCount < 15) {
+                    val previousValue = iterator.previous()
+                    if(previousValue.key == paginationToken && !foundFromFlag) {
+                        foundFromFlag = true
+                        continue
+                    }
+
+                    if(foundFromFlag) {
+                        messagesChunk.add(previousValue.value)
+                        messageCount++
+                    }
+                }
+                return messagesChunk
+            }
         }
         return null
     }
