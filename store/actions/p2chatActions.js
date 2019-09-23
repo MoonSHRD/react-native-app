@@ -87,11 +87,11 @@ export function sendMessage(topic, message) {
 
 export function getP2ChatMessageHistory(topic) {
     return (dispatch) => {
-        console.log('get message history')
         const promise = P2Chat.loadMoreMessages(topic, null)
         promise.then((data) => {
-            console.log(data)
             jsonData = JSON.parse(data)
+            console.log('getting message history')
+            console.log(jsonData)
             dispatch(getMessageHistory())
             dispatch(setEnd(jsonData.end))
             dispatch(setStart(jsonData.start))
@@ -128,6 +128,7 @@ export function getP2ChatMessageHistory(topic) {
 
             dispatch(getMessageHistorySuccess(messageHistory))
             console.log(jsonData)    
+            callback(messageHistory)
         },
         (error) => {
             dispatch(getMessageHistoryFailure())
