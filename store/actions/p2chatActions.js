@@ -90,17 +90,44 @@ export function getP2ChatMessageHistory(topic) {
         console.log('get message history')
         const promise = P2Chat.loadMoreMessages(topic, null)
         promise.then((data) => {
-            if (data != null) {
-                console.log(data)
-                jsonData = JSON.parse(data)
-                dispatch(getMessageHistory())
-                dispatch(setEnd(jsonData.end))
-                dispatch(setStart(jsonData.start))
-                dispatch(getMessageHistorySuccess(jsonData))
-                console.log(jsonData)    
-            } else {
-                console.log('returned null')
-            }
+            console.log(data)
+            jsonData = JSON.parse(data)
+            dispatch(getMessageHistory())
+            dispatch(setEnd(jsonData.end))
+            dispatch(setStart(jsonData.start))
+
+            const messageHistory = new Object()
+            const time = new Date()
+            messageHistory.end = jsonData.end
+            messageHistory.start = jsonData.start
+            
+            messageHistory.messages = jsonData.messages.map(data => {
+
+                var message = new Object()
+        
+                message._id = data.Id
+                message.text = data.body
+                message.createdAt = time - data.Timestamp
+
+                var user = new Object()
+                message.user = user
+
+                user._id = data.fromMatrixID
+                user.matrixUser = new Object()
+                user.matrixUser.avatarUrl = data.User.avatarUrl
+                user.matrixUser.isActive = data.User.isActive
+                user.matrixUser.lastMessage = data.User.lastMessage
+                user.matrixUser.lastMessageDate = data.User.lastMessageDate
+                user.matrixUser.lastMessageState = data.User.lastMessageState
+                user.matrixUser.name = data.User.name
+                user.matrixUser.unreadMessagesCount = data.User.unreadMessagesCount
+                user.matrixUser.userId = data.User.userId
+
+              return message
+            })    
+
+            dispatch(getMessageHistorySuccess(messageHistory))
+            console.log(jsonData)    
         },
         (error) => {
             dispatch(getMessageHistoryFailure())
@@ -117,7 +144,38 @@ export function getP2ChatUpdatedMessageHistory(topic, token) {
             jsonData = JSON.parse(data)
             dispatch(getMessageHistory())
             dispatch(setEnd(jsonData.end))
-            dispatch(getUpdatedMessageHistory(jsonData))
+
+            const messageHistory = new Object()
+            const time = new Date()
+            messageHistory.end = jsonData.end
+            messageHistory.start = jsonData.start
+            
+            messageHistory.messages = jsonData.messages.map(data => {
+
+                var message = new Object()
+        
+                message._id = data.Id
+                message.text = data.body
+                message.createdAt = time - data.Timestamp
+
+                var user = new Object()
+                message.user = user
+
+                user._id = data.fromMatrixID
+                user.matrixUser = new Object()
+                user.matrixUser.avatarUrl = data.User.avatarUrl
+                user.matrixUser.isActive = data.User.isActive
+                user.matrixUser.lastMessage = data.User.lastMessage
+                user.matrixUser.lastMessageDate = data.User.lastMessageDate
+                user.matrixUser.lastMessageState = data.User.lastMessageState
+                user.matrixUser.name = data.User.name
+                user.matrixUser.unreadMessagesCount = data.User.unreadMessagesCount
+                user.matrixUser.userId = data.User.userId
+
+              return message
+            })    
+
+            dispatch(getUpdatedMessageHistory(messageHistory))
             console.log(jsonData)
         },
         (error) => {
