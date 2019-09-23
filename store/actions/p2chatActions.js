@@ -72,6 +72,7 @@ export function getChatMembers(topic) {
 
 export function sendMessage(topic, message) {
     return (dispatch) => {
+        console.log('send message')
         const promise = P2Chat.sendMessage(topic, message)
         promise.then((data) => {
             jsonData = JSON.parse(data)
@@ -85,6 +86,7 @@ export function sendMessage(topic, message) {
 
 export function getP2ChatMessageHistory(topic) {
     return (dispatch) => {
+        console.log('get message history')
         const promise = P2Chat.loadMoreMessages(topic, null)
         promise.then((data) => {
             jsonData = JSON.parse(data)
@@ -103,6 +105,7 @@ export function getP2ChatMessageHistory(topic) {
 
 export function getP2ChatUpdatedMessageHistory(topic, token) {
     return (dispatch) => {
+        console.log('update message history')
         const promise = P2Chat.loadMoreMessages(topic, token)
         promise.then((data) => {
             jsonData = JSON.parse(data)

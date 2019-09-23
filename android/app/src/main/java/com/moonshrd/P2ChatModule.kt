@@ -82,8 +82,8 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
         members?.forEach {
             users.add(MatrixSdkHelper.getUserData(it).get())
         }
-        Log.d("test",users.size.toString)
-        Log.d("test","m: "+members.size.toString)
+        // Log.d("test",users.size.toString)
+        // Log.d("test","m: "+members.size.toString)
         promise.resolve(gson.toJson(users))
     }
 

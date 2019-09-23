@@ -95,34 +95,35 @@ class GroupP2Chat extends React.Component {
   componentDidMount = async () => {
       await this.props.getMyUserId()
       // await this.getMessageHistory()
-    //   var self = this;
-    //   const { chat, setNewMessage, pushNewMessage, pushNewMessageSuccess, pushNewMessageToHistory, resetNewMessage } = this.props;
-    //   this.eventMessage = DeviceEventEmitter.addListener('eventMessage', function(e) {
-    //     const data = e.message
-    //     const jsonData = JSON.parse(data)
-    //     const time = new Date()
+      var self = this;
+      const { chat, setNewMessage, pushNewMessage, pushNewMessageSuccess, pushNewMessageToHistory, resetNewMessage } = this.props;
+      this.NewMessageEvent = DeviceEventEmitter.addListener('NewMessageEvent', function(e) {
+        console.log(e)
+        // const data = e.message
+        // const jsonData = JSON.parse(data)
+        // const time = new Date()
 
-    //     var newMessage = new Object()
+        // var newMessage = new Object()
 
-    //     newMessage._id = jsonData.event_id
-    //     newMessage.text = jsonData.content.body
-    //     newMessage.createdAt = time - jsonData.unsigned.age
-    //     newMessage.status = jsonData.m_sent_state
+        // newMessage._id = jsonData.event_id
+        // newMessage.text = jsonData.content.body
+        // newMessage.createdAt = time - jsonData.unsigned.age
+        // newMessage.status = jsonData.m_sent_state
 
-    //     var user = new Object()
-    //     newMessage.user = user
-    //     user._id = jsonData.sender
+        // var user = new Object()
+        // newMessage.user = user
+        // user._id = jsonData.sender
 
-    //     console.log(newMessage)
+        // console.log(newMessage)
 
-    //     setNewMessage(newMessage)
-    //     pushNewMessage()
-    //     pushNewMessageSuccess()
-    //     self.addNewMessage(newMessage)
-    //     pushNewMessageToHistory()
-    //     resetNewMessage()
+        // setNewMessage(newMessage)
+        // pushNewMessage()
+        // pushNewMessageSuccess()
+        // self.addNewMessage(newMessage)
+        // pushNewMessageToHistory()
+        // resetNewMessage()
         
-    //   })
+      })
     }
 
   getMessageHistory() {
@@ -149,6 +150,11 @@ class GroupP2Chat extends React.Component {
     const chatName = await navigation.getParam('chatName', '')
     if (p2chat.newTextMessage != '') {
       await sendMessage(chatName, p2chat.newTextMessage)
+      // await this.setState((previousState) => {
+      //   return {
+      //     messages: GiftedChat.append(previousState.messages, p2chat.newTextMessage),
+      //   };
+      // });
     }
   }
 
