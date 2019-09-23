@@ -1,4 +1,4 @@
-import { GET_ALL_TOPICS, GET_TOPIC, NEW_TOPIC, ADD_TOPIC_TO_ARRAY, GET_MATCHES, GET_ALL_P2CHATS, GET_ALL_P2CHATS_FAILURE, GET_ALL_P2CHATS_SUCCESS, GET_CHAT_MEMBERS, HANDLE_P2CHAT_MESSAGE_CHANGE, SET_START_P2CHAT, SET_END_P2CHAT, GET_P2CHAT_MESSAGE_HISTORY, GET_P2CHAT_MESSAGE_HISTORY_FAILURE, GET_P2CHAT_MESSAGE_HISTORY_SUCCESS, GET_P2CHAT_UPDATED_MESSAGE_HISTORY } from '../actions/constants'
+import { GET_ALL_TOPICS, GET_TOPIC, NEW_TOPIC, ADD_TOPIC_TO_ARRAY, GET_MATCHES, GET_ALL_P2CHATS, GET_ALL_P2CHATS_FAILURE, GET_ALL_P2CHATS_SUCCESS, GET_CHAT_MEMBERS, HANDLE_P2CHAT_MESSAGE_CHANGE, SET_START_P2CHAT, SET_END_P2CHAT, GET_P2CHAT_MESSAGE_HISTORY, GET_P2CHAT_MESSAGE_HISTORY_FAILURE, GET_P2CHAT_MESSAGE_HISTORY_SUCCESS, GET_P2CHAT_UPDATED_MESSAGE_HISTORY, P2CHAT_PUSH_NEW_MESSAGE, P2CHAT_PUSH_NEW_MESSAGE_SUCCESS, P2CHAT_PUSH_NEW_MESSAGE_FAILURE, P2CHAT_NEW_MESSAGE, P2CHAT_RESET_NEW_MESSAGE, P2CHAT_PUSH_NEW_MESSAGE_TO_HISTORY } from '../actions/constants'
 
 const initialState = {
     topics: [],
@@ -17,6 +17,7 @@ const initialState = {
         messages: [],
         start: '',
     },
+    newMessage: {},
     isLoading: false,
     error: false,
     newTextMessage: '',
@@ -99,20 +100,58 @@ export default function p2chatReducer (state = initialState, action) {
             return {
                 ...state,
                 messageHistory: action.data,
-                loading: false
+                isLoading: false
             }    
         case GET_P2CHAT_MESSAGE_HISTORY_FAILURE:
             return {
                 ...state,
-                loading: false,
+                isLoading: false,
                 error: true,
             }            
         case GET_P2CHAT_UPDATED_MESSAGE_HISTORY:
             return {
                 ...state,
                 newMessageHistory: action.data,
-                loading: false
-            }           
+                isLoading: false
+            } 
+        case P2CHAT_PUSH_NEW_MESSAGE:
+            return {
+                ...state,
+                isLoading: true,
+            }
+        case P2CHAT_PUSH_NEW_MESSAGE_SUCCESS:
+            return {
+                ...state,
+                isLoading: false
+            }
+        case P2CHAT_PUSH_NEW_MESSAGE_FAILURE:
+            return {
+                ...state,
+                isLoading: false,
+                error: true
+            }
+        case P2CHAT_NEW_MESSAGE:
+            return {
+                ...state,
+                newMessage: action.data
+            }
+        case P2CHAT_RESET_NEW_MESSAGE:
+            return {
+                ...state,
+                newMessage: {}
+            }
+        case P2CHAT_PUSH_NEW_MESSAGE_TO_HISTORY:
+            return {
+                ...state,
+                messageHistory: {
+                    ...state.messageHistory,
+                        end: state.messageHistory.end,
+                        messages: [
+                            state.newMessage,  ...state.messageHistory.messages
+                        ],
+                        start: state.messageHistory.start,
+                },
+            }                  
         default:
             return state               
     }

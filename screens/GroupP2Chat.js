@@ -9,7 +9,7 @@ import TimeAgo from 'react-native-timeago';
 import { theme } from '../constants';  
 import ImagePicker from 'react-native-image-crop-picker';
 import ActionSheet from 'react-native-action-sheet';
-import { sendMessage, handleMessageChange, getP2ChatMessageHistory } from '../store/actions/p2chatActions';
+import { sendMessage, handleMessageChange, getP2ChatMessageHistory, setNewMessage, pushNewMessage, pushNewMessageSuccess, pushNewMessageToHistory, resetNewMessage } from '../store/actions/p2chatActions';
 import { getMyUserId } from '../store/actions/contactsActions';
 const { width, height } = Dimensions.get('window');
 
@@ -99,29 +99,29 @@ class GroupP2Chat extends React.Component {
       const { chat, setNewMessage, pushNewMessage, pushNewMessageSuccess, pushNewMessageToHistory, resetNewMessage } = this.props;
       this.NewMessageEvent = DeviceEventEmitter.addListener('NewMessageEvent', function(e) {
         console.log(e)
-        // const data = e.message
-        // const jsonData = JSON.parse(data)
-        // const time = new Date()
+        const data = e
+        const jsonData = JSON.parse(data)
+        const time = new Date()
 
-        // var newMessage = new Object()
+        var newMessage = new Object()
 
-        // newMessage._id = jsonData.event_id
-        // newMessage.text = jsonData.content.body
-        // newMessage.createdAt = time - jsonData.unsigned.age
-        // newMessage.status = jsonData.m_sent_state
+        newMessage._id = jsonData.id
+        newMessage.text = jsonData.body
+        newMessage.createdAt = time - jsonData.timestamp
+        newMessage.status = jsonData.m_sent_state
 
-        // var user = new Object()
-        // newMessage.user = user
-        // user._id = jsonData.sender
+        var user = new Object()
+        newMessage.user = user
+        user._id = jsonData.fromMatrixID
 
-        // console.log(newMessage)
+        console.log(newMessage)
 
-        // setNewMessage(newMessage)
-        // pushNewMessage()
-        // pushNewMessageSuccess()
-        // self.addNewMessage(newMessage)
-        // pushNewMessageToHistory()
-        // resetNewMessage()
+        setNewMessage(newMessage)
+        pushNewMessage()
+        pushNewMessageSuccess()
+        self.addNewMessage(newMessage)
+        pushNewMessageToHistory()
+        resetNewMessage()
         
       })
     }
@@ -387,7 +387,12 @@ function mapStateToProps (state) {
         sendMessage: (topic, message) => dispatch(sendMessage(topic, message)),
         handleMessageChange: (text) => dispatch(handleMessageChange(text)),
         getP2ChatMessageHistory: (topic) => dispatch(getP2ChatMessageHistory(topic)),
-        getP2ChatUpdatedMessageHistory: (topic, token) => dispatch(getP2ChatUpdatedMessageHistory(topic, token))
+        getP2ChatUpdatedMessageHistory: (topic, token) => dispatch(getP2ChatUpdatedMessageHistory(topic, token)),
+        setNewMessage: (data) => dispatch(setNewMessage(data)),
+        pushNewMessage: () => dispatch(pushNewMessage()),
+        pushNewMessageSuccess: () => dispatch(pushNewMessageSuccess()),
+        pushNewMessageToHistory: () => dispatch(pushNewMessageToHistory()),
+        resetNewMessage: () => dispatch(resetNewMessage()),  
     }
   }  
     

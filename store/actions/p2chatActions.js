@@ -1,4 +1,4 @@
-import { GET_ALL_TOPICS, GET_TOPIC, NEW_TOPIC, ADD_TOPIC_TO_ARRAY, GET_MATCHES, GET_ALL_P2CHATS, GET_ALL_P2CHATS_FAILURE, GET_ALL_P2CHATS_SUCCESS, GET_CHAT_MEMBERS, HANDLE_P2CHAT_MESSAGE_CHANGE, SET_START_P2CHAT, SET_END_P2CHAT, GET_P2CHAT_MESSAGE_HISTORY, GET_P2CHAT_MESSAGE_HISTORY_FAILURE, GET_P2CHAT_MESSAGE_HISTORY_SUCCESS, GET_P2CHAT_UPDATED_MESSAGE_HISTORY } from '../actions/constants'
+import { GET_ALL_TOPICS, GET_TOPIC, NEW_TOPIC, ADD_TOPIC_TO_ARRAY, GET_MATCHES, GET_ALL_P2CHATS, GET_ALL_P2CHATS_FAILURE, GET_ALL_P2CHATS_SUCCESS, GET_CHAT_MEMBERS, HANDLE_P2CHAT_MESSAGE_CHANGE, SET_START_P2CHAT, SET_END_P2CHAT, GET_P2CHAT_MESSAGE_HISTORY, GET_P2CHAT_MESSAGE_HISTORY_FAILURE, GET_P2CHAT_MESSAGE_HISTORY_SUCCESS, GET_P2CHAT_UPDATED_MESSAGE_HISTORY, P2CHAT_PUSH_NEW_MESSAGE, P2CHAT_PUSH_NEW_MESSAGE_SUCCESS, P2CHAT_PUSH_NEW_MESSAGE_FAILURE, P2CHAT_NEW_MESSAGE, P2CHAT_RESET_NEW_MESSAGE, P2CHAT_PUSH_NEW_MESSAGE_TO_HISTORY } from '../actions/constants'
 import P2Chat from '../../native/P2Chat';
 
 export function getCurrentTopics() {
@@ -59,6 +59,8 @@ export function getChatMembers(topic) {
     return (dispatch) => {
         const promise = P2Chat.getLocalChatMembers(topic)
         promise.then((data) => {
+            console.log('get chat members')
+            console.log('get chat members')
             console.log(data)
             jsonData = JSON.parse(data)
             console.log(jsonData)
@@ -229,5 +231,42 @@ export function getMessageHistory() {
     return {
       type: GET_P2CHAT_UPDATED_MESSAGE_HISTORY,
       data
+    }
+  }
+
+  export function pushNewMessage() {
+    return {
+        type: P2CHAT_PUSH_NEW_MESSAGE,
+    }
+  }
+
+  export function pushNewMessageSuccess() {
+    return {
+        type: P2CHAT_PUSH_NEW_MESSAGE_SUCCESS,
+    }
+  }
+
+  export function pushNewMessageFailure() {
+    return {
+        type: P2CHAT_PUSH_NEW_MESSAGE_FAILURE,
+    }
+  }
+
+  export function setNewMessage(data) {
+    return {
+        type: P2CHAT_NEW_MESSAGE,
+        data
+    }
+  }
+
+  export function pushNewMessageToHistory() {
+    return {
+      type: P2CHAT_PUSH_NEW_MESSAGE_TO_HISTORY,
+    }
+  }
+
+  export function resetNewMessage() {
+    return {
+      type: P2CHAT_RESET_NEW_MESSAGE,
     }
   }
