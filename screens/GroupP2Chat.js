@@ -150,11 +150,17 @@ class GroupP2Chat extends React.Component {
     const chatName = await navigation.getParam('chatName', '')
     if (p2chat.newTextMessage != '') {
       await sendMessage(chatName, p2chat.newTextMessage)
-      // await this.setState((previousState) => {
-      //   return {
-      //     messages: GiftedChat.append(previousState.messages, p2chat.newTextMessage),
-      //   };
-      // });
+      var newMessage = new Object()
+
+      newMessage._id = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(2, 10);
+      newMessage.text = p2chat.newTextMessage
+      newMessage.createdAt = new Date()
+
+      var user = new Object()
+      newMessage.user = user
+      user._id = this.props.contacts.myProfile.userId
+      console.log(newMessage)
+      this.addNewMessage(newMessage)
     }
   }
 
