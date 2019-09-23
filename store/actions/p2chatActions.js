@@ -193,14 +193,14 @@ export function handleMessageChange(data) {
     }
   }
 
-  export function setStart() {
+  export function setStart(data) {
     return {
         type: SET_START_P2CHAT,
         data
     }
 }
 
-export function setEnd() {
+export function setEnd(data) {
     return {
         type: SET_END_P2CHAT,
         data
