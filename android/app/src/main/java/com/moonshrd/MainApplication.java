@@ -92,7 +92,14 @@ public class MainApplication extends Application implements ReactApplication {
         SoLoader.init(this, /* native exopackage */ false);
 
 
-        getApplicationContext().startService(new Intent(getApplicationContext(), P2ChatService.class));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            getApplicationContext().startForegroundService(new Intent(getApplicationContext(), P2ChatService.class));
+        } else {
+            getApplicationContext().startService(new Intent(getApplicationContext(), P2ChatService.class));
+        }
+
+       // getApplicationContext().startService(new Intent(getApplicationContext(), P2ChatService.class));
         reactContext = mReactNativeHost.getReactInstanceManager().getCurrentReactContext();
 
         ServiceConnection serviceConnection = new ServiceConnection() {

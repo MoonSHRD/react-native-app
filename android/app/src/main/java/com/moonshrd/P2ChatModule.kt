@@ -82,8 +82,8 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
         members?.forEach {
             users.add(MatrixSdkHelper.getUserData(it).get())
         }
-        // Log.d("test",users.size.toString)
-        // Log.d("test","m: "+members.size.toString)
+         Log.d("testM", users.size.toString())
+         Log.d("testM","m: "+ (members?.size ?: "NULL"))
         promise.resolve(gson.toJson(users))
     }
 
@@ -91,9 +91,13 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
     fun loadMoreMessages(topic: String, paginationToken: String?, promise: Promise) {
         val messages = LocalChatsRepository.getLocalChat(topic)!!.getHistoryMessages(paginationToken)
         val map = HashMap<String, Any?>()
-        map["start"] = messages?.first()?.id ?: ""
-        map["end"] = messages?.last()?.id ?: ""
-        map["messages"] = messages
+        messages?.let {
+            if(it.isNotEmpty()){
+                map["start"] = it.first().id
+                map["end"] = it.last().id
+                map["messages"] = messages
+            }
+        }
         promise.resolve(gson.toJson(map))
     }
 
