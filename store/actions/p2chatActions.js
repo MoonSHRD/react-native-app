@@ -85,7 +85,7 @@ export function sendMessage(topic, message) {
     }
 }
 
-export function getP2ChatMessageHistory(topic) {
+export function getP2ChatMessageHistory(topic, callback) {
     return (dispatch) => {
         const promise = P2Chat.loadMoreMessages(topic, null)
         promise.then((data) => {
