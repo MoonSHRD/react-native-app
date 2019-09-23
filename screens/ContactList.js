@@ -103,7 +103,7 @@ class ContactList extends Component {
             text: 'Continue', onPress: () => {}
         }
         ],
-        { cancelable: false }
+        { cancelable: true }
       )  
     })
     

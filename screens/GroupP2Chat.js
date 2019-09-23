@@ -94,7 +94,7 @@ class GroupP2Chat extends React.Component {
 
   componentDidMount = async () => {
       await this.props.getMyUserId()
-      // await this.getMessageHistory()
+      await this.getMessageHistory()
       var self = this;
       const { chat, setNewMessage, pushNewMessage, pushNewMessageSuccess, pushNewMessageToHistory, resetNewMessage } = this.props;
       this.NewMessageEvent = DeviceEventEmitter.addListener('NewMessageEvent', function(e) {

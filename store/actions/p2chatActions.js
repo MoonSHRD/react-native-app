@@ -89,12 +89,17 @@ export function getP2ChatMessageHistory(topic) {
         console.log('get message history')
         const promise = P2Chat.loadMoreMessages(topic, null)
         promise.then((data) => {
-            jsonData = JSON.parse(data)
-            dispatch(getMessageHistory())
-            dispatch(setEnd(jsonData.end))
-            dispatch(setStart(jsonData.start))
-            dispatch(getMessageHistorySuccess(jsonData))
-            console.log(jsonData)
+            if (data != null) {
+                console.log(data)
+                jsonData = JSON.parse(data)
+                dispatch(getMessageHistory())
+                dispatch(setEnd(jsonData.end))
+                dispatch(setStart(jsonData.start))
+                dispatch(getMessageHistorySuccess(jsonData))
+                console.log(jsonData)    
+            } else {
+                console.log('returned null')
+            }
         },
         (error) => {
             dispatch(getMessageHistoryFailure())

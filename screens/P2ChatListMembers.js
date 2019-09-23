@@ -71,7 +71,6 @@ class P2ChatListMembers extends Component {
 
   componentDidMount() {
     this.setHeaderParams()
-    this.props.loadDirectChats()
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
         const chatName = this.props.navigation.getParam('chatName', '')
         this.props.getMyUserId()
