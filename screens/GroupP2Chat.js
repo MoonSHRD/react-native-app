@@ -129,6 +129,7 @@ class GroupP2Chat extends React.Component {
   getMessageHistory() {
     const chatName = this.props.navigation.getParam('chatName', '')
     this.props.getP2ChatMessageHistory(chatName, (messages) => {
+      console.log('messages was imported successfully')
       console.log(messages)
       const newMessages = messages.messages
       this.setState((previousState) => {

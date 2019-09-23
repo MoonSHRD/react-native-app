@@ -91,10 +91,6 @@ export function getP2ChatMessageHistory(topic) {
         promise.then((data) => {
             jsonData = JSON.parse(data)
             console.log('getting message history')
-            console.log(jsonData)
-            dispatch(getMessageHistory())
-            dispatch(setEnd(jsonData.end))
-            dispatch(setStart(jsonData.start))
 
             const messageHistory = new Object()
             const time = new Date()
@@ -108,26 +104,29 @@ export function getP2ChatMessageHistory(topic) {
                 message._id = data.Id
                 message.text = data.body
                 message.createdAt = time - data.Timestamp
+                message.status = "SENT"
 
                 var user = new Object()
                 message.user = user
-
                 user._id = data.fromMatrixID
-                // user.matrixUser = new Object()
-                // user.matrixUser.avatarUrl = data.User.avatarUrl
-                // user.matrixUser.isActive = data.User.isActive
-                // user.matrixUser.lastMessage = data.User.lastMessage
-                // user.matrixUser.lastMessageDate = data.User.lastMessageDate
-                // user.matrixUser.lastMessageState = data.User.lastMessageState
-                // user.matrixUser.name = data.User.name
-                // user.matrixUser.unreadMessagesCount = data.User.unreadMessagesCount
-                // user.matrixUser.userId = data.User.userId
 
               return message
             })    
+            dispatch(getMessageHistory())
+            dispatch(setEnd(jsonData.end))
 
+            console.log(jsonData.end)
+            console.log('end setted successfully')
+
+            dispatch(setStart(jsonData.start))
+            
+            console.log(jsonData.start)
+            console.log('start setted successfully')
+            console.log('parsed data from p2chat:')
+            console.log(jsonData) 
+            console.log('parsed data to group chat page:')
+            console.log(messageHistory)   
             dispatch(getMessageHistorySuccess(messageHistory))
-            console.log(jsonData)    
             callback(messageHistory)
         },
         (error) => {
