@@ -77,30 +77,15 @@ class ContactList extends Component {
       this.props.getCurrentTopics()
       this.props.loadDirectChats()
     });
-
-    this.onNetworkErrorEvent = DeviceEventEmitter.addListener('onNetworkError', function(e) {
-      console.log('onNetworkError')
+    this.NewMatchEvent = DeviceEventEmitter.addListener('NewMatchEvent', function(e) {
       console.log(e)
-    });  
-    this.onMatrixErrorEvent = DeviceEventEmitter.addListener('onMatrixError', (e) => {
-      console.log('onMatrixError')
-      console.log(e)
-    });  
-    this.onUnexpectedErrorEvent = DeviceEventEmitter.addListener('onUnexpectedError', function(e) {
-      console.log('onUnexpectedError')
-      console.log(e)
-    });  
-    this.successSearch = DeviceEventEmitter.addListener('onSuccess', (e) => {
-        console.log('onSuccess')
-    })
-    this.newMatchEvent = DeviceEventEmitter.addListener('NewMatchEvent', function(e) {
       console.log('NewMatchEvent')
       Alert.alert(
         'Success!',
         'Your match was successful',
         [
         {
-            text: 'Continue', onPress: () => {}
+            text: 'Continue',
         }
         ],
         { cancelable: true }
