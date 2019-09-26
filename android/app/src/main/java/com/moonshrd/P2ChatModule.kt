@@ -10,10 +10,12 @@ import com.moonshrd.models.LocalChat
 import com.moonshrd.models.LocalChatModel
 import com.moonshrd.models.MessageModel
 import com.moonshrd.models.UserModel
+import com.moonshrd.repository.ContactRepository
 import com.moonshrd.repository.LocalChatsRepository
 import com.moonshrd.utils.TopicStorage
 import com.moonshrd.utils.matrix.Matrix
 import com.moonshrd.utils.matrix.MatrixSdkHelper
+import com.orhanobut.logger.Logger
 import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
@@ -103,12 +105,18 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
 
     @ReactMethod
     fun getLocalChats(promise: Promise) {
-        Log.d("test","test")
         val localChats = ArrayList<LocalChatModel>()
         LocalChatsRepository.getAllLocalChats().entries.forEach {
             val lastMessage = it.value.getLastMessage()
             localChats.add(LocalChatModel(it.key, lastMessage?.body ?: "", lastMessage?.id ?: "", lastMessage?.timestamp ?: 0))
         }
         promise.resolve(gson.toJson(localChats))
+    }
+
+    @ReactMethod
+    fun getMatchedChats(promise: Promise){
+        Logger.i("getMatchedChats call success")
+        val contacts = ContactRepository.getAllContacts()
+        promise.resolve(gson.toJson(contacts))
     }
 }

@@ -12,6 +12,7 @@ import com.moonshrd.models.LocalChat
 import com.moonshrd.models.MatchModel
 import com.moonshrd.models.MessageModel
 import com.moonshrd.models.UserModel
+import com.moonshrd.repository.ContactRepository
 import com.moonshrd.repository.LocalChatsRepository
 import com.moonshrd.utils.TopicStorage
 import com.moonshrd.utils.matrix.Matrix
@@ -81,7 +82,7 @@ class P2ChatService : Service() {
                     Logger.i("Messege get success")
                 }
             } catch (e: Exception) {
-                Logger.i("ERROR - unexpected exception")
+                Logger.i("ERROR - ${e.message}")
             }
         }, 0, 300, TimeUnit.MILLISECONDS)
 
@@ -111,6 +112,10 @@ class P2ChatService : Service() {
             LocalChatsRepository.getLocalChat(messageObject.topic)!!.putMessage(messageObject)
             val writableMap = Arguments.createMap()
             writableMap.putString("message", gson.toJson(messageObject))
+
+            val msgLog = gson.toJson(messageObject)
+            Logger.i("Message  - $msgLog")
+
             sendRNEvent(MainApplication.getReactContext(), newMessageEventName, writableMap)
         }
     }
@@ -121,6 +126,8 @@ class P2ChatService : Service() {
             val match = gson.fromJson(newMatch, MatchModel::class.java)
             if (match.isValid) {
                 LocalChatsRepository.getLocalChat(match.topic)!!.putMember(match.matrixID)
+                //TopicMemberRepository.addMember(match.matrixID,match.topic)
+                ContactRepository.addTopicUser(match.topic,match.matrixID)
                 sendEventWithOneStringArg(MainApplication.getReactContext(), newMatchEventName, "match", newMatch)
             } else {
                 LocalChatsRepository.getLocalChat(match.topic)!!.removeMember(match.matrixID)

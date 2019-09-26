@@ -14,5 +14,6 @@ data class UserModel (
         val unreadMessagesCount: Int = 0,
         val avatarLink: String? = null,
         val roomId: String? = null,
-        val multiAddress: String? = null // libp2p multiaddress for local chats
+        val multiAddress: String? = null, // libp2p multiaddress for local chats
+        val topics: ArrayList<String> = arrayListOf() // libp2p multiaddress for local chats
 )
