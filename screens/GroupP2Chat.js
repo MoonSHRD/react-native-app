@@ -105,10 +105,9 @@ class GroupP2Chat extends React.Component {
 
         var newMessage = new Object()
 
-        newMessage._id = jsonData.id
+        newMessage._id = jsonData.Id
         newMessage.text = jsonData.body
-        newMessage.createdAt = time - jsonData.timestamp
-        newMessage.status = jsonData.m_sent_state
+        newMessage.createdAt = time - jsonData.Timestamp
 
         var user = new Object()
         newMessage.user = user
