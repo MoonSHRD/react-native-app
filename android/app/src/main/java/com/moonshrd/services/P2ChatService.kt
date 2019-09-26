@@ -73,9 +73,15 @@ class P2ChatService : Service() {
             Logger.i("P2mobile started successfully!")
         }.start()
         P2mobile.setMatrixID("")
+
         scheduledExecutorService!!.scheduleAtFixedRate({
-            if (isServiceRunning) {
-                getMessage()
+            try {  // Let no Exception reach the ScheduledExecutorService.
+                if (isServiceRunning) {
+                    getMessage()
+                    Logger.i("Messege get success")
+                }
+            } catch (e: Exception) {
+                Logger.i("ERROR - unexpected exception")
             }
         }, 0, 300, TimeUnit.MILLISECONDS)
 
@@ -91,7 +97,6 @@ class P2ChatService : Service() {
         }
         Logger.i("Successfully subscribed to all topics which I have.")
     }
-
 
     private fun getMessage() {
         val message = P2mobile.getMessages()
