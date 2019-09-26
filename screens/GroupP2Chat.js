@@ -99,7 +99,7 @@ class GroupP2Chat extends React.Component {
       const { chat, setNewMessage, pushNewMessage, pushNewMessageSuccess, pushNewMessageToHistory, resetNewMessage } = this.props;
       this.NewMessageEvent = DeviceEventEmitter.addListener('NewMessageEvent', function(e) {
         console.log(e)
-        const data = e
+        const data = e.message
         const jsonData = JSON.parse(data)
         const time = new Date()
 
