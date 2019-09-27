@@ -32,6 +32,7 @@ import javax.inject.Inject
 
 class P2ChatService : Service() {
     private val newMatchEventName = "NewMatchEvent"
+    private val newMatchMemberEventName = "newMatchMemberEventName"
     private val newMessageEventName = "NewMessageEvent"
 
     @Inject
@@ -154,13 +155,10 @@ class P2ChatService : Service() {
                                 roomId = room.roomId
                         )
                         ContactRepository.addTopicUser(match.topic,chat)
+                        match.userModel = chat
                     }
                   }
-
-
-
-
-                sendEventWithOneStringArg(MainApplication.getReactContext(), newMatchEventName, "match", newMatch)
+                sendEventWithOneStringArg(MainApplication.getReactContext(), newMatchEventName, "match", gson.toJson(match))
             } else {
                 LocalChatsRepository.getLocalChat(match.topic)!!.removeMember(match.matrixID)
             }
