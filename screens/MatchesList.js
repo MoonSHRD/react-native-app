@@ -215,17 +215,14 @@ parseUserId(props) {
                 this.props.contacts.searchList.map((l, i) => (
                   <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
                   <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
-                  {
-                    l.name[0] == '@'
-                    ?
                     <ListItem
                       key={i}
                       leftAvatar={
-                        (l.avatarUrl == "")
+                        l.avatarUrl
                         ?
-                        { title: l.name[1], titleStyle:{textTransform: 'capitalize'} }
-                        :
                         { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
+                        :
+                        { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
                       }
                       title={
                         l.name[0] == '@'
@@ -235,47 +232,18 @@ parseUserId(props) {
                         this.capitalize(l.name)
                       }
                       titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
-                      subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>}
-                      subtitleStyle={styles.subtitle}
                       containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
                       onPress={() => {
-                        navigation.navigate('Profile', {
+                        this.props.navigation.navigate('Profile', {
                           userName: l.name,
                           userIdName: this.parseUserId(l.userId),
                           userId: l.userId,
                           avatarLink: this.parseAvatarUrl(l.avatarUrl),
                           roomId: l.roomId,
-                          type: "match",
+                          from: 'search',
                         })
                       }}  
                     />
-                    :
-                    <ListItem
-                      key={i}
-                      leftAvatar={
-                        (l.avatarUrl == "")
-                        ?
-                        { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
-                        :
-                        { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
-                      }
-                      title={this.capitalize(l.name)}
-                      titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
-                      subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>}
-                      subtitleStyle={styles.subtitle}
-                      containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
-                      onPress={() => {
-                        navigation.navigate('Profile', {
-                          userName: l.name,
-                          userIdName: this.parseUserId(l.userId),
-                          userId: l.userId,
-                          avatarLink: this.parseAvatarUrl(l.avatarUrl),
-                          roomId: l.roomId,
-                          type: "match",
-                        })
-                      }}  
-                    />
-                  }
                     </BoxShadow>
                     </View>
                 ))
@@ -311,7 +279,7 @@ parseUserId(props) {
                       this.capitalize(l.name)
                     }
                   titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
-                    subtitle={l.topics}
+                    subtitle={l.topics.join(", ")}
                     subtitleStyle={styles.subtitle}
                     containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
                     onPress={() => {
@@ -337,7 +305,7 @@ parseUserId(props) {
                     }
                     title={this.capitalize(l.name)}
                     titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
-                    subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>}
+                    subtitle={l.topics.join(", ")}
                     subtitleStyle={styles.subtitle}
                     containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
                     onPress={() => {
@@ -352,39 +320,8 @@ parseUserId(props) {
                     }}  
                   />
                 }
-                  <ListItem
-                    key={i}
-                    leftAvatar={
-                      (l.avatarUrl == "")
-                      ?
-                      { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
-                      :
-                      { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
-                    }
-                    title={this.capitalize(l.name)}
-                    titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
-                    subtitle={
-                      l.matches != ''
-                      ?
-                      l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen} interval={60000}/></Text>
-                      :
-                      <Text>{l.matches}</Text>
-                    }
-                    subtitleStyle={styles.subtitle}
-                    containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
-                    onPress={() => {
-                      navigation.navigate('Profile', {
-                        userName: l.name,
-                        userIdName: this.parseUserId(l.userId),
-                        userId: l.userId,
-                        avatarLink: this.parseAvatarUrl(l.avatarUrl),
-                        roomId: l.roomId,
-                        type: "match",
-                      })
-                    }}  
-                  />
-                  </BoxShadow>
-                  </View>
+                </BoxShadow>
+                </View>
               ))
             }  
             </Block>
