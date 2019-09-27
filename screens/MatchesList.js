@@ -9,7 +9,7 @@ import { theme } from '../constants';
 import { Text, Block } from '../components';
 
 import {connect} from 'react-redux';
-import { getContactList, searchBar, changeContactList, clearSearchBar, selectContact } from '../store/actions/contactsActions';
+import { getContactList, searchBar, changeContactList, clearSearchBar, selectContact, getMatchedContactList } from '../store/actions/contactsActions';
 import { getAllMatches } from '../store/actions/p2chatActions';
 
 const { width, height } = Dimensions.get('window');
@@ -82,6 +82,7 @@ class MatchesList extends Component {
     this.setHeaderParams()
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
       this.props.getDirectChats();
+      this.props.getMatchedContactList();
     });
   }
 
@@ -556,6 +557,7 @@ function mapDispatchToProps (dispatch) {
     clearSearchBar: () => dispatch(clearSearchBar()),
     selectContact: (data) => dispatch(selectContact(data)),
     getAllMatches: () => dispatch(getAllMatches()),
+    getMatchedContactList: () => dispatch(getMatchedContactList())
   }
 }
 

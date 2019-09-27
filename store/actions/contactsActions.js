@@ -1,5 +1,6 @@
-import { FETCHING_CONTACTS, FETCHING_CONTACTS_SUCCESS, FETCHING_CONTACTS_FAILURE, SEARCH_BAR, SEARCH_LIST, CLEAR_SEARCH_BAR, SELECT_CONTACT, DESELECT_CONTACT, SELECT_CHAT, DESELECT_CHAT, ADD_SELECTOR, SELECTED_CONTACTS, SELECT_IN_CONTACTS, FETCHING_CONTACT, FETCHING_CONTACT_SUCCESS, FETCHING_CONTACT_FAILURE, SAVE_MY_USERNAME, SAVE_MY_USER_ID, SET_MY_PROFILE,  } from './constants'
+import { FETCHING_CONTACTS, FETCHING_CONTACTS_SUCCESS, FETCHING_CONTACTS_FAILURE, SEARCH_BAR, SEARCH_LIST, CLEAR_SEARCH_BAR, SELECT_CONTACT, DESELECT_CONTACT, SELECT_CHAT, DESELECT_CHAT, ADD_SELECTOR, SELECTED_CONTACTS, SELECT_IN_CONTACTS, FETCHING_CONTACT, FETCHING_CONTACT_SUCCESS, FETCHING_CONTACT_FAILURE, SAVE_MY_USERNAME, SAVE_MY_USER_ID, SET_MY_PROFILE, FETCHING_MATCHED_CONTACTS_SUCCESS } from './constants'
 import MatrixClient from '../../native/MatrixClient';  
+import P2Chat from '../../native/P2Chat';  
 
 export function getContactList() {
   return (dispatch) => {
@@ -122,6 +123,24 @@ export function createDirectChat(userId) {
   }
 }
 
+export function getMatchedContactList() {
+  return (dispatch) => {
+    console.log('getMatchedContactList')
+    const promise = P2Chat.getMatchedChats()
+    promise.then((data) => {
+      console.log(data)
+      const jsonData = JSON.parse(data)
+      dispatch(getMatchedContactsSuccess(jsonData))
+      console.log(jsonData)
+      },
+      (error) => {
+      console.log(error);
+      }
+    );
+  }
+}
+
+
   export function getContacts() {
     return {
       type: FETCHING_CONTACTS
@@ -134,6 +153,15 @@ export function createDirectChat(userId) {
       data,
     }
   }
+
+  export function getMatchedContactsSuccess(data) {
+    return {
+      type: FETCHING_MATCHED_CONTACTS_SUCCESS,
+      data,
+    }
+  }
+  
+
   
   export function getContactsFailure() {
     return {
