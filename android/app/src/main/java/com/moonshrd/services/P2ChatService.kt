@@ -155,7 +155,7 @@ class P2ChatService : Service() {
                                 roomId = room.roomId
                         )
                         ContactRepository.addTopicUser(match.topic,chat)
-                        match.userModel = chat
+                        match.userModel = ContactRepository.getUser(chat.userId)
                     }
                   }
                 sendEventWithOneStringArg(MainApplication.getReactContext(), newMatchEventName, "match", gson.toJson(match))

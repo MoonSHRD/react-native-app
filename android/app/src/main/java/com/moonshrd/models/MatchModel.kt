@@ -10,4 +10,4 @@ data class MatchModel(@SerializedName("topic")
                       var peerID: String,
                       @SerializedName("isValid")
                       var isValid: Boolean,
-                      var userModel: UserModel)
+                      var userModel: UserModel?)
