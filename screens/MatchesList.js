@@ -81,7 +81,6 @@ class MatchesList extends Component {
   componentDidMount() {
     this.setHeaderParams()
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
-      this.props.getDirectChats();
       this.props.getMatchedContactList();
     });
   }
@@ -289,7 +288,7 @@ parseUserId(props) {
             :
             <Block>
             {
-              this.props.contacts.contactList.map((l, i) => (
+              this.props.contacts.matchedContactList.map((l, i) => (
                 <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
                 <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
                 {
@@ -312,7 +311,7 @@ parseUserId(props) {
                       this.capitalize(l.name)
                     }
                   titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
-                    subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>}
+                    subtitle={l.topics}
                     subtitleStyle={styles.subtitle}
                     containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
                     onPress={() => {
@@ -551,7 +550,6 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
   return {
-    getDirectChats: () => dispatch(getContactList()),
     updateSearchBar: (data) => dispatch(searchBar(data)),
     updateSearchList: (data) => dispatch(changeContactList(data)),
     clearSearchBar: () => dispatch(clearSearchBar()),
