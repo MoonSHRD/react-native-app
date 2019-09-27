@@ -81,6 +81,8 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         val directChats = matrixInstance.defaultSession.dataHandler.store.rooms.filter {
             it.isDirect
         }
+        //remove all contacts
+        ContactRepository.removeAllContacts()
 
         val chatModels = mutableListOf<UserModel>()
         directChats.forEach { room ->

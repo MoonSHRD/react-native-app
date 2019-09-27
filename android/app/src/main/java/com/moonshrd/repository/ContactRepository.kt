@@ -13,6 +13,10 @@ object ContactRepository {
         contacts.add(localChat)
     }
 
+    fun removeAllContacts() {
+        contacts.clear()
+    }
+
     fun removeContact(topic: UserModel) {
         contacts.remove(topic)
     }

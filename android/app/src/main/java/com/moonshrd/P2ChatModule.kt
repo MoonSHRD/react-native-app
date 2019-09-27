@@ -116,7 +116,9 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
     @ReactMethod
     fun getMatchedChats(promise: Promise){
         Logger.i("getMatchedChats call success")
-        val contacts = ContactRepository.getAllContacts()
-        promise.resolve(gson.toJson(contacts))
+        val contactsWithTopics = ContactRepository.getAllContacts().filter {
+            it.topics.size!=0
+        }
+        promise.resolve(gson.toJson(contactsWithTopics))
     }
 }
