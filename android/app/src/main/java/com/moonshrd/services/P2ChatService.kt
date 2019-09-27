@@ -8,6 +8,7 @@ import com.facebook.react.bridge.Arguments
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.moonshrd.MainApplication
+import com.moonshrd.MatrixClientModule
 import com.moonshrd.models.LocalChat
 import com.moonshrd.models.MatchModel
 import com.moonshrd.models.MessageModel
@@ -79,7 +80,6 @@ class P2ChatService : Service() {
             try {  // Let no Exception reach the ScheduledExecutorService.
                 if (isServiceRunning) {
                     getMessage()
-                    Logger.i("Messege get success")
                 }
             } catch (e: Exception) {
                 Logger.i("ERROR - ${e.message}")
@@ -127,7 +127,39 @@ class P2ChatService : Service() {
             if (match.isValid) {
                 LocalChatsRepository.getLocalChat(match.topic)!!.putMember(match.matrixID)
                 //TopicMemberRepository.addMember(match.matrixID,match.topic)
-                ContactRepository.addTopicUser(match.topic,match.matrixID)
+
+
+
+                val directChats = matrixInstance.defaultSession.dataHandler.store.rooms.filter {
+                    it.isDirect
+                }
+
+                directChats.forEach { room ->
+                    val contactID = room.state.loadedMembers.filter {
+                        it.userId != matrixInstance.defaultSession.myUserId }[0].userId
+                    if(match.matrixID==contactID){
+                        val roomSummary = room.roomSummary
+
+                        val contact = matrixInstance.defaultSession.dataHandler.store.getUser(contactID)
+                        val chat = UserModel(
+                                contactID,
+                                room.getRoomDisplayName(MainApplication.getReactContext()),
+                                room.avatarUrl ?: "",
+                                contact.latestPresenceTs,
+                                contact.isActive,
+                                matrixInstance.defaultLatestChatMessageCache.getLatestText(MainApplication.getReactContext(), roomSummary!!.roomId),
+                                roomSummary.latestReceivedEvent.originServerTs,
+                                roomSummary.latestReceivedEvent.mSentState.name,
+                                roomSummary.mUnreadEventsCount,
+                                roomId = room.roomId
+                        )
+                        ContactRepository.addTopicUser(match.topic,chat)
+                    }
+                  }
+
+
+
+
                 sendEventWithOneStringArg(MainApplication.getReactContext(), newMatchEventName, "match", newMatch)
             } else {
                 LocalChatsRepository.getLocalChat(match.topic)!!.removeMember(match.matrixID)

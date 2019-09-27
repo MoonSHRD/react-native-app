@@ -21,11 +21,17 @@ object ContactRepository {
         contacts.remove(topic)
     }
 
-    fun addTopicUser(topic: String,userId:String){
+    fun addTopicUser(topic: String,user:UserModel){
+        var isFind = false
             for(i in contacts.indices){
-                if(userId==contacts[i].userId){
+                if(user.userId==contacts[i].userId){
                     contacts[i].topics.add(topic)
+                    isFind = true
                 }
+            }
+            if(!isFind){
+                user.topics.add(topic)
+                contacts.add(user)
             }
     }
 }

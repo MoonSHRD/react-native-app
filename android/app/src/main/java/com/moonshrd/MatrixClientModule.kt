@@ -82,7 +82,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             it.isDirect
         }
         //remove all contacts
-        ContactRepository.removeAllContacts()
+       // ContactRepository.removeAllContacts()
 
         val chatModels = mutableListOf<UserModel>()
         directChats.forEach { room ->
@@ -110,7 +110,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                     roomId = room.roomId
             )
             chatModels.add(chat)
-            ContactRepository.addContact(chat)
+           // ContactRepository.addContact(chat)
         }
         return chatModels
     }
