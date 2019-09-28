@@ -80,9 +80,8 @@ class ContactList extends Component {
     });
     this.NewMatchEvent = DeviceEventEmitter.addListener('NewMatchEvent', (e) => {
       console.log(e)
-      data = e.match
       console.log('NewMatchEvent')
-      setMatchedUser(data)
+      setMatchedUser(e)
       setVisible(true)
     })
   }
@@ -158,31 +157,31 @@ parseUserId(props) {
 }
 
 goToChatScreen = async (navigation) => {
-  if (this.props.p2chat.matchedUser.userModel.roomId != null) {
-      roomId = this.props.p2chat.matchedUser.userModel.roomId
+  if (this.props.p2chat.matchedUser.match.match.userModel.roomId != null) {
+      roomId = this.props.p2chat.matchedUser.match.match.userModel.roomId
       await this.props.navigation.navigate('Chat', {
-          userName: this.capitalize(this.props.p2chat.matchedUser.userModel.name),
-          userIdName: this.parseUserId(this.props.p2chat.matchedUser.userModel.userId),
-          userId: this.props.p2chat.matchedUser.userModel.userId,
-          avatarUrl: this.props.p2chat.matchedUser.userModel.avatarUrl,
-          avatarLink: this.parseAvatarUrl(this.props.p2chat.matchedUser.userModel.avatarUrl),
-          isActive: this.props.p2chat.matchedUser.userModel.isActive,
-          lastSeen: this.props.p2chat.matchedUser.userModel.lastSeen,
+          userName: this.capitalize(this.props.p2chat.matchedUser.match.userModel.name),
+          userIdName: this.parseUserId(this.props.p2chat.matchedUser.match.userModel.userId),
+          userId: this.props.p2chat.matchedUser.match.userModel.userId,
+          avatarUrl: this.props.p2chat.matchedUser.match.userModel.avatarUrl,
+          avatarLink: this.parseAvatarUrl(this.props.p2chat.matchedUser.match.userModel.avatarUrl),
+          isActive: this.props.p2chat.matchedUser.match.userModel.isActive,
+          lastSeen: this.props.p2chat.matchedUser.match.userModel.lastSeen,
           roomId: roomId
       })        
   } else {
-      userId = this.props.p2chat.matchedUser.userModel.userId
+      userId = this.props.p2chat.matchedUser.match.userModel.userId
       const promise = MatrixClient.createDirectChat(userId)
       promise.then(async (data) => {
           await console.log(data)
           await this.props.navigation.navigate('Chat', {
-              userName: this.capitalize(this.props.p2chat.matchedUser.userModel.name),
-              userIdName: this.parseUserId(this.props.p2chat.matchedUser.userModel.userId),
-              userId: this.props.p2chat.matchedUser.userModel.userId,
-              avatarUrl: this.props.p2chat.matchedUser.userModel.avatarUrl,
-              avatarLink: this.parseAvatarUrl(this.props.p2chat.matchedUser.userModel.avatarUrl),
-              isActive: this.props.p2chat.matchedUser.userModel.isActive,
-              lastSeen: this.props.p2chat.matchedUser.userModel.lastSeen,
+              userName: this.capitalize(this.props.p2chat.matchedUser.match.userModel.name),
+              userIdName: this.parseUserId(this.props.p2chat.matchedUser.match.userModel.userId),
+              userId: this.props.p2chat.matchedUser.match.userModel.userId,
+              avatarUrl: this.props.p2chat.matchedUser.match.userModel.avatarUrl,
+              avatarLink: this.parseAvatarUrl(this.props.p2chat.matchedUser.match.userModel.avatarUrl),
+              isActive: this.props.p2chat.matchedUser.match.userModel.isActive,
+              lastSeen: this.props.p2chat.matchedUser.match.userModel.lastSeen,
               roomId: data
           })
         },
@@ -241,11 +240,11 @@ goToChatScreen = async (navigation) => {
             >
                 <Block style={styles.overlayAvatarContainer}>
                 {
-                  this.props.p2chat.matchedUser.userModel.avatarUrl == ''
+                  this.props.p2chat.matchedUser.match.userModel.avatarUrl == ''
                   ?
                   <Avatar 
                     rounded
-                    title={this.capitalize(this.props.p2chat.matchedUser.userModel.name[0])}
+                    title={this.capitalize(this.props.p2chat.matchedUser.match.userModel.name[0])}
                     titleStyle={{fontSize:36}}
                     containerStyle={styles.overlayAvatar}
                     avatarStyle={styles.overlayAvatarImage}
@@ -255,7 +254,7 @@ goToChatScreen = async (navigation) => {
                     rounded
                     source={{
                         uri:
-                        this.parseAvatarUrl(this.props.p2chat.matchedUser.userModel.avatarUrl),
+                        this.parseAvatarUrl(this.props.p2chat.matchedUser.match.userModel.avatarUrl),
                     }}
                     containerStyle={styles.overlayAvatar}
                     avatarStyle={styles.overlayAvatarImage}
@@ -263,11 +262,11 @@ goToChatScreen = async (navigation) => {
                 }
                 </Block>
                 <View style={{paddingHorizontal:14, marginTop: 42}}>
-                <Text center h3 notBlack bold style={{marginTop:20, marginHorizontal: 14}}>{this.props.p2chat.matchedUser.userModel.name}</Text>
-                <Text center subhead notBlack style={{marginTop:8, marginHorizontal: 20}}>You have a match by {this.props.p2chat.matchedUser.userModel.topics.length > 1 ? <Text>{this.props.p2chat.matchedUser.userModel.topics.length} tags</Text> : <Text>{this.props.p2chat.matchedUser.userModel.topics.length} tag</Text>}</Text>
+                <Text center h3 notBlack bold style={{marginTop:20, marginHorizontal: 14}}>{this.props.p2chat.matchedUser.match.userModel.name}</Text>
+                <Text center subhead notBlack style={{marginTop:8, marginHorizontal: 20}}>You have a match by {this.props.p2chat.matchedUser.match.userModel.topics.length > 1 ? <Text>{this.props.p2chat.matchedUser.match.userModel.topics.length} tags</Text> : <Text>{this.props.p2chat.matchedUser.match.userModel.topics.length} tag</Text>}</Text>
                 <Block style={styles.overlayTagContainer}>
                   {
-                    this.props.p2chat.matchedUser.userModel.topics.map((l,i) => (
+                    this.props.p2chat.matchedUser.match.userModel.topics.map((l,i) => (
                               <Button
                                   key={i}
                                   style={styles.overlayMatchedTag}>
