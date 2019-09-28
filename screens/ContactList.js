@@ -81,7 +81,7 @@ class ContactList extends Component {
     this.NewMatchEvent = DeviceEventEmitter.addListener('NewMatchEvent', async (e) => {
       await console.log(e)
       await console.log('NewMatchEvent')
-      await etMatchedUser(e)
+      await setMatchedUser(e)
       await setVisible(true)
     })
   }
