@@ -82,7 +82,7 @@ class ContactList extends Component {
       await console.log(e)
       await console.log('NewMatchEvent')
       await setMatchedUser(e)
-      await setVisible(true)
+      // await setVisible(true)
     })
   }
 
