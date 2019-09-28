@@ -78,11 +78,11 @@ class ContactList extends Component {
       this.props.getCurrentTopics()
       this.props.loadDirectChats()
     });
-    this.NewMatchEvent = DeviceEventEmitter.addListener('NewMatchEvent', (e) => {
-      console.log(e)
-      console.log('NewMatchEvent')
-      setMatchedUser(e)
-      setVisible(true)
+    this.NewMatchEvent = DeviceEventEmitter.addListener('NewMatchEvent', async (e) => {
+      await console.log(e)
+      await console.log('NewMatchEvent')
+      await etMatchedUser(e)
+      await setVisible(true)
     })
   }
 
