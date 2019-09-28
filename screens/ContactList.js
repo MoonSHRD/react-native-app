@@ -69,6 +69,7 @@ class ContactList extends Component {
   }
 
   componentDidMount() {
+    const {setMatchedUser, setVisible} = this.props
     this.setHeaderParams()
     this.props.loadDirectChats()
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
@@ -77,11 +78,11 @@ class ContactList extends Component {
       this.props.getCurrentTopics()
       this.props.loadDirectChats()
     });
-    this.NewMatchEvent = DeviceEventEmitter.addListener('NewMatchEvent', function(e) {
+    this.NewMatchEvent = DeviceEventEmitter.addListener('NewMatchEvent', (e) => {
       console.log(e)
       console.log('NewMatchEvent')
-      this.props.setMatchedUser(e)
-      this.props.setVisible(true)
+      setMatchedUser(e)
+      setVisible(true)
     })
   }
 
