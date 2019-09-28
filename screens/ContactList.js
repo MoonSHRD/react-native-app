@@ -80,8 +80,9 @@ class ContactList extends Component {
     });
     this.NewMatchEvent = DeviceEventEmitter.addListener('NewMatchEvent', (e) => {
       console.log(e)
+      data = e.match
       console.log('NewMatchEvent')
-      setMatchedUser(e)
+      setMatchedUser(data)
       setVisible(true)
     })
   }
