@@ -353,7 +353,6 @@ class Profile extends Component {
           }
         )    
     }
-
   }
 
   setHeaderParams = () => {
