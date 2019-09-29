@@ -8,8 +8,9 @@ import com.facebook.react.bridge.ReactMethod
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.moonshrd.di.modules.MessageEventModel
+import com.moonshrd.di.modules.MessageHistory
 import com.moonshrd.models.UserModel
-import com.moonshrd.repository.ContactRepository
+import com.moonshrd.repository.ContactsRepository
 import com.moonshrd.utils.matrix.Matrix
 import com.moonshrd.utils.matrix.MatrixSdkHelper
 import com.moonshrd.utils.sendEventWithOneStringArg
@@ -25,12 +26,12 @@ import org.matrix.androidsdk.data.RoomSummary
 import org.matrix.androidsdk.data.timeline.EventTimeline
 import org.matrix.androidsdk.listeners.IMXMediaUploadListener
 import org.matrix.androidsdk.rest.model.Event
+import org.matrix.androidsdk.rest.model.TokensChunkEvents
 import org.matrix.androidsdk.rest.model.search.SearchUsersResponse
+import org.matrix.androidsdk.rest.model.sync.RoomResponse
 import java.io.ByteArrayInputStream
 import java.net.URLConnection.guessContentTypeFromStream
 import javax.inject.Inject
-import org.matrix.androidsdk.rest.model.TokensChunkEvents
-import org.matrix.androidsdk.rest.model.sync.RoomResponse
 
 class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
     private val eventListeners = HashMap<String, NewEventsListener>()
@@ -79,11 +80,13 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
     }
 
     private fun getDirectChatsInternal(): List<UserModel> {
+
+        ContactsRepository.removeAllContacts()
         val directChats = matrixInstance.defaultSession.dataHandler.store.rooms.filter {
             it.isDirect
         }
         //remove all contacts
-       // ContactRepository.removeAllContacts()
+        // ContactRepository.removeAllContacts()
 
         val chatModels = mutableListOf<UserModel>()
         directChats.forEach { room ->
@@ -112,7 +115,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                     roomId = room.roomId
             )
             chatModels.add(chat)
-           // ContactRepository.addContact(chat)
+            ContactsRepository.addContact(chat)
         }
         return chatModels
     }
@@ -151,7 +154,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         }
 
         val currentSession = matrixInstance.defaultSession
-        val httpUrlAvatar = currentSession.contentManager.getDownloadableUrl(currentSession.dataHandler.myUser.avatarUrl,false)
+        val httpUrlAvatar = currentSession.contentManager.getDownloadableUrl(currentSession.dataHandler.myUser.avatarUrl, false)
         promise.resolve(gson.toJson(UserModel(currentSession.myUserId,
                 currentSession.dataHandler.myUser.displayname,
                 currentSession.dataHandler.myUser.avatarUrl,
@@ -337,7 +340,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         val room = matrixInstance.defaultSession.dataHandler.getRoom(roomId)
         room.sendTextMessage(message, message, message, object : RoomMediaMessage.EventCreationListener {
             override fun onEventCreated(roomMediaMessage: RoomMediaMessage?) {
-              //  getHistoryMessageTest(roomId,null)
+                //  getHistoryMessageTest(roomId,null)
                 promise.resolve(true)
             }
 
@@ -352,19 +355,26 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
     }
 
     @ReactMethod
-    private fun getHistoryMessage(roomId: String, tokenMessageEnd: String, promise: Promise){
+    private fun getHistoryMessage(roomId: String, tokenMessageEnd: String, promise: Promise) {
         val room = matrixInstance.defaultSession.dataHandler.getRoom(roomId)
 
-        matrixInstance.defaultSession.roomsApiClient.getRoomMessagesFrom(room.roomId, tokenMessageEnd, EventTimeline.Direction.BACKWARDS, 15,null, object : ApiCallback<TokensChunkEvents> {
+        matrixInstance.defaultSession.roomsApiClient.getRoomMessagesFrom(room.roomId, tokenMessageEnd, EventTimeline.Direction.BACKWARDS, 15, null, object : ApiCallback<TokensChunkEvents> {
 
             override fun onSuccess(info: TokensChunkEvents) {
                 //it hack need because we can`t direct convert info to Json
-                val messages = arrayListOf<JsonObject>()
+                val messages = arrayListOf<MessageHistory>()
 
                 val newInfo: HashMap<String, Any> = hashMapOf()
 
-                for(i in info.chunk.indices){
-                        messages.add(info.chunk[i].toJsonObject())
+                for (i in info.chunk.indices) {
+                    if (info.chunk[i].sender == getMyProfile().userId) {
+                        val user = getMyProfile()
+                        messages.add(MessageHistory(info.chunk[i].toJsonObject(), user))
+                    } else {
+                        val user = ContactsRepository.getUser(info.chunk[i].sender)
+                        messages.add(MessageHistory(info.chunk[i].toJsonObject(), user!!))
+                    }
+
                 }
 
                 newInfo["start"] = info.start
@@ -390,9 +400,9 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
     }
 
     @ReactMethod
-    fun acceptInvite(roomId:String,promise: Promise){
+    fun acceptInvite(roomId: String, promise: Promise) {
         val room = matrixInstance.defaultSession.dataHandler.getRoom(roomId)
-        matrixInstance.defaultSession.roomsApiClient.joinRoom(roomId,null,null,object:ApiCallback<RoomResponse> {
+        matrixInstance.defaultSession.roomsApiClient.joinRoom(roomId, null, null, object : ApiCallback<RoomResponse> {
             override fun onSuccess(info: RoomResponse?) {
                 val infoRoom = gson.toJson(info)
                 promise.resolve(infoRoom)
@@ -413,18 +423,18 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         })
     }
 
-    private fun getHistoryMessageTest(roomId:String,tokenMessageEnd:String?){
+    private fun getHistoryMessageTest(roomId: String, tokenMessageEnd: String?) {
         val room = matrixInstance.defaultSession.dataHandler.getRoom(roomId)
 
-        matrixInstance.defaultSession.roomsApiClient.getRoomMessagesFrom(room.roomId, tokenMessageEnd, EventTimeline.Direction.BACKWARDS, 15,null, object : ApiCallback<TokensChunkEvents> {
+        matrixInstance.defaultSession.roomsApiClient.getRoomMessagesFrom(room.roomId, tokenMessageEnd, EventTimeline.Direction.BACKWARDS, 15, null, object : ApiCallback<TokensChunkEvents> {
 
             override fun onSuccess(info: TokensChunkEvents) {
                 val messages = arrayListOf<JsonObject>()
 
                 val newInfo: HashMap<String, Any> = hashMapOf()
 
-                for(i in info.chunk.indices){
-                        messages.add(info.chunk[i].toJsonObject())
+                for (i in info.chunk.indices) {
+                    messages.add(info.chunk[i].toJsonObject())
                 }
 
                 newInfo["start"] = info.start
@@ -434,7 +444,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                 val jsonMessages = gson.toJson(newInfo)
 
 
-                matrixInstance.defaultSession.roomsApiClient.getRoomMessagesFrom(room.roomId, info.end, EventTimeline.Direction.BACKWARDS, 15,null, object : ApiCallback<TokensChunkEvents> {
+                matrixInstance.defaultSession.roomsApiClient.getRoomMessagesFrom(room.roomId, info.end, EventTimeline.Direction.BACKWARDS, 15, null, object : ApiCallback<TokensChunkEvents> {
 
                     override fun onSuccess(info: TokensChunkEvents) {
 
@@ -462,6 +472,15 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         })
     }
 
+    fun getMyProfile(): UserModel {
+        val currentSession = matrixInstance.defaultSession
+        val httpUrlAvatar = currentSession.contentManager.getDownloadableUrl(currentSession.dataHandler.myUser.avatarUrl, false)
+        return UserModel(currentSession.myUserId,
+                currentSession.dataHandler.myUser.displayname,
+                currentSession.dataHandler.myUser.avatarUrl,
+                avatarLink = httpUrlAvatar)
+    }
+
 
     //can refactor with use dagger2
     internal class NewEventsListener(private val reactContext: ReactApplicationContext,
@@ -469,10 +488,10 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                                      private val roomSummary: RoomSummary) : EventTimeline.Listener {
         private val matrixInstance = Matrix.getInstance(reactContext)
 
-        fun getMyProfile():UserModel {
+        fun getMyProfile(): UserModel {
             val currentSession = matrixInstance.defaultSession
-            val httpUrlAvatar = currentSession.contentManager.getDownloadableUrl(currentSession.dataHandler.myUser.avatarUrl,false)
-            return  UserModel(currentSession.myUserId,
+            val httpUrlAvatar = currentSession.contentManager.getDownloadableUrl(currentSession.dataHandler.myUser.avatarUrl, false)
+            return UserModel(currentSession.myUserId,
                     currentSession.dataHandler.myUser.displayname,
                     currentSession.dataHandler.myUser.avatarUrl,
                     avatarLink = httpUrlAvatar)
@@ -482,14 +501,14 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
             event?.let {
                 matrixInstance.defaultLatestChatMessageCache.updateLatestMessage(reactContext, room.roomId, event.contentAsJsonObject?.get("body")?.asString)
                 roomSummary.setLatestReceivedEvent(event, roomState)
-                val gson =  Gson()
-                if(getMyProfile().userId==event.sender){
-                    val message = MessageEventModel(event,getMyProfile())
+                val gson = Gson()
+                if (getMyProfile().userId == event.sender) {
+                    val message = MessageEventModel(event, getMyProfile())
                     val msg = gson.toJson(message)
                     sendEventWithOneStringArg(reactContext, "eventMessage", "message", msg)
-                }else{
-                    val user =  MatrixSdkHelper.getUserData(event.sender).get()
-                    val message = MessageEventModel(event,user)
+                } else {
+                    val user = MatrixSdkHelper.getUserData(event.sender).get()
+                    val message = MessageEventModel(event, user)
                     val msg = gson.toJson(message)
                     sendEventWithOneStringArg(reactContext, "eventMessage", "message", msg)
                 }
