@@ -108,7 +108,23 @@ export function getP2ChatMessageHistory(topic, callback) {
 
                 var user = new Object()
                 message.user = user
+
+                if (data.User.avatarUrl != '') {
+                    let parts = data.user.avatarUrl.split('mxc://', 2);
+                    let urlWithoutMxc  = parts[1];
+                    let urlParts = urlWithoutMxc.split('/', 2)
+                    let firstPart = urlParts[0]
+                    let secondPart = urlParts[1] 
+                    let serverUrl = 'https://matrix.moonshard.tech/_matrix/media/r0/download/'
+                    let avatarLink =  serverUrl + firstPart + '/' + secondPart    
+                    user.avatar = avatarLink
+                }
+
                 user._id = data.fromMatrixID
+                user.name = data.User.name
+                user.userId = data.User.userId
+                user.avatarUrl = data.user.avatarUrl
+                user.roomId = data.User.roomId      
 
               return message
             })    
@@ -150,18 +166,24 @@ export function getP2ChatUpdatedMessageHistory(topic, token) {
                 var user = new Object()
                 message.user = user
 
-                user._id = data.fromMatrixID
-                // user.matrixUser = new Object()
-                // user.matrixUser.avatarUrl = data.User.avatarUrl
-                // user.matrixUser.isActive = data.User.isActive
-                // user.matrixUser.lastMessage = data.User.lastMessage
-                // user.matrixUser.lastMessageDate = data.User.lastMessageDate
-                // user.matrixUser.lastMessageState = data.User.lastMessageState
-                // user.matrixUser.name = data.User.name
-                // user.matrixUser.unreadMessagesCount = data.User.unreadMessagesCount
-                // user.matrixUser.userId = data.User.userId
+                if (data.User.avatarUrl != '') {
+                    let parts = data.user.avatarUrl.split('mxc://', 2);
+                    let urlWithoutMxc  = parts[1];
+                    let urlParts = urlWithoutMxc.split('/', 2)
+                    let firstPart = urlParts[0]
+                    let secondPart = urlParts[1] 
+                    let serverUrl = 'https://matrix.moonshard.tech/_matrix/media/r0/download/'
+                    let avatarLink =  serverUrl + firstPart + '/' + secondPart    
+                    user.avatar = avatarLink
+                }        
 
-              return message
+                user._id = data.fromMatrixID
+                user.name = data.User.name
+                user.userId = data.User.userId
+                user.avatarUrl = data.user.avatarUrl
+                user.roomId = data.User.roomId      
+
+                return message
             })    
 
             dispatch(getUpdatedMessageHistory(messageHistory))

@@ -167,20 +167,39 @@ class Chat extends React.Component {
       var self = this;
       const { chat, setNewMessage, pushNewMessage, pushNewMessageSuccess, pushNewMessageToHistory, resetNewMessage } = this.props;
       this.eventMessage = DeviceEventEmitter.addListener('eventMessage', function(e) {
-        const data = e.message
-        const jsonData = JSON.parse(data)
+        console.log("new message event")
+        console.log(e)
+        const data = JSON.parse(e.message)
+        console.log(data)
+        jsonData = JSON.parse(data.event.contentAsString)
+        console.log(jsonData)
         const time = new Date()
 
         var newMessage = new Object()
 
-        newMessage._id = jsonData.event_id
-        newMessage.text = jsonData.content.body
-        newMessage.createdAt = time - jsonData.unsigned.age
-        newMessage.status = jsonData.m_sent_state
+        newMessage._id = data.event.eventId
+        newMessage.text = jsonData.body
+        newMessage.createdAt = time - data.event.unsigned.age
+        newMessage.status = data.event.mSentState
 
         var user = new Object()
         newMessage.user = user
-        user._id = jsonData.sender
+        user._id = data.event.sender
+        user.name = data.user.name
+        user.userId = data.user.userId
+        user.avatarUrl = data.user.avatarUrl
+        user.roomId = data.event.roomId
+        
+        if (data.user.avatarUrl != '') {
+          let parts = data.user.avatarUrl.split('mxc://', 2);
+          let urlWithoutMxc  = parts[1];
+          let urlParts = urlWithoutMxc.split('/', 2)
+          let firstPart = urlParts[0]
+          let secondPart = urlParts[1] 
+          let serverUrl = 'https://matrix.moonshard.tech/_matrix/media/r0/download/'
+          let avatarLink =  serverUrl + firstPart + '/' + secondPart    
+          user.avatar = avatarLink
+        }
 
         console.log(newMessage)
 
@@ -353,9 +372,19 @@ loadPreviousMessages = async () => {
         // loadEarlier={this.state.refreshing}
         placeholder={'Type Message Here'}
         renderSend={this.renderSend}
+        onPressAvatar={(user) => {
+          console.log(user)
+          this.props.navigation.navigate('Profile', {
+            userName: user.name,
+            userId: user.userId,
+            userIdName: user.name,
+            avatarLink: user.avatar,
+            roomId: user.roomId,
+            from: 'chat',
+          })
+        }}
         renderActions={this.renderCustomActions}
         onPressActionButton={this.openActionSheet}
-        renderAvatar={null}
         renderComposer={this.renderComposer}
         renderInputToolbar={this.renderInputToolbar} 
         minInputToolbarHeight={48}

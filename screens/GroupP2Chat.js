@@ -112,6 +112,21 @@ class GroupP2Chat extends React.Component {
         var user = new Object()
         newMessage.user = user
         user._id = jsonData.fromMatrixID
+        user.name = data.User.name
+        user.userId = data.User.userId
+        user.avatarUrl = data.user.avatarUrl
+        user.roomId = data.User.roomId
+
+        if (data.User.avatarUrl != '') {
+          let parts = data.user.avatarUrl.split('mxc://', 2);
+          let urlWithoutMxc  = parts[1];
+          let urlParts = urlWithoutMxc.split('/', 2)
+          let firstPart = urlParts[0]
+          let secondPart = urlParts[1] 
+          let serverUrl = 'https://matrix.moonshard.tech/_matrix/media/r0/download/'
+          let avatarLink =  serverUrl + firstPart + '/' + secondPart    
+          user.avatar = avatarLink
+      }
 
         console.log(newMessage)
 
@@ -291,6 +306,17 @@ loadPreviousMessages = async () => {
               this.loadPreviousMessages()
             }
           },
+        }}
+        onPressAvatar={(user) => {
+          console.log(user)
+          this.props.navigation.navigate('Profile', {
+            userName: user.name,
+            userId: user.userId,
+            userIdName: user.name,
+            avatarLink: user.avatar,
+            roomId: user.roomId,
+            from: 'chat',
+          })
         }}
         placeholder={'Type Message Here'}
         renderSend={this.renderSend}

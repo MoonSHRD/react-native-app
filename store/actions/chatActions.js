@@ -6,6 +6,7 @@ export function getDirectChatHistory (roomId, callback) {
       const promise = MatrixClient.getHistoryMessage(roomId, null)
       promise.then((data) => {
         const jsonData = JSON.parse(data)
+        console.log(jsonData)
 
         // parsing json object from matrix for rendering
         const messageHistory = new Object()
@@ -14,21 +15,37 @@ export function getDirectChatHistory (roomId, callback) {
         messageHistory.start = jsonData.start
         
         messageHistory.messages = jsonData.messages.filter((data) => {
-          if (data.content.body == null) {
+          if (data.event.content.body == null) {
             return false
           }
           return true
         }).map(data => {
           var message = new Object()
 
-          message._id = data.event_id
-          message.text = data.content.body
-          message.createdAt = time - data.age
-          message.status = data.m_sent_state
+          message._id = data.event.event_id
+          message.text = data.event.content.body
+          message.createdAt = time - data.event.age
+          message.status = data.event.m_sent_state
+
           var user = new Object()
           message.user = user
-          user._id = data.sender
+          user._id = data.event.sender
 
+          if (data.user.avatarUrl != '') {
+            let parts = data.user.avatarUrl.split('mxc://', 2);
+            let urlWithoutMxc  = parts[1];
+            let urlParts = urlWithoutMxc.split('/', 2)
+            let firstPart = urlParts[0]
+            let secondPart = urlParts[1] 
+            let serverUrl = 'https://matrix.moonshard.tech/_matrix/media/r0/download/'
+            let avatarLink =  serverUrl + firstPart + '/' + secondPart    
+            user.avatar = avatarLink
+          }
+          
+          user.name = data.user.name
+          user.userId = data.user.userId
+          user.avatarUrl = data.user.avatarUrl
+          user.roomId = data.user.roomId
           return message
         })
 
@@ -52,6 +69,7 @@ export function getDirectChatHistory (roomId, callback) {
       const promise = MatrixClient.getHistoryMessage(roomId, end)
       promise.then((data) => {
         const jsonData = JSON.parse(data)
+        console.log(jsonData)
 
         // parsing json object from matrix for rendering
 
@@ -61,21 +79,36 @@ export function getDirectChatHistory (roomId, callback) {
         messageHistory.start = jsonData.start
 
         messageHistory.messages = jsonData.messages.filter((data) => {
-          if (data.content.body == null) {
+          if (data.event.content.body == null) {
             return false
           }
           return true
         }).map(data => {
           var message = new Object()
 
-          message._id = data.event_id
-          message.text = data.content.body
-          message.createdAt = time - data.age
-          message.status = data.m_sent_state
-
+          message._id = data.event.event_id
+          message.text = data.event.content.body
+          message.createdAt = time - data.event.age
+          message.status = data.event.m_sent_state
           var user = new Object()
           message.user = user
-          user._id = data.sender
+          user._id = data.event.sender
+
+          if (data.user.avatarUrl != '') {
+            let parts = data.user.avatarUrl.split('mxc://', 2);
+            let urlWithoutMxc  = parts[1];
+            let urlParts = urlWithoutMxc.split('/', 2)
+            let firstPart = urlParts[0]
+            let secondPart = urlParts[1] 
+            let serverUrl = 'https://matrix.moonshard.tech/_matrix/media/r0/download/'
+            let avatarLink =  serverUrl + firstPart + '/' + secondPart    
+            user.avatar = avatarLink
+          }
+
+          user.name = data.user.name
+          user.userId = data.user.userId
+          user.avatarUrl = data.user.avatarUrl
+          user.roomId = data.user.roomId
 
           return message
         })

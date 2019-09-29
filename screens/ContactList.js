@@ -316,7 +316,7 @@ goToChatScreen = async (navigation) => {
             inputStyle={this.props.appState.nightTheme ? styles.darkSearchInputText : styles.searchInputText}
           />
         }
-        <View style={{marginBottom: 110,}}>
+        <View style={{marginBottom: 130,}}>
           <ListItem
             title="Find matches on this place"
             titleStyle={this.props.appState.nightTheme ? styles.grayTitle : styles.title}
