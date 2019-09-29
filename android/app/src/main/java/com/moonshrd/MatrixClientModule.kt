@@ -88,6 +88,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         val chatModels = mutableListOf<UserModel>()
         directChats.forEach { room ->
             val roomSummary = room.roomSummary
+
             // hack for optimization: since we hold the same listener, we will not create a useless instance of this listener (else it will add new object to internal list of listeners and messing up the memory)
             if (eventListeners[roomSummary!!.roomId] == null) {
                 eventListeners[roomSummary.roomId] = NewEventsListener(reactApplicationContext, room, roomSummary)
@@ -461,21 +462,37 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         })
     }
 
+
     //can refactor with use dagger2
     internal class NewEventsListener(private val reactContext: ReactApplicationContext,
                                      private val room: Room,
                                      private val roomSummary: RoomSummary) : EventTimeline.Listener {
         private val matrixInstance = Matrix.getInstance(reactContext)
 
+        fun getMyProfile():UserModel {
+            val currentSession = matrixInstance.defaultSession
+            val httpUrlAvatar = currentSession.contentManager.getDownloadableUrl(currentSession.dataHandler.myUser.avatarUrl,false)
+            return  UserModel(currentSession.myUserId,
+                    currentSession.dataHandler.myUser.displayname,
+                    currentSession.dataHandler.myUser.avatarUrl,
+                    avatarLink = httpUrlAvatar)
+        }
+
         override fun onEvent(event: Event?, direction: EventTimeline.Direction?, roomState: RoomState?) {
             event?.let {
                 matrixInstance.defaultLatestChatMessageCache.updateLatestMessage(reactContext, room.roomId, event.contentAsJsonObject?.get("body")?.asString)
                 roomSummary.setLatestReceivedEvent(event, roomState)
                 val gson =  Gson()
-                val user =  MatrixSdkHelper.getUserData(event.userId).get()
-                val message = MessageEventModel(event,user)
-                val msg = gson.toJson(message)
-                sendEventWithOneStringArg(reactContext, "eventMessage", "message", msg)
+                if(getMyProfile().userId==event.sender){
+                    val message = MessageEventModel(event,getMyProfile())
+                    val msg = gson.toJson(message)
+                    sendEventWithOneStringArg(reactContext, "eventMessage", "message", msg)
+                }else{
+                    val user =  MatrixSdkHelper.getUserData(event.sender).get()
+                    val message = MessageEventModel(event,user)
+                    val msg = gson.toJson(message)
+                    sendEventWithOneStringArg(reactContext, "eventMessage", "message", msg)
+                }
             }
         }
     }
