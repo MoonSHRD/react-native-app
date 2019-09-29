@@ -7,6 +7,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.moonshrd.di.modules.MessageEventModel
 import com.moonshrd.models.UserModel
 import com.moonshrd.repository.ContactRepository
 import com.moonshrd.utils.matrix.Matrix
@@ -471,7 +472,9 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                 matrixInstance.defaultLatestChatMessageCache.updateLatestMessage(reactContext, room.roomId, event.contentAsJsonObject?.get("body")?.asString)
                 roomSummary.setLatestReceivedEvent(event, roomState)
                 val gson =  Gson()
-                val msg = gson.toJson(event.toJsonObject())
+                val user =  MatrixSdkHelper.getUserData(event.userId).get()
+                val message = MessageEventModel(event,user)
+                val msg = gson.toJson(message)
                 sendEventWithOneStringArg(reactContext, "eventMessage", "message", msg)
             }
         }

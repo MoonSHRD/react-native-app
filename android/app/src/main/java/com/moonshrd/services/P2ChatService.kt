@@ -83,7 +83,7 @@ class P2ChatService : Service() {
                     getMessage()
                 }
             } catch (e: Exception) {
-                Logger.i("ERROR - ${e.message}")
+              //  Logger.i("ERROR - ${e.message}")
             }
         }, 0, 300, TimeUnit.MILLISECONDS)
 
@@ -109,14 +109,9 @@ class P2ChatService : Service() {
             val future = MatrixSdkHelper.getMinimalUserData(messageObject.from)
             val user = future.get() // FIXME may be blocking
             messageObject.user = UserModel(messageObject.from, user.name, user.avatarUrl)
-            Logger.d("New message! [${messageObject.topic}] ${messageObject.from} > ${messageObject.body})")
             LocalChatsRepository.getLocalChat(messageObject.topic)!!.putMessage(messageObject)
             val writableMap = Arguments.createMap()
             writableMap.putString("message", gson.toJson(messageObject))
-
-            val msgLog = gson.toJson(messageObject)
-            Logger.i("Message  - $msgLog")
-
             sendRNEvent(MainApplication.getReactContext(), newMessageEventName, writableMap)
         }
     }
@@ -158,6 +153,7 @@ class P2ChatService : Service() {
                         match.userModel = ContactRepository.getUser(chat.userId)
                     }
                   }
+                Logger.i("getMatch - ${gson.toJson(match)}")
                 sendEventWithOneStringArg(MainApplication.getReactContext(), newMatchEventName, "match", gson.toJson(match))
             } else {
                 LocalChatsRepository.getLocalChat(match.topic)!!.removeMember(match.matrixID)

@@ -171,6 +171,12 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
 
                     @Override
                     public void onNetworkError(Exception e) {
+                        UnrecognizedCertificateException uException = CertUtil.getCertificateException(e);
+                        if(uException != null) {
+                            hsConfig.getAllowedFingerprints().add(uException.getFingerprint());
+                            getRegFlowsAndRegister(hsConfig, registrationManager, promise);
+                            return;
+                        }
                         promise.reject("onNetworkError", e.getMessage());
                     }
 
