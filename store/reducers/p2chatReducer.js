@@ -158,6 +158,7 @@ export default function p2chatReducer (state = initialState, action) {
             return {
                 ...state,
                 matchedUser: action.data,
+                isVisible: true,
             }       
         case SET_VISIBLE:
             return {

@@ -84,7 +84,6 @@ class ContactList extends Component {
       jsonData = await JSON.parse(data)
       await console.log('NewMatchEvent')
       await setMatchedUser(jsonData)
-      // await setVisible(true)
     })
   }
 
