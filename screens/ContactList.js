@@ -69,7 +69,7 @@ class ContactList extends Component {
   }
 
   componentDidMount() {
-    const {setMatchedUser, setVisible} = this.props
+    const {setMatchedUser} = this.props
     this.setHeaderParams()
     this.props.loadDirectChats()
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
