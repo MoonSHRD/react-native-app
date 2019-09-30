@@ -119,7 +119,7 @@ class GroupP2Chat extends React.Component {
         user.roomId = jsonData.User.roomId
 
         if (jsonData.User.avatarUrl != '') {
-          let parts = jsonData.user.avatarUrl.split('mxc://', 2);
+          let parts = jsonData.User.avatarUrl.split('mxc://', 2);
           let urlWithoutMxc  = parts[1];
           let urlParts = urlWithoutMxc.split('/', 2)
           let firstPart = urlParts[0]

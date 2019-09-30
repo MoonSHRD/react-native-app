@@ -111,7 +111,7 @@ export function getP2ChatMessageHistory(topic, callback) {
                 message.user = user
 
                 if (data.User.avatarUrl != '') {
-                    let parts = data.user.avatarUrl.split('mxc://', 2);
+                    let parts = data.User.avatarUrl.split('mxc://', 2);
                     let urlWithoutMxc  = parts[1];
                     let urlParts = urlWithoutMxc.split('/', 2)
                     let firstPart = urlParts[0]
@@ -167,7 +167,7 @@ export function getP2ChatUpdatedMessageHistory(topic, token) {
                 message.user = user
 
                 if (data.User.avatarUrl != '') {
-                    let parts = data.user.avatarUrl.split('mxc://', 2);
+                    let parts = data.User.avatarUrl.split('mxc://', 2);
                     let urlWithoutMxc  = parts[1];
                     let urlParts = urlWithoutMxc.split('/', 2)
                     let firstPart = urlParts[0]
