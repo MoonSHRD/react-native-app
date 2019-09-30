@@ -452,172 +452,154 @@ goToChatScreen = async (navigation) => {
               {
                 l.name[0] == '@'
                 ?
-                <ListItem
-                  key={i}
-                  leftAvatar={
-                  (l.avatarUrl == "")
-                  ?
-                  { title: l.name[1], titleStyle:{textTransform: 'capitalize'}, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
-                  :
-                  { source: { uri: this.parseAvatarUrl(l.avatarUrl) }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
-                  }
-                  title={
-                    l.name[0] == '@'
+                <Block>
+                  <ListItem
+                    key={i}
+                    leftAvatar={
+                    (l.avatarUrl == "")
                     ?
-                    this.parseUserId(l.name)
+                    { title: l.name[1], titleStyle:{textTransform: 'capitalize'}, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
                     :
-                    this.capitalize(l.name)
-                  }
-                  titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
-                  rightTitle={
-                    <Moment element={Text} calendar={calendarStrings} style={styles.dateTag}>{new Date(l.lastSeen)}</Moment>
-                  }
-                  rightTitleStyle={styles.dateTag}
-                  subtitle={
-                    l.lastMessage == "" 
+                    { source: { uri: this.parseAvatarUrl(l.avatarUrl) }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
+                    }
+                    title={
+                      l.name[0] == '@'
+                      ?
+                      this.parseUserId(l.name)
+                      :
+                      this.capitalize(l.name)
+                    }
+                    titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                    rightTitle={
+                      <Moment element={Text} calendar={calendarStrings} style={styles.dateTag}>{new Date(l.lastSeen)}</Moment>
+                    }
+                    rightTitleStyle={styles.dateTag}
+                    subtitle={
+                      l.lastMessage == "" 
+                      ?
+                      l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>
+                      :
+                      l.lastMessage
+                    }
+                    subtitleStyle={styles.subtitle}
+                    containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                    onPress={(navigation) => {
+                      const myUserId = this.props.contacts.myUserID
+                      this.props.navigation.navigate('Chat', {
+                        userName: this.parseUserId(this.capitalize(l.name)),
+                        userIdName: this.parseUserId(l.userId),
+                        userId: l.userId,
+                        avatarUrl: l.avatarUrl,
+                        avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                        isActive: l.isActive,
+                        lastSeen: l.lastSeen,
+                        previousScreen: 'ChatList',
+                        roomId: l.roomId,
+                        myUserId: myUserId,
+                      })
+                    }}  
+                  />
+                  {
+                    l.unreadMessagesCount > 0 
                     ?
-                    l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>
+                    <Badge 
+                      value={l.unreadMessagesCount} 
+                      status="error" 
+                      badgeStyle={{ width: 24, height: 24, borderRadius: 50, overflow: 'hidden'}}
+                      containerStyle={{ position: 'absolute', top: 36, right: 16}}
+                      textStyle={{fontSize: 12}}
+                    />
                     :
-                    l.lastMessage
+                    null
                   }
-                  subtitleStyle={styles.subtitle}
-                  containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
-                  onPress={(navigation) => {
-                    const myUserId = this.props.contacts.myUserID
-                    this.props.navigation.navigate('Chat', {
-                      userName: this.parseUserId(this.capitalize(l.name)),
-                      userIdName: this.parseUserId(l.userId),
-                      userId: l.userId,
-                      avatarUrl: l.avatarUrl,
-                      avatarLink: this.parseAvatarUrl(l.avatarUrl),
-                      isActive: l.isActive,
-                      lastSeen: l.lastSeen,
-                      previousScreen: 'ChatList',
-                      roomId: l.roomId,
-                      myUserId: myUserId,
-                    })
-                  }}  
-                />
+                  {
+                    (l.isActive) 
+                    ? 
+                    <Badge 
+                      status="primary" 
+                      badgeStyle={{width: 12, height: 12, overflow: 'hidden', borderRadius: 50, backgroundColor: theme.colors.blue}}
+                      containerStyle={{ position: 'absolute', top: 48, left: 52}}
+                    />
+                    :
+                    null
+                  }
+                </Block>
                 :
-                <ListItem
-                  key={i}
-                  leftAvatar={
-                  (l.avatarUrl == "")
-                  ?
-                  { title: l.name[0], titleStyle:{textTransform: 'capitalize'}, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
-                  :
-                  { source: { uri: this.parseAvatarUrl(l.avatarUrl) }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
-                  }
-                  title={
-                    l.name[0] == '@'
+                <Block>
+                  <ListItem
+                    key={i}
+                    leftAvatar={
+                    (l.avatarUrl == "")
                     ?
-                    this.parseUserId(l.name)
+                    { title: l.name[0], titleStyle:{textTransform: 'capitalize'}, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
                     :
-                    this.capitalize(l.name)
-                  }
-                  titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
-                  rightTitle={
-                    <Moment element={Text} calendar={calendarStrings} style={styles.dateTag}>{new Date(l.lastSeen)}</Moment>
-                  }
-                  rightTitleStyle={styles.dateTag}
-                  subtitle={
-                    l.lastMessage == "" 
+                    { source: { uri: this.parseAvatarUrl(l.avatarUrl) }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
+                    }
+                    title={
+                      l.name[0] == '@'
+                      ?
+                      this.parseUserId(l.name)
+                      :
+                      this.capitalize(l.name)
+                    }
+                    titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                    rightTitle={
+                      <Moment element={Text} calendar={calendarStrings} style={styles.dateTag}>{new Date(l.lastSeen)}</Moment>
+                    }
+                    rightTitleStyle={styles.dateTag}
+                    subtitle={
+                      l.lastMessage == "" 
+                      ?
+                      l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>
+                      :
+                      l.lastMessage
+                    }
+                    subtitleStyle={styles.subtitle}
+                    containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                    onPress={(navigation) => {
+                      const myUserId = this.props.contacts.myUserID
+                      this.props.navigation.navigate('Chat', {
+                        userName: this.capitalize(l.name),
+                        userIdName: this.parseUserId(l.userId),
+                        userId: l.userId,
+                        avatarUrl: l.avatarUrl,
+                        avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                        isActive: l.isActive,
+                        lastSeen: l.lastSeen,
+                        previousScreen: 'ChatList',
+                        roomId: l.roomId,
+                        myUserId: myUserId,
+                      })
+                    }}  
+                  />
+                  {
+                    l.unreadMessagesCount > 0 
                     ?
-                    l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>
+                    <Badge 
+                      value={l.unreadMessagesCount} 
+                      status="error" 
+                      badgeStyle={{ width: 24, height: 24, borderRadius: 50, overflow: 'hidden'}}
+                      containerStyle={{ position: 'absolute', top: 36, right: 16}}
+                      textStyle={{fontSize: 12}}
+                    />
                     :
-                    l.lastMessage
+                    null
                   }
-                  subtitleStyle={styles.subtitle}
-                  containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
-                  onPress={(navigation) => {
-                    const myUserId = this.props.contacts.myUserID
-                    this.props.navigation.navigate('Chat', {
-                      userName: this.capitalize(l.name),
-                      userIdName: this.parseUserId(l.userId),
-                      userId: l.userId,
-                      avatarUrl: l.avatarUrl,
-                      avatarLink: this.parseAvatarUrl(l.avatarUrl),
-                      isActive: l.isActive,
-                      lastSeen: l.lastSeen,
-                      previousScreen: 'ChatList',
-                      roomId: l.roomId,
-                      myUserId: myUserId,
-                    })
-                  }}  
-                />
+                  {
+                    (l.isActive) 
+                    ? 
+                    <Badge 
+                      status="primary" 
+                      badgeStyle={{width: 12, height: 12, overflow: 'hidden', borderRadius: 50, backgroundColor: theme.colors.blue}}
+                      containerStyle={{ position: 'absolute', top: 48, left: 52}}
+                    />
+                    :
+                    null
+                  }
+                </Block>
               }
-                <ListItem
-                  key={i}
-                  leftAvatar={
-                  (l.avatarUrl == "")
-                  ?
-                  { title: l.name[0], titleStyle:{textTransform: 'capitalize'}, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
-                  :
-                  { source: { uri: this.parseAvatarUrl(l.avatarUrl) }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
-                  }
-                  title={
-                    l.name[0] == '@'
-                    ?
-                    this.parseUserId(l.name)
-                    :
-                    this.capitalize(l.name)
-                  }
-                  titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
-                  rightTitle={
-                    <Moment element={Text} calendar={calendarStrings} style={styles.dateTag}>{new Date(l.lastSeen)}</Moment>
-                  }
-                  rightTitleStyle={styles.dateTag}
-                  subtitle={
-                    l.lastMessage == "" 
-                    ?
-                    l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>
-                    :
-                    l.lastMessage
-                  }
-                  subtitleStyle={styles.subtitle}
-                  containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
-                  onPress={(navigation) => {
-                    const myUserId = this.props.contacts.myUserID
-                    this.props.navigation.navigate('Chat', {
-                      userName: this.capitalize(l.name),
-                      userIdName: this.parseUserId(l.userId),
-                      userId: l.userId,
-                      avatarUrl: l.avatarUrl,
-                      avatarLink: this.parseAvatarUrl(l.avatarUrl),
-                      isActive: l.isActive,
-                      lastSeen: l.lastSeen,
-                      previousScreen: 'ChatList',
-                      roomId: l.roomId,
-                      myUserId: myUserId,
-                    })
-                  }}  
-                />
-                {
-                  l.unreadMessagesCount > 0 
-                  ?
-                  <Badge 
-                    value={l.unreadMessagesCount} 
-                    status="error" 
-                    badgeStyle={{ width: 24, height: 24, borderRadius: 50, overflow: 'hidden'}}
-                    containerStyle={{ position: 'absolute', top: 36, right: 16}}
-                    textStyle={{fontSize: 12}}
-                  />
-                  :
-                  null
-                }
-                {
-                  (l.isActive) 
-                  ? 
-                  <Badge 
-                    status="primary" 
-                    badgeStyle={{width: 12, height: 12, overflow: 'hidden', borderRadius: 50, backgroundColor: theme.colors.blue}}
-                    containerStyle={{ position: 'absolute', top: 48, left: 52}}
-                  />
-                  :
-                  null
-                }
-                </BoxShadow>
-                </View>
+              </BoxShadow>
+              </View>
             ))
           }  
           </Block>
