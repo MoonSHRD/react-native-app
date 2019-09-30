@@ -113,13 +113,13 @@ class GroupP2Chat extends React.Component {
         var user = new Object()
         newMessage.user = user
         user._id = jsonData.fromMatrixID
-        user.name = data.User.name
-        user.userId = data.User.userId
-        user.avatarUrl = data.user.avatarUrl
-        user.roomId = data.User.roomId
+        user.name = jsonData.User.name
+        user.userId = jsonData.User.userId
+        user.avatarUrl = jsonData.user.avatarUrl
+        user.roomId = jsonData.User.roomId
 
-        if (data.User.avatarUrl != '') {
-          let parts = data.user.avatarUrl.split('mxc://', 2);
+        if (jsonData.User.avatarUrl != '') {
+          let parts = jsonData.user.avatarUrl.split('mxc://', 2);
           let urlWithoutMxc  = parts[1];
           let urlParts = urlWithoutMxc.split('/', 2)
           let firstPart = urlParts[0]
