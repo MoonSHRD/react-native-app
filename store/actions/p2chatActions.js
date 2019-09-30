@@ -123,8 +123,7 @@ export function getP2ChatMessageHistory(topic, callback) {
                 user._id = data.fromMatrixID
                 user.name = data.User.name
                 user.userId = data.User.userId
-                user.avatarUrl = data.user.avatarUrl
-                user.roomId = data.User.roomId      
+                user.avatarUrl = data.user.avatarUrl 
 
               return message
             })    
@@ -180,8 +179,7 @@ export function getP2ChatUpdatedMessageHistory(topic, token) {
                 user._id = data.fromMatrixID
                 user.name = data.User.name
                 user.userId = data.User.userId
-                user.avatarUrl = data.user.avatarUrl
-                user.roomId = data.User.roomId      
+                user.avatarUrl = data.user.avatarUrl    
 
                 return message
             })    
