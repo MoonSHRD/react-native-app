@@ -424,7 +424,6 @@ loadPreviousMessages = async () => {
             userId: user.userId,
             userIdName: user.name,
             avatarLink: user.avatar,
-            roomId: user.roomId,
             from: 'chat',
           })
         }}
