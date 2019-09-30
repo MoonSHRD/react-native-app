@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Platform, Dimensions, Alert, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
+import { Platform, Dimensions, Alert, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet, DeviceEventEmitter } from 'react-native';
 import MatrixLoginClient from '../native/MatrixLoginClient';
 import { connect } from 'react-redux';
 import { logout } from '../store/actions/loginActions';

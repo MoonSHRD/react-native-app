@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Image, Platform, View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet, DeviceEventEmitter } from 'react-native';
+import { Image, Platform, View, Dimensions, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet, DeviceEventEmitter } from 'react-native';
 
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Button, Block, Text, Input } from '../components';

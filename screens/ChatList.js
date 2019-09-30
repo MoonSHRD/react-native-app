@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Platform, View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
+import { Platform, View, Dimensions, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet, DeviceEventEmitter } from 'react-native';
 
 import {BoxShadow} from 'react-native-shadow';
 import Moment from 'react-moment';
