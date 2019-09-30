@@ -115,7 +115,7 @@ class GroupP2Chat extends React.Component {
         user._id = jsonData.fromMatrixID
         user.name = jsonData.User.name
         user.userId = jsonData.User.userId
-        user.avatarUrl = jsonData.user.avatarUrl
+        user.avatarUrl = jsonData.User.avatarUrl
         user.roomId = jsonData.User.roomId
 
         if (jsonData.User.avatarUrl != '') {

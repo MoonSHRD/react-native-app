@@ -91,6 +91,7 @@ export function getP2ChatMessageHistory(topic, callback) {
         promise.then((data) => {
             jsonData = JSON.parse(data)
             console.log('getting message history')
+            console.log(jsonData)
 
             const messageHistory = new Object()
             const time = new Date()
@@ -123,7 +124,7 @@ export function getP2ChatMessageHistory(topic, callback) {
                 user._id = data.fromMatrixID
                 user.name = data.User.name
                 user.userId = data.User.userId
-                user.avatarUrl = data.user.avatarUrl 
+                user.avatarUrl = data.User.avatarUrl 
 
               return message
             })    
@@ -179,7 +180,7 @@ export function getP2ChatUpdatedMessageHistory(topic, token) {
                 user._id = data.fromMatrixID
                 user.name = data.User.name
                 user.userId = data.User.userId
-                user.avatarUrl = data.user.avatarUrl    
+                user.avatarUrl = data.User.avatarUrl    
 
                 return message
             })    
