@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { Text, Dimensions, StyleSheet, Platform, View, DeviceEventEmitter } from 'react-native';
 
-import { Button, Block } from '../components';
-import { Overlay, Avatar, Badge, Icon } from 'react-native-elements';
+import { Block } from '../components';
+import { Avatar, Badge, Icon } from 'react-native-elements';
 import { GiftedChat, Actions, Send, InputToolbar, Composer, GiftedAvatar } from 'react-native-gifted-chat';
 import {connect} from 'react-redux';
 import TimeAgo from 'react-native-timeago';
@@ -11,7 +11,6 @@ import ImagePicker from 'react-native-image-crop-picker';
 import ActionSheet from 'react-native-action-sheet';
 import { getDirectChatHistory, updateDirectChatHistory, sendMessage, handleMessageChange, pushNewMessageSuccess, pushNewMessage, pushNewMessageToHistory, resetNewMessage, setNewMessage } from '../store/actions/chatActions';
 import { getMyUserId } from '../store/actions/contactsActions';
-import { setMatchedUser, setVisible } from '../store/actions/p2chatActions';
 const { width, height } = Dimensions.get('window');
 
 
@@ -213,13 +212,6 @@ class Chat extends React.Component {
         resetNewMessage()
         
       })
-      this.NewMatchEvent = DeviceEventEmitter.addListener('NewMatchEvent', async (e) => {
-        await console.log(e)
-        data = await e.match
-        jsonData = await JSON.parse(data)
-        await console.log('NewMatchEvent')
-        await setMatchedUser(jsonData)
-      })  
     }
 
   getMessageHistory() {
@@ -239,42 +231,6 @@ class Chat extends React.Component {
     let text = props.slice(0,1).toUpperCase() + props.slice(1, props.length);
     return text
   }
-
-  goToChatScreen = async (navigation) => {
-    if (this.props.p2chat.matchedUser.userModel.roomId != null) {
-        roomId = this.props.p2chat.matchedUser.userModel.roomId
-        await this.props.navigation.navigate('Chat', {
-            userName: this.capitalize(this.props.p2chat.matchedUser.userModel.name),
-            userIdName: this.parseUserId(this.props.p2chat.matchedUser.userModel.userId),
-            userId: this.props.p2chat.matchedUser.userModel.userId,
-            avatarUrl: this.props.p2chat.matchedUser.userModel.avatarUrl,
-            avatarLink: this.parseAvatarUrl(this.props.p2chat.matchedUser.userModel.avatarUrl),
-            isActive: this.props.p2chat.matchedUser.userModel.isActive,
-            lastSeen: this.props.p2chat.matchedUser.userModel.lastSeen,
-            roomId: roomId
-        })        
-    } else {
-        userId = this.props.p2chat.matchedUser.userModel.userId
-        const promise = MatrixClient.createDirectChat(userId)
-        promise.then(async (data) => {
-            await console.log(data)
-            await this.props.navigation.navigate('Chat', {
-                userName: this.capitalize(this.props.p2chat.matchedUser.userModel.name),
-                userIdName: this.parseUserId(this.props.p2chat.matchedUser.userModel.userId),
-                userId: this.props.p2chat.matchedUser.userModel.userId,
-                avatarUrl: this.props.p2chat.matchedUser.userModel.avatarUrl,
-                avatarLink: this.parseAvatarUrl(this.props.p2chat.matchedUser.userModel.avatarUrl),
-                isActive: this.props.p2chat.matchedUser.userModel.isActive,
-                lastSeen: this.props.p2chat.matchedUser.userModel.lastSeen,
-                roomId: data
-            })
-          },
-          (error) => {
-            console.log(error);
-          }
-        )    
-    }
-  }  
 
   onSend = async () => {
     const {chat, sendMessage, navigation} = await this.props
@@ -400,73 +356,6 @@ loadPreviousMessages = async () => {
     const myUserId = this.props.contacts.myUserID
 
     return (
-      <Block>
-      <Block>
-      {
-        this.props.p2chat.isVisible 
-        ?
-          <Overlay 
-            isVisible
-            onBackdropPress={()=>this.props.setVisible(false)}
-            overlayStyle={styles.overlayContainer}
-            borderRadius={16}
-            height="auto"
-          >
-              <Block style={styles.overlayAvatarContainer}>
-              {
-                this.props.p2chat.matchedUser.userModel.avatarUrl == ''
-                ?
-                <Avatar 
-                  rounded
-                  title={this.capitalize(this.props.p2chat.matchedUser.userModel.name[0])}
-                  titleStyle={{fontSize:36}}
-                  containerStyle={styles.overlayAvatar}
-                  avatarStyle={styles.overlayAvatarImage}
-                />
-                :
-                <Avatar 
-                  rounded
-                  source={{
-                      uri:
-                      this.parseAvatarUrl(this.props.p2chat.matchedUser.userModel.avatarUrl),
-                  }}
-                  containerStyle={styles.overlayAvatar}
-                  avatarStyle={styles.overlayAvatarImage}
-                />
-              }
-              </Block>
-              <View style={{paddingHorizontal:14, marginTop: 42}}>
-              <Text center h3 notBlack bold style={{marginTop:20, marginHorizontal: 14}}>{this.props.p2chat.matchedUser.userModel.name}</Text>
-              <Text center subhead notBlack style={{marginTop:8, marginHorizontal: 20}}>You have a match by {this.props.p2chat.matchedUser.userModel.topics.length > 1 ? <Text>{this.props.p2chat.matchedUser.userModel.topics.length} tags</Text> : <Text>{this.props.p2chat.matchedUser.userModel.topics.length} tag</Text>}</Text>
-              <Block style={styles.overlayTagContainer}>
-                {
-                  this.props.p2chat.matchedUser.userModel.topics.map((l,i) => (
-                            <Button
-                                key={i}
-                                style={styles.overlayMatchedTag}>
-                                <Text caption white center>{l}</Text>
-                            </Button>
-                    ))
-                }
-              </Block>
-              <Block style={styles.overlayButtonContainer}>
-                <Button style={styles.overlayCloseButton}               
-                    onPress={()=>this.props.setVisible(false)}
-                >
-                  <Text headline bold blue center>Close</Text>
-                </Button>
-                <Button gradient style={styles.overlayConfirmButton}               
-                    onPress={() => this.goToChatScreen()}
-                >
-                  <Text headline bold white center>Send message</Text>
-                </Button>       
-              </Block>
-              </View>
-          </Overlay>
-        :
-        null
-      }          
-      </Block>
       <GiftedChat
         text={this.props.chat.newTextMessage}
         onInputTextChanged={text => this.props.handleMessageChange(text)}    
@@ -504,7 +393,6 @@ loadPreviousMessages = async () => {
           _id: myUserId,
         }}
       />
-      </Block>
     )
   }
 }
@@ -577,54 +465,6 @@ const styles = StyleSheet.create({
         top: 17,
         left: 8,
     },
-    overlayContainer: {
-      marginHorizontal: 64,
-      paddingBottom: 15.67,
-      paddingHorizontal: 0,
-      flexDirection: 'column',
-      alignSelf: 'center',
-    },
-    overlayAvatarContainer: {
-      alignSelf: 'center',
-      position: 'absolute',
-      top: -55
-    },
-    overlayAvatar: {
-        width: 110,
-        height: 110,
-        borderRadius: 50,
-        overflow: 'hidden',
-        borderColor: 'white',
-        borderStyle: 'solid',
-        borderWidth: 3,
-    },
-    overlayTagContainer: {
-      flex:0,
-      flexDirection: "row",
-      justifyContent: 'space-evenly',
-      flexWrap: 'wrap',
-      marginTop: 12,
-    },  
-    overlayMatchedTag: {
-      backgroundColor: theme.colors.blue,
-      borderRadius: 16,
-      overflow: 'hidden',
-      height: 24,
-      paddingVertical: 4,
-      paddingHorizontal: 16,
-      marginHorizontal: 2,
-    },
-    overlayButtonContainer: {
-      flex: 0,
-      marginTop:15.67,
-    },
-    overlayCloseButton: {
-      backgroundColor: theme.colors.white,
-      borderColor: theme.colors.blue,
-      borderWidth: 1,
-      borderRadius: 8,
-      overflow: 'hidden'
-    },  
 })
 
 function mapStateToProps (state) {
@@ -632,7 +472,6 @@ function mapStateToProps (state) {
       contacts: state.contacts,
       appState: state.appState,
       chat: state.chat,
-      p2chat: state.p2chat,
     }
   }
 
@@ -649,8 +488,6 @@ function mapStateToProps (state) {
       pushNewMessageToHistory: () => dispatch(pushNewMessageToHistory()),
       resetNewMessage: () => dispatch(resetNewMessage()),
       loadMessages: (roomId, callback) => dispatch(loadMessages(roomId, callback)),
-      setMatchedUser: (data) => dispatch(setMatchedUser(data)),
-      setVisible: (data) => dispatch(setVisible(data)),  
     }
   }  
     
