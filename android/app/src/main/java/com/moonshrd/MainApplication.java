@@ -8,19 +8,12 @@ import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-
 import com.BV.LinearGradient.LinearGradientPackage;
 import com.actionsheet.ActionSheetPackage;
 import com.facebook.react.ReactApplication;
-import com.orhanobut.logger.AndroidLogAdapter;
-import com.orhanobut.logger.FormatStrategy;
-import com.orhanobut.logger.Logger;
-import com.orhanobut.logger.PrettyFormatStrategy;
-
-import com.reactnative.ivpusic.imagepicker.PickerPackage;
-import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
+import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
 import com.horcrux.svg.SvgPackage;
@@ -29,11 +22,13 @@ import com.moonshrd.di.components.DaggerApplicationComponent;
 import com.moonshrd.di.modules.ApplicationModule;
 import com.moonshrd.services.P2ChatService;
 import com.oblador.vectoricons.VectorIconsPackage;
+import com.orhanobut.logger.AndroidLogAdapter;
+import com.orhanobut.logger.FormatStrategy;
+import com.orhanobut.logger.Logger;
+import com.orhanobut.logger.PrettyFormatStrategy;
+import com.reactnative.ivpusic.imagepicker.PickerPackage;
 import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
-
-
 import org.matrix.androidsdk.MXSession;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -47,7 +42,6 @@ public class MainApplication extends Application implements ReactApplication {
     private static P2ChatService service = null;
     private static ReactContext reactContext;
 
-
     private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
         @Override
         public boolean getUseDeveloperSupport() {
@@ -56,17 +50,17 @@ public class MainApplication extends Application implements ReactApplication {
 
         @Override
         protected List<ReactPackage> getPackages() {
-          return Arrays.asList(
-                new MainReactPackage(),
-                new RNGestureHandlerPackage(),
-                new PickerPackage(),
-                new VectorIconsPackage(),
-                new SvgPackage(),
-                new ActionSheetPackage(),
-                new LinearGradientPackage(),
-                new MatrixClientPackage(),
-                new P2ChatPackage()
-          );
+            return Arrays.asList(
+                    new MainReactPackage(),
+                    new RNGestureHandlerPackage(),
+                    new PickerPackage(),
+                    new VectorIconsPackage(),
+                    new SvgPackage(),
+                    new ActionSheetPackage(),
+                    new LinearGradientPackage(),
+                    new MatrixClientPackage(),
+                    new P2ChatPackage()
+            );
         }
 
         @Override
@@ -74,6 +68,10 @@ public class MainApplication extends Application implements ReactApplication {
             return "index";
         }
     };
+
+    public static void createReactNative(ReactContext rc) {
+        reactContext = rc;
+    }
 
     @Override
     public ReactNativeHost getReactNativeHost() {
@@ -83,7 +81,7 @@ public class MainApplication extends Application implements ReactApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-        
+
         setupLogger();
 
         component = DaggerApplicationComponent.builder()
@@ -91,11 +89,6 @@ public class MainApplication extends Application implements ReactApplication {
                 .build();
 
         SoLoader.init(this, /* native exopackage */ false);
-
-
-
-
-
 
         ServiceConnection serviceConnection = new ServiceConnection() {
             @Override

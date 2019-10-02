@@ -10,7 +10,7 @@ import com.google.gson.JsonObject
 import com.moonshrd.di.modules.MessageEventModel
 import com.moonshrd.di.modules.MessageHistory
 import com.moonshrd.models.UserModel
-import com.moonshrd.repository.ContactsRepository
+import com.moonshrd.repository.ContactsMatrixRepository
 import com.moonshrd.utils.matrix.Matrix
 import com.moonshrd.utils.matrix.MatrixSdkHelper
 import com.moonshrd.utils.sendEventWithOneStringArg
@@ -81,12 +81,12 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     private fun getDirectChatsInternal(): List<UserModel> {
 
-        ContactsRepository.removeAllContacts()
+        ContactsMatrixRepository.removeAllContacts()
         val directChats = matrixInstance.defaultSession.dataHandler.store.rooms.filter {
             it.isDirect
         }
         //remove all contacts
-        // ContactRepository.removeAllContacts()
+        // MatchContactsRepository.removeAllContacts()
 
         val chatModels = mutableListOf<UserModel>()
         directChats.forEach { room ->
@@ -115,7 +115,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                     roomId = room.roomId
             )
             chatModels.add(chat)
-            ContactsRepository.addContact(chat)
+            ContactsMatrixRepository.addContact(chat)
         }
         return chatModels
     }
@@ -371,7 +371,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                         val user = getMyProfile()
                         messages.add(MessageHistory(info.chunk[i].toJsonObject(), user))
                     } else {
-                        val user = ContactsRepository.getUser(info.chunk[i].sender)
+                        val user = ContactsMatrixRepository.getUser(info.chunk[i].sender)
                         messages.add(MessageHistory(info.chunk[i].toJsonObject(), user!!))
                     }
 

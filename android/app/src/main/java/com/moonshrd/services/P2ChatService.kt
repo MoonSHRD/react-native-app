@@ -1,6 +1,5 @@
 package com.moonshrd.services
 
-import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
@@ -8,12 +7,11 @@ import com.facebook.react.bridge.Arguments
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.moonshrd.MainApplication
-import com.moonshrd.MatrixClientModule
 import com.moonshrd.models.LocalChat
 import com.moonshrd.models.MatchModel
 import com.moonshrd.models.MessageModel
 import com.moonshrd.models.UserModel
-import com.moonshrd.repository.ContactRepository
+import com.moonshrd.repository.MatchContactsRepository
 import com.moonshrd.repository.LocalChatsRepository
 import com.moonshrd.utils.TopicStorage
 import com.moonshrd.utils.matrix.Matrix
@@ -28,12 +26,27 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import android.content.Context.NOTIFICATION_SERVICE
+import android.R
+import android.app.*
+import android.media.RingtoneManager
+import android.os.Build
+import android.content.Context
+import com.moonshrd.MainActivity
+import android.graphics.BitmapFactory
+import android.graphics.Bitmap
+import android.graphics.Color
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationCompat.DEFAULT_VIBRATE
 
 
 class P2ChatService : Service() {
     private val newMatchEventName = "NewMatchEvent"
     private val newMatchMemberEventName = "newMatchMemberEventName"
     private val newMessageEventName = "NewMessageEvent"
+
+    private val CHANNEL_ID = "1250012"
+    private val TAG = P2ChatService::class.java.simpleName
 
     @Inject
     lateinit var gson: Gson
@@ -58,6 +71,28 @@ class P2ChatService : Service() {
 
     override fun onCreate() {
         MainApplication.getComponent().inject(this)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            val icon = BitmapFactory.decodeResource(resources, R.mipmap.sym_def_app_icon)
+
+            val intent = Intent(this, MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
+
+            val notificationBuilder: NotificationCompat.Builder = NotificationCompat.Builder(this, CHANNEL_ID)
+            val notificationChannel = NotificationChannel(CHANNEL_ID, TAG, NotificationManager.IMPORTANCE_DEFAULT)
+                notificationChannel.enableVibration(true)
+                (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(notificationChannel)
+
+            val notification=   notificationBuilder
+                    .setContentText("Service is start")
+                    .setAutoCancel(true)
+                    .setContentIntent(pendingIntent)
+                    .setSmallIcon(R.mipmap.sym_def_app_icon).build()
+
+            startForeground(1, notification)
+        }
     }
 
     override fun onBind(intent: Intent): IBinder? {
@@ -85,7 +120,7 @@ class P2ChatService : Service() {
             } catch (e: Exception) {
               //  Logger.i("ERROR - ${e.message}")
             }
-        }, 0, 300, TimeUnit.MILLISECONDS)
+        }, 0, 500, TimeUnit.MILLISECONDS)
 
         scheduledExecutorService!!.scheduleAtFixedRate({
             if (isServiceRunning) {
@@ -122,9 +157,6 @@ class P2ChatService : Service() {
             val match = gson.fromJson(newMatch, MatchModel::class.java)
             if (match.isValid) {
                 LocalChatsRepository.getLocalChat(match.topic)!!.putMember(match.matrixID)
-                //TopicMemberRepository.addMember(match.matrixID,match.topic)
-
-
 
                 val directChats = matrixInstance.defaultSession.dataHandler.store.rooms.filter {
                     it.isDirect
@@ -149,8 +181,8 @@ class P2ChatService : Service() {
                                 roomSummary.mUnreadEventsCount,
                                 roomId = room.roomId
                         )
-                        ContactRepository.addTopicUser(match.topic,chat)
-                        match.userModel = ContactRepository.getUser(chat.userId)
+                        MatchContactsRepository.addTopicUser(match.topic,chat)
+                        match.userModel = MatchContactsRepository.getUser(chat.userId)
                     }
                   }
                 Logger.i("getMatch - ${gson.toJson(match)}")
