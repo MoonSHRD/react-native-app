@@ -1,9 +1,10 @@
-import { FETCHING_CONTACTS, FETCHING_CONTACTS_SUCCESS, FETCHING_CONTACTS_FAILURE, ADD_CONTACT, HANDLE_INPUT_CHANGE, DELETE_CONTACT, SEARCH_BAR, SEARCH_LIST, CLEAR_SEARCH_BAR, SELECT_CONTACT, DESELECT_CONTACT, SELECT_CHAT, DESELECT_CHAT, ADD_SELECTOR, SELECTED_CONTACTS, SELECT_IN_CONTACTS, FETCHING_CONTACT, FETCHING_CONTACT_FAILURE, FETCHING_CONTACT_SUCCESS, SAVE_MY_USERNAME, SAVE_MY_USER_ID, SET_MY_PROFILE } from '../actions/constants'
+import { FETCHING_CONTACTS, FETCHING_CONTACTS_SUCCESS, FETCHING_CONTACTS_FAILURE, ADD_CONTACT, HANDLE_INPUT_CHANGE, DELETE_CONTACT, SEARCH_BAR, SEARCH_LIST, CLEAR_SEARCH_BAR, SELECT_CONTACT, DESELECT_CONTACT, SELECT_CHAT, DESELECT_CHAT, ADD_SELECTOR, SELECTED_CONTACTS, SELECT_IN_CONTACTS, FETCHING_CONTACT, FETCHING_CONTACT_FAILURE, FETCHING_CONTACT_SUCCESS, SAVE_MY_USERNAME, SAVE_MY_USER_ID, SET_MY_PROFILE, FETCHING_MATCHED_CONTACTS_SUCCESS } from '../actions/constants'
 
 const initialState = {
   myUserName: null,
   myUserID: null,
   contactList: [],
+  matchedContactList: [],
   contact: {},
   myProfile: {},
   searchList: [],
@@ -22,6 +23,7 @@ const initialState = {
     avatar: null,
   },
   isLoading: false,
+  alreadyLoaded: false,
   error: false
 }
 
@@ -37,8 +39,16 @@ export default function contactsReducer (state = initialState, action) {
       return {
         ...state,
         isLoading: false,
-        contactList: action.data
+        contactList: action.data,
+        alreadyLoaded: true,
       }
+    case FETCHING_MATCHED_CONTACTS_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        matchedContactList: action.data,
+        alreadyLoaded: true,
+      }  
     case FETCHING_CONTACTS_FAILURE:
       return {
         ...state,

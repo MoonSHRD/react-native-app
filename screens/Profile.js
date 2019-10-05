@@ -1,17 +1,18 @@
 import React, { Component } from 'react';
-import { Image, Platform, View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet, DeviceEventEmitter } from 'react-native';
+import { Image, Platform, View, Dimensions, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet, DeviceEventEmitter } from 'react-native';
 
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Button, Block, Text, Input } from '../components';
 import { theme } from '../constants';
-import { Avatar, ThemeConsumer } from 'react-native-elements';
+import { Overlay, Avatar, ThemeConsumer } from 'react-native-elements';
 import ImagePicker from 'react-native-image-crop-picker';
 import ActionSheet from 'react-native-action-sheet';
 import MatrixClient from  '../native/MatrixClient';
 
 import {connect} from 'react-redux';
-import { getContactInfo, deselectContact, getMyUserProfile, createDirectChat, saveNewUserName, saveNewAvatar, getMyUserId } from '../store/actions/contactsActions';
-import { subcribeToTopic, unsubscribeFromTopic } from '../store/actions/p2chatActions';
+import { getContactInfo, deselectContact, getMyUserProfile, saveNewUserName, saveNewAvatar, getMyUserId } from '../store/actions/contactsActions';
+import { subcribeToTopic, unsubscribeFromTopic, getCurrentTopics, setVisible, setMatchedUser } from '../store/actions/p2chatActions';
+
 const { width, height } = Dimensions.get('window');
 
 class Profile extends Component {
@@ -77,52 +78,115 @@ class Profile extends Component {
       avatarChanged: false,
       newName: '',
       phone: '+1(323)564-34-22',
-      tags: [
-          {
-            name: 'Bikes',
-            matched: true,
-          },
-          {
-            name: 'Marvel',
-            matched: false,
-          },
-          {
-              name: 'DC Comix',
-              matched: true,
-
-          },
-          {
-            name: 'Buzrum',
-            matched: true
-          },
-          {
-            name: 'Progressive Black Metal',
-            matched: false
-          },
-        ],
-      newTag: null,
+      tags: [],
+      newTag: '',
       errors: [],
       suggestedTags: [
         {
-            name: 'Cost',
-            matched: false
+            name: 'Crypto',
         },
         {
-            name: 'Cosplay',
-            matched: false,
+            name: 'Blockchain',
         },
         {
-            name: 'Cosmopolitan',
-            matched: false 
+            name: 'Finance',
         },  
         {
-            name: 'Costume',
-            matched: false,
+            name: 'Dating',
         },
         {
-            name: 'Costumes',
-            matched: true,
+            name: 'Business',
         },
+        {
+            name: 'News',
+        },
+        {
+            name: 'Politics',
+        },
+        {
+            name: 'Food',
+        },
+        {
+            name: 'Home cooking',
+        },
+        {
+            name: 'English',
+        },
+        {
+            name: 'Spanish',
+        },
+        {
+            name: 'German',
+        },
+        {
+            name: 'French',
+        },
+        {
+            name: 'Greek',
+        },
+        {
+            name: 'Italian',
+        },
+        {
+            name: 'Portuguese',
+        },
+        {
+            name: 'Danish',
+        },
+        {
+            name: 'Dutch',
+        },
+        {
+            name: 'Chinese',
+        },
+        {
+            name: 'Japanese',
+        },
+        {
+            name: 'Football',
+        },
+        {
+            name: 'Basketball',
+        },
+        {
+            name: 'Golf',
+        },
+        {
+            name: 'Boxing',
+        },
+        {
+            name: 'Arts',
+        },
+        {
+            name: 'Contemporary art',
+        },
+        {
+            name: 'Digital art',
+        },
+        {
+            name: 'Classic art',
+        },
+        {
+            name: 'Music',
+        },
+        {
+            name: 'Illistrations',
+        },
+        {
+            name: 'Techno',
+        },
+        {
+            name: 'Rock',
+        },
+        {
+            name: 'Rap',
+        },
+        {
+            name: 'Hip Hop',
+        },
+        {
+            name: 'Test',
+        }
       ]
   }
 
@@ -139,14 +203,54 @@ class Profile extends Component {
     const userId = await this.props.navigation.getParam('userId', 'userId');
     await console.log(userId)
     await this.props.getContactInfo(userId.toLowerCase())
+    await this.checkIfInvite()
     await this.checkName()
     await this.props.getMyUserId()
     await this.loadAvatar()
   }
 
+  checkIfInvite = async () => {
+      const userName = this.props.navigation.getParam('userName', 'userName')
+      const userIdName = this.props.navigation.getParam('userIdName', 'userIdName').toLowerCase()
+      const roomId = this.props.navigation.getParam('roomId', 'roomId')
+      console.log('Приглашение от ' + userIdName)
+      if (userName == 'Приглашение от ' + userIdName || userName == 'Invite from ' + userIdName) { 
+            console.log('invite has to be sended')
+            const promise = MatrixClient.acceptInvite(roomId)
+            promise.then((data) => {
+                console.log(data)
+            },
+            (error) => {
+                console.log(error)
+            })
+      }
+  }
+
   toggleModal = () => {
     this.setState({ isModalVisible: !this.state.isModalVisible });
   };
+
+  acceptInvite = async (roomId) => {
+      const promise = MatrixClient.acceptInvite(roomId)
+      promise.then(async = (data) => {
+          const jsonData = JSON.parse(data)
+          const user = new Object()
+          
+          this.props.navigation.navigate('Chat', {
+            userName: jsonData.name,
+            userIdName: this.parseUserId(jsonData.userId),
+            userId: jsonData.userId,
+            avatarUrl: jsonData.avatarUrl,
+            avatarLink: this.parseAvatarUrl(jsonData.avatarUrl),
+            isActive: jsonData.isActive,
+            lastSeen: jsonData.lastSeen,
+            roomId: jsonData.roomId
+        },
+        (error) => {
+            console.log(error);
+        })        
+      })
+  }
 
   checkName = async () => {
     const userName = await this.props.navigation.getParam('userName', '');
@@ -171,8 +275,47 @@ class Profile extends Component {
     const avatarLink = await this.props.navigation.getParam('avatarLink', '');
     if (avatarLink != '') {
         await this.setState({avatarUrl: avatarLink})
+    } else {
+        const newAvatarLink = await this.parseAvatarUrl(this.props.contacts.contact.avatarUrl)
+        await this.setState({avatarUrl: newAvatarLink})
     }
   }
+
+  goToChatScreenMatch = async (navigation) => {
+    if (this.props.p2chat.matchedUser.userModel.roomId != null) {
+        roomId = this.props.p2chat.matchedUser.userModel.roomId
+        await this.props.navigation.navigate('Chat', {
+            userName: this.capitalize(this.props.p2chat.matchedUser.userModel.name),
+            userIdName: this.parseUserId(this.props.p2chat.matchedUser.userModel.userId),
+            userId: this.props.p2chat.matchedUser.userModel.userId,
+            avatarUrl: this.props.p2chat.matchedUser.userModel.avatarUrl,
+            avatarLink: this.parseAvatarUrl(this.props.p2chat.matchedUser.userModel.avatarUrl),
+            isActive: this.props.p2chat.matchedUser.userModel.isActive,
+            lastSeen: this.props.p2chat.matchedUser.userModel.lastSeen,
+            roomId: roomId
+        })        
+    } else {
+        userId = this.props.p2chat.matchedUser.userModel.userId
+        const promise = MatrixClient.createDirectChat(userId)
+        promise.then(async (data) => {
+            await console.log(data)
+            await this.props.navigation.navigate('Chat', {
+                userName: this.capitalize(this.props.p2chat.matchedUser.userModel.name),
+                userIdName: this.parseUserId(this.props.p2chat.matchedUser.userModel.userId),
+                userId: this.props.p2chat.matchedUser.userModel.userId,
+                avatarUrl: this.props.p2chat.matchedUser.userModel.avatarUrl,
+                avatarLink: this.parseAvatarUrl(this.props.p2chat.matchedUser.userModel.avatarUrl),
+                isActive: this.props.p2chat.matchedUser.userModel.isActive,
+                lastSeen: this.props.p2chat.matchedUser.userModel.lastSeen,
+                roomId: data
+            })
+          },
+          (error) => {
+            console.log(error);
+          }
+        )    
+    }
+  }  
 
   parseUserId(props) {
     if (props != '') {
@@ -212,34 +355,40 @@ class Profile extends Component {
     await this.loadMyAvatar()
   }
 
-  createDirectChatWithUser = async (userId) => {
-    const promise = await MatrixClient.createDirectChat(userId)
-    promise.then( async (data) => {
-        await this.setState({roomId: data})
-        console.log(data)
-      },
-      (error) => {
-        console.log(error);
-      }
-    )
-  }
-
   goToChatScreen = async (navigation) => {
-    await this.createDirectChatWithUser(userId)
-    const roomId = await this.state.roomId
     if (this.props.contacts.contact.roomId != null) {
         roomId = this.props.contacts.contact.roomId
+        await this.props.navigation.navigate('Chat', {
+            userName: this.capitalize(this.props.contacts.contact.name),
+            userIdName: this.parseUserId(this.props.contacts.contact.userId),
+            userId: this.props.contacts.contact.userId,
+            avatarUrl: this.props.contacts.contact.avatarUrl,
+            avatarLink: this.parseAvatarUrl(this.props.contacts.contact.avatarUrl),
+            isActive: this.props.contacts.contact.isActive,
+            lastSeen: this.props.contacts.contact.lastSeen,
+            roomId: roomId
+        })        
+    } else {
+        userId = this.props.contacts.contact.userId
+        const promise = MatrixClient.createDirectChat(userId)
+        promise.then(async (data) => {
+            await console.log(data)
+            await this.props.navigation.navigate('Chat', {
+                userName: this.capitalize(this.props.contacts.contact.name),
+                userIdName: this.parseUserId(this.props.contacts.contact.userId),
+                userId: this.props.contacts.contact.userId,
+                avatarUrl: this.props.contacts.contact.avatarUrl,
+                avatarLink: this.parseAvatarUrl(this.props.contacts.contact.avatarUrl),
+                isActive: this.props.contacts.contact.isActive,
+                lastSeen: this.props.contacts.contact.lastSeen,
+                roomId: data
+            })
+          },
+          (error) => {
+            console.log(error);
+          }
+        )    
     }
-    await this.props.navigation.navigate('Chat', {
-        userName: this.capitalize(this.props.contacts.contact.name),
-        userIdName: this.parseUserId(this.props.contacts.contact.userId),
-        userId: this.props.contacts.contact.userId,
-        avatarUrl: this.props.contacts.contact.avatarUrl,
-        avatarLink: this.parseAvatarUrl(this.props.contacts.contact.avatarUrl),
-        isActive: this.props.contacts.contact.isActive,
-        lastSeen: this.props.contacts.contact.lastSeen,
-        roomId: roomId
-    })    
   }
 
   setHeaderParams = () => {
@@ -331,8 +480,10 @@ class Profile extends Component {
   }
 
   componentDidMount() {
+    const {setMatchedUser} = this.props
     this.setState({roomId: this.props.navigation.getParam('roomId', '')})
     this.setHeaderParams()
+    this.loadAllTags()
     this.willFocus = this.props.navigation.addListener('willFocus', async () => {
         const userName = await this.props.navigation.getParam('userName', 'userName')
         await (userName != 'userName')
@@ -342,19 +493,14 @@ class Profile extends Component {
         this.loadMyProfile()
     })
     
-    this.onNetworkErrorEvent = DeviceEventEmitter.addListener('onNetworkError', function(e) {
-        console.log('onNetworkError')
-        console.log(e)
-      });  
-      this.onMatrixErrorEvent = DeviceEventEmitter.addListener('onMatrixError', (e) => {
-        console.log('onMatrixError')
-        console.log(e)
-      });  
-      this.onUnexpectedErrorEvent = DeviceEventEmitter.addListener('onUnexpectedError', function(e) {
-        console.log('onUnexpectedError')
-        console.log(e)
-      }); 
-}
+    this.NewMatchEvent = DeviceEventEmitter.addListener('NewMatchEvent', async (e) => {
+        await console.log(e)
+        data = await e.match
+        jsonData = await JSON.parse(data)
+        await console.log('NewMatchEvent')
+        await setMatchedUser(jsonData)
+      })
+  }
 
 
 componentDidUpdate(prevProps) {
@@ -363,6 +509,56 @@ componentDidUpdate(prevProps) {
     }  
   }
 
+
+filterItems(array, search) {
+    return array.filter(function(array) {
+        return array.name.toString().toLowerCase().indexOf(search.toString().toLowerCase()) !== -1;
+    })
+}
+
+loadAllTags = () => {
+    this.props.getCurrentTopics()
+
+    if  (this.props.p2chat.topics.length != 0) {
+        allTags = new Array()
+        this.props.p2chat.topics.map((data, i) => {
+            tag = new Object()
+            tag.name = data.valueOf(i)
+            allTags = this.state.tags.push(tag)
+        })
+    }
+}
+
+
+subscribeOnThis = async (topic, index) => {
+    await console.log('pressed topic ' +  topic + ' ' + index) 
+    const promise = await this.props.subcribeToTopic(topic)
+    newTag = new Object()
+    newTag.name = topic
+    this.setState({
+        tags: this.state.tags.concat(newTag)
+    })    
+    await promise.then((data) => {
+        console.log(data)
+    },
+    (error) => {
+        console.log(error)
+    })
+}
+
+unsubscribeFromThis = async (topic) => {
+    await console.log('pressed topic' +  topic)
+    const promise = this.props.unsubscribeFromTopic(topic)
+    this.setState({
+        tags: this.state.tags.filter(tag => tag.name !== topic)
+    })        
+    await promise.then((data) => {
+        console.log(data)
+    },
+    (error) => {
+        console.log(error)
+    })
+}
 
 
   render() {
@@ -373,6 +569,7 @@ componentDidUpdate(prevProps) {
     const userName = this.props.navigation.getParam('userName', '')
     const userIdName = this.props.navigation.getParam('userIdName', '')
     const userId = this.props.navigation.getParam('userId', 'userId')
+    const previousScreen = this.props.navigation.getParam('previousScreen', 'previousScreen')
 
       
     return (
@@ -384,6 +581,71 @@ componentDidUpdate(prevProps) {
             style={this.props.appState.nightTheme ? styles.darkBackground : styles.background}
         >
         {
+            this.props.p2chat.isVisible 
+            ?
+              <Overlay 
+                isVisible
+                onBackdropPress={()=>this.props.setVisible(false)}
+                overlayStyle={styles.overlayContainer}
+                borderRadius={16}
+                height="auto"
+              >
+                  <Block style={styles.overlayAvatarContainer}>
+                  {
+                    this.props.p2chat.matchedUser.userModel.avatarUrl == ''
+                    ?
+                    <Avatar 
+                      rounded
+                      title={this.capitalize(this.props.p2chat.matchedUser.userModel.name[0])}
+                      titleStyle={{fontSize:36}}
+                      containerStyle={styles.overlayAvatar}
+                      avatarStyle={styles.overlayAvatarImage}
+                    />
+                    :
+                    <Avatar 
+                      rounded
+                      source={{
+                          uri:
+                          this.parseAvatarUrl(this.props.p2chat.matchedUser.userModel.avatarUrl),
+                      }}
+                      containerStyle={styles.overlayAvatar}
+                      avatarStyle={styles.overlayAvatarImage}
+                    />
+                  }
+                  </Block>
+                  <View style={{paddingHorizontal:14, marginTop: 42}}>
+                  <Text center h3 notBlack bold style={{marginTop:20, marginHorizontal: 14}}>{this.props.p2chat.matchedUser.userModel.name}</Text>
+                  <Text center subhead notBlack style={{marginTop:8, marginHorizontal: 20}}>You have a match by {this.props.p2chat.matchedUser.userModel.topics.length > 1 ? <Text>{this.props.p2chat.matchedUser.userModel.topics.length} tags</Text> : <Text>{this.props.p2chat.matchedUser.userModel.topics.length} tag</Text>}</Text>
+                  <Block style={styles.overlayTagContainer}>
+                    {
+                      this.props.p2chat.matchedUser.userModel.topics.map((l,i) => (
+                                <Button
+                                    key={i}
+                                    style={styles.overlayMatchedTag}>
+                                    <Text caption white center>{l}</Text>
+                                </Button>
+                        ))
+                    }
+                  </Block>
+                  <Block style={styles.overlayButtonContainer}>
+                    <Button style={styles.overlayCloseButton}               
+                        onPress={()=>this.props.setVisible(false)}
+                    >
+                      <Text headline bold blue center>Close</Text>
+                    </Button>
+                    <Button gradient style={styles.overlayConfirmButton}               
+                        onPress={() => this.goToChatScreenMatch()}
+                    >
+                      <Text headline bold white center>Send message</Text>
+                    </Button>       
+                  </Block>
+                  </View>
+              </Overlay>
+            :
+            null
+          }            
+        <View style={{marginBottom: 110,}}>
+        {
             (userIdName != '')
             ?
             <Block style={this.props.appState.nightTheme ? styles.darkContainer : styles.container}>
@@ -393,29 +655,57 @@ componentDidUpdate(prevProps) {
             />
             <Block style={styles.avatarContainer}>
             {
-                this.props.contacts.contact.avatarUrl != ''
+                this.props.navigation.getParam('from', '') != 'search'
                 ?
-                <Avatar 
-                    rounded
-                    source={{
-                        uri: this.state.avatarUrl
-                    }}
-                    containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
-                    avatarStyle={styles.avatarImage}
-                />
-                :
-                <Avatar 
-                    rounded
-                    title={
-                        this.props.contacts.contact.name != ''
+                <Block>
+                    {
+                        this.props.contacts.contact.avatarUrl != ''
                         ?
-                        this.capitalize(this.props.contacts.contact.name[1])
+                        <Avatar 
+                            rounded
+                            source={{
+                                uri: this.state.avatarUrl
+                            }}
+                            containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
+                            avatarStyle={styles.avatarImage}
+                        />
                         :
-                        this.state.name[0]
-                    }
-                    containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
-                    avatarStyle={styles.avatarImage}
-                />
+                        <Avatar 
+                            rounded
+                            title={
+                                this.props.contacts.contact.name != ''
+                                ?
+                                this.capitalize(this.props.contacts.contact.name[0])
+                                :
+                                this.state.name[0]
+                            }
+                            containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
+                            avatarStyle={styles.avatarImage}
+                        />
+                    } 
+                </Block>   
+                :
+                <Block>
+                {
+                    this.props.contacts.contact.avatarUrl != ''
+                    ?
+                    <Avatar 
+                        rounded
+                        source={{
+                            uri: this.props.navigation.getParam('avatarLink', '')
+                        }}
+                        containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
+                        avatarStyle={styles.avatarImage}
+                    />
+                    :
+                    <Avatar 
+                        rounded
+                        title={this.capitalize(this.props.contacts.contact.name[0])}
+                        containerStyle={this.props.appState.nightTheme ? styles.darkAvatar: styles.avatar}
+                        avatarStyle={styles.avatarImage}
+                    />
+                }
+                </Block>
             }
             </Block>
             <Block style={styles.profileContainer}>
@@ -491,7 +781,13 @@ componentDidUpdate(prevProps) {
                     null
                 }
                 <Button gradient style={styles.confirmButton}               
-                    onPress={() => this.goToChatScreen()}
+                    onPress={
+                        previousScreen == 'Chat'
+                        ?
+                        () => navigation.goBack()
+                        :
+                        () => this.goToChatScreen()
+                    }
                 >
                     <Text headline bold white center>Send Message</Text>
                 </Button>       
@@ -602,32 +898,25 @@ componentDidUpdate(prevProps) {
                     null
                 }
                 {
-                    this.props.contacts.myProfile.tags
+                    this.state.tags.length === 0
                     ?
+                    null
+                    :
                     <Block>
                         <Text subhead gray style={{marginTop:20}}>My Tags</Text>
                         <Block style={styles.tagContainer}>
                         {
-                            this.props.contacts.myProfile.tags.map((l,i) => (
-                                    l.matched
-                                    ?
+                            this.state.tags.map((l,i) => (
                                     <Button
                                         key={i}
-                                        style={styles.matchedTag}>
+                                        style={styles.matchedTag}
+                                        onPress={() => this.unsubscribeFromThis(l.name)}>
                                         <Text caption white center>{l.name}</Text>
-                                    </Button>
-                                    :
-                                    <Button
-                                        key={i}
-                                        style={styles.dismatchedTag}>
-                                        <Text caption blue center>{l.name}</Text>
                                     </Button>
                             ))
                         }
                         </Block>
                     </Block>    
-                    :
-                    null
                 }
                 <Input
                     error={hasErrors('tags')}
@@ -638,26 +927,30 @@ componentDidUpdate(prevProps) {
                     onChangeText={text => this.setState({ newTag: text })}
                 />
                 {
-                    newTag !== null 
+                    newTag !== '' 
                     ?
                     <Block style={this.props.appState.nightTheme ? styles.darkNewTagContainer : styles.newTagContainer}>
                         <Text caption2 gray style={styles.suggestedTagsText}>Suggested tags</Text>
                         <Block style={styles.newTagList}>
                             {
-                                suggestedTags.map((l,i) => (
-                                    l.matched
-                                    ?
+                                this.filterItems(suggestedTags, newTag).map((l,i) => (
+                                    // l.matched
+                                    // ?
+                                    // <Button
+                                    //     key={i}
+                                    //     style={this.props.appState.nightTheme ? styles.darkMatchedTag : styles.matchedTag}
+                                    //     onPress={this.subscribeOnThis(l.name)}>
+                                    //     <Text caption style={this.props.appState.nightTheme ? {color: theme.colors.black}: {color: theme.colors.white}} center>{l.name}</Text>
+                                    // </Button>
+                                    // :
+                                    <View>
                                     <Button
                                         key={i}
-                                        style={this.props.appState.nightTheme ? styles.darkMatchedTag : styles.matchedTag}>
-                                        <Text caption style={this.props.appState.nightTheme ? {color: theme.colors.black}: {color: theme.colors.white}} center>{l.name}</Text>
+                                        style={this.props.appState.nightTheme ? styles.darkDismatchedTag : styles.dismatchedTag}
+                                        onPress={() => {this.subscribeOnThis(l.name, i)}}>
+                                            <Text caption style={this.props.appState.nightTheme ? {color: theme.colors.white}: {color: theme.colors.blue}} center>{l.name}</Text>
                                     </Button>
-                                    :
-                                    <Button
-                                        key={i}
-                                        style={this.props.appState.nightTheme ? styles.darkDismatchedTag : styles.dismatchedTag}>
-                                        <Text caption style={this.props.appState.nightTheme ? {color: theme.colors.white}: {color: theme.colors.blue}} center>{l.name}</Text>
-                                    </Button>
+                                    </View>
                                 ))
                             }
                         </Block>
@@ -673,6 +966,7 @@ componentDidUpdate(prevProps) {
             </Block>
         </Block>
         }
+        </View>
         </ScrollView>
       </KeyboardAvoidingView>
     )
@@ -848,13 +1142,62 @@ const styles = StyleSheet.create({
     },
     confirmButton: {
         marginTop: 20,
-    }
+    },
+    overlayContainer: {
+        marginHorizontal: 64,
+        paddingBottom: 15.67,
+        paddingHorizontal: 0,
+        flexDirection: 'column',
+        alignSelf: 'center',
+      },
+      overlayAvatarContainer: {
+        alignSelf: 'center',
+        position: 'absolute',
+        top: -55
+      },
+      overlayAvatar: {
+          width: 110,
+          height: 110,
+          borderRadius: 50,
+          overflow: 'hidden',
+          borderColor: 'white',
+          borderStyle: 'solid',
+          borderWidth: 3,
+      },
+      overlayTagContainer: {
+        flex:0,
+        flexDirection: "row",
+        justifyContent: 'space-evenly',
+        flexWrap: 'wrap',
+        marginTop: 12,
+      },  
+      overlayMatchedTag: {
+        backgroundColor: theme.colors.blue,
+        borderRadius: 16,
+        overflow: 'hidden',
+        height: 24,
+        paddingVertical: 4,
+        paddingHorizontal: 16,
+        marginHorizontal: 2,
+      },
+      overlayButtonContainer: {
+        flex: 0,
+        marginTop:15.67,
+      },
+      overlayCloseButton: {
+        backgroundColor: theme.colors.white,
+        borderColor: theme.colors.blue,
+        borderWidth: 1,
+        borderRadius: 8,
+        overflow: 'hidden'
+      },    
 })
 
 function mapStateToProps (state) {
     return {
       contacts: state.contacts,
       appState: state.appState,
+      p2chat: state.p2chat,
     }
   }
   
@@ -867,8 +1210,11 @@ function mapStateToProps (state) {
       createDirectChat: (data) => dispatch(createDirectChat(data)),
       saveNewUserName: (data) => dispatch(saveNewUserName(data)),
       saveNewAvatar: (data) => dispatch(saveNewAvatar(data)),
-      subcribeToTopic:  () =>  dispatch(subcribeToTopic()),
-      unsubscribeFromTopic:  () =>  dispatch(unsubscribeFromTopic()),  
+      subcribeToTopic:  (data) =>  dispatch(subcribeToTopic(data)),
+      unsubscribeFromTopic:  (data) =>  dispatch(unsubscribeFromTopic(data)), 
+      getCurrentTopics: () => dispatch(getCurrentTopics()), 
+      setMatchedUser: (data) => dispatch(setMatchedUser(data)),
+      setVisible: (data) => dispatch(setVisible(data)),  
     }
   }
   

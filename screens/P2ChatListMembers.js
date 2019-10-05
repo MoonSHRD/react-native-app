@@ -1,22 +1,32 @@
 import React, { Component } from 'react';
 import { Platform, View, Dimensions, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet, DeviceEventEmitter } from 'react-native';
 
-import Icon from 'react-native-vector-icons/Ionicons';
 import {BoxShadow} from 'react-native-shadow';
+import Icon from 'react-native-vector-icons/Ionicons';
 import TimeAgo from 'react-native-timeago';
-import { Button, Block, Text } from '../components';
-import { Overlay, Avatar, SearchBar, ListItem, ThemeConsumer } from 'react-native-elements';
+import { Avatar, Overlay, SearchBar, ListItem, ThemeConsumer } from 'react-native-elements';
 import { theme } from '../constants';
+import { Button, Text, Block } from '../components';
 
 import {connect} from 'react-redux';
-import { getContactList, searchBar, changeContactList, clearSearchBar, createDirectChat, selectChat } from '../store/actions/contactsActions';
-import { setMatchedUser, setVisible } from '../store/actions/p2chatActions';
-
+import { getContactList, searchBar, changeContactList, clearSearchBar, selectContact, deselectContact, getMyUserId, getMyUserProfile, searchUserById } from '../store/actions/contactsActions';
+import { getCurrentTopics, getChatMembers, setMatchedUser, setVisible } from '../store/actions/p2chatActions';
 
 const { width, height } = Dimensions.get('window');
 
-class NewChat extends Component {
+class P2ChatListMembers extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      searchChanged: false,
+      search: '',
+      screenHeight: height,
+    };
+  }
+
   static navigationOptions = ({ navigation }) => {
+    const chatName = navigation.getParam('chatName', '')
     return {
       headerTitle: (
         <Text style={
@@ -26,35 +36,30 @@ class NewChat extends Component {
           :
           styles.headerText
         }
-        >
-        New Chat</Text>
+        >  
+        {chatName} members</Text>
       ),
-      headerLeft: (
+      headerRight: (
         <Icon
-            name="ios-arrow-back" 
-            size={24} 
-            color={
-              navigation.getParam('nightTheme') 
-              ?
-              theme.colors.white
-              :
-              theme.colors.blue
-            }
-              onPress={() => navigation.goBack()}
-            style={{paddingVertical: 10, paddingHorizontal: 20,}}
+          name="ios-person" 
+          size={24} 
+          color={
+            navigation.getParam('nightTheme') 
+            ?
+            theme.colors.white
+            :
+            theme.colors.blue
+          }
+          onPress={() => navigation.navigate('Profile')}
+          style={{paddingVertical: 10, paddingHorizontal: 20,}}
         />
       ),
       headerStyle:  {
         backgroundColor: navigation.getParam('nightTheme') ? theme.colors.notBlack : theme.colors.white
       }
-    }
-  };
+    };
+  }
 
-  state = {
-    search: '',
-    searchChanged: false,
-    screenHeight: height,
-  };
 
   onContentSizeChange = (contentWidth, contentHeight) => {
     this.setState({ screenHeight: contentHeight });
@@ -62,6 +67,69 @@ class NewChat extends Component {
 
   setHeaderParams = () => {
     this.props.navigation.setParams({nightTheme: this.props.appState.nightTheme});  
+  }
+
+  componentDidMount() {
+    const {setMatchedUser} = this.props
+    this.setHeaderParams()
+    this.willFocus = this.props.navigation.addListener('willFocus', () => {
+        const chatName = this.props.navigation.getParam('chatName', '')
+        this.props.getMyUserId()
+        this.props.getMyUserProfile()
+        this.props.getCurrentTopics()
+        this.props.getChatMembers(chatName)
+    });    
+    this.NewMatchEvent = DeviceEventEmitter.addListener('NewMatchEvent', async (e) => {
+      await console.log(e)
+      data = await e.match
+      jsonData = await JSON.parse(data)
+      await console.log('NewMatchEvent')
+      await setMatchedUser(jsonData)
+    })
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.appState.nightTheme !== this.props.appState.nightTheme) {
+      this.setHeaderParams()
+    }  
+  }
+
+
+  updateSearch = async(text) => {
+    await this.setState({ search: text , searchChanged: true});
+    if (this.state.search == '') {
+      if (this.props.contacts.searchChanged) {
+        await this.props.clearSearchBar();
+        await this.props.loadDirectChats();  
+      }
+    }
+
+      const newData = await this.props.contacts.contactList.filter((item)=>{
+        const itemData = item.name.toUpperCase()
+        const textData = text.toUpperCase()
+        return itemData.indexOf(textData)>-1
+      });
+      await this.props.searchBar(text)
+      await this.props.changeContactList(newData) 
+  };
+
+  handleSearch = async (text) => {
+    await this.setState({ search: text , searchChanged: true});
+    if (this.state.search == '') {
+        if (this.state.searchChanged) {
+          await this.props.clearSearchBar();
+          await this.props.loadDirectChats();    
+          await this.setState({searchChanged: false});
+        }
+    } else {
+        await this.props.searchBar(text);
+        await this.props.searchUserById(text);  
+    }
+  }
+  
+  capitalize(props) {
+    let text = props.slice(0,1).toUpperCase() + props.slice(1, props.length);
+    return text
   }
 
   parseAvatarUrl(props) {
@@ -78,6 +146,43 @@ class NewChat extends Component {
     }
 }
 
+goToChatScreen = async (navigation) => {
+  if (this.props.p2chat.matchedUser.userModel.roomId != null) {
+      roomId = this.props.p2chat.matchedUser.userModel.roomId
+      await this.props.navigation.navigate('Chat', {
+          userName: this.capitalize(this.props.p2chat.matchedUser.userModel.name),
+          userIdName: this.parseUserId(this.props.p2chat.matchedUser.userModel.userId),
+          userId: this.props.p2chat.matchedUser.userModel.userId,
+          avatarUrl: this.props.p2chat.matchedUser.userModel.avatarUrl,
+          avatarLink: this.parseAvatarUrl(this.props.p2chat.matchedUser.userModel.avatarUrl),
+          isActive: this.props.p2chat.matchedUser.userModel.isActive,
+          lastSeen: this.props.p2chat.matchedUser.userModel.lastSeen,
+          roomId: roomId
+      })        
+  } else {
+      userId = this.props.p2chat.matchedUser.userModel.userId
+      const promise = MatrixClient.createDirectChat(userId)
+      promise.then(async (data) => {
+          await console.log(data)
+          await this.props.navigation.navigate('Chat', {
+              userName: this.capitalize(this.props.p2chat.matchedUser.userModel.name),
+              userIdName: this.parseUserId(this.props.p2chat.matchedUser.userModel.userId),
+              userId: this.props.p2chat.matchedUser.userModel.userId,
+              avatarUrl: this.props.p2chat.matchedUser.userModel.avatarUrl,
+              avatarLink: this.parseAvatarUrl(this.props.p2chat.matchedUser.userModel.avatarUrl),
+              isActive: this.props.p2chat.matchedUser.userModel.isActive,
+              lastSeen: this.props.p2chat.matchedUser.userModel.lastSeen,
+              roomId: data
+          })
+        },
+        (error) => {
+          console.log(error);
+        }
+      )    
+  }
+}
+
+
 parseUserId(props) {
   if (props != null) {
     if (props != '') {
@@ -90,92 +195,11 @@ parseUserId(props) {
   }
 }
 
-  componentDidMount() {
-    const {setMatchedUser} = this.props
-    this.setHeaderParams()
-    this.willFocus = this.props.navigation.addListener('willFocus', () => {
-      this.props.getDirectChats();
-    });
-    this.NewMatchEvent = DeviceEventEmitter.addListener('NewMatchEvent', async (e) => {
-      await console.log(e)
-      data = await e.match
-      jsonData = await JSON.parse(data)
-      await console.log('NewMatchEvent')
-      await setMatchedUser(jsonData)
-    })
-  }
-  
-  updateSearch = async(text) => {
-    await this.setState({ search: text , searchChanged: true});
-
-    if (this.state.search == '') {
-      if (this.props.contacts.searchChanged) {
-        await this.props.clearSearchBar();
-        await this.props.getDirectChats();  
-      }
-    }
-
-      const newData = await this.props.contacts.contactList.filter((item)=>{
-        const itemData = item.name.toUpperCase()
-        const textData = text.toUpperCase()
-        return itemData.indexOf(textData)>-1
-      });
-      await this.props.updateSearchBar(text)
-      await this.props.updateSearchList(newData) 
-  };
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.appState.nightTheme !== this.props.appState.nightTheme) {
-      this.setHeaderParams()
-    }  
-  }
-
-  goToChatScreen = async (navigation) => {
-    if (this.props.p2chat.matchedUser.userModel.roomId != null) {
-        roomId = this.props.p2chat.matchedUser.userModel.roomId
-        await this.props.navigation.navigate('Chat', {
-            userName: this.capitalize(this.props.p2chat.matchedUser.userModel.name),
-            userIdName: this.parseUserId(this.props.p2chat.matchedUser.userModel.userId),
-            userId: this.props.p2chat.matchedUser.userModel.userId,
-            avatarUrl: this.props.p2chat.matchedUser.userModel.avatarUrl,
-            avatarLink: this.parseAvatarUrl(this.props.p2chat.matchedUser.userModel.avatarUrl),
-            isActive: this.props.p2chat.matchedUser.userModel.isActive,
-            lastSeen: this.props.p2chat.matchedUser.userModel.lastSeen,
-            roomId: roomId
-        })        
-    } else {
-        userId = this.props.p2chat.matchedUser.userModel.userId
-        const promise = MatrixClient.createDirectChat(userId)
-        promise.then(async (data) => {
-            await console.log(data)
-            await this.props.navigation.navigate('Chat', {
-                userName: this.capitalize(this.props.p2chat.matchedUser.userModel.name),
-                userIdName: this.parseUserId(this.props.p2chat.matchedUser.userModel.userId),
-                userId: this.props.p2chat.matchedUser.userModel.userId,
-                avatarUrl: this.props.p2chat.matchedUser.userModel.avatarUrl,
-                avatarLink: this.parseAvatarUrl(this.props.p2chat.matchedUser.userModel.avatarUrl),
-                isActive: this.props.p2chat.matchedUser.userModel.isActive,
-                lastSeen: this.props.p2chat.matchedUser.userModel.lastSeen,
-                roomId: data
-            })
-          },
-          (error) => {
-            console.log(error);
-          }
-        )    
-    }
-  }  
-
-  capitalize(props) {
-    let text = props.slice(0,1).toUpperCase() + props.slice(1, props.length);
-    return text
-  }
-  
   render() {
     const { navigation } = this.props;
     const { loading, errors, searchChanged } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
-    const scrollEnabled = this.state.screenHeight > height - 100;
+    const scrollEnabled = this.state.screenHeight > height - 200;
 
     const shadowOpt = {
       width: width - 16,
@@ -198,7 +222,6 @@ parseUserId(props) {
 			x:0,
 			y:0,
     }
-
 
     return (
       <KeyboardAvoidingView behavior="padding">
@@ -271,12 +294,12 @@ parseUserId(props) {
             </Overlay>
           :
           null
-        }          
+        }
         { Platform.OS === 'ios'
           ? 
           <SearchBar 
             placeholder="Search"
-            onChangeText={(text) => this.updateSearch(text)}
+            onChangeText={(text) => this.handleSearch(text)}
             platform="ios"
             value={this.props.contacts.search}
             containerStyle={this.props.appState.nightTheme ? styles.darkSearchBar: styles.searchBar}
@@ -287,7 +310,7 @@ parseUserId(props) {
           <SearchBar 
             placeholder="Search"
             platform="ios"
-            onChangeText={(text) => this.updateSearch(text)}
+            onChangeText={(text) => this.handleSearch(text)}
             cancelButtonTitle={null}
             value={this.props.contacts.search}
             containerStyle={this.props.appState.nightTheme ? styles.darkSearchBar: styles.searchBar}
@@ -308,6 +331,81 @@ parseUserId(props) {
                 this.props.contacts.searchList.map((l, i) => (
                   <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
                   <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
+                    <ListItem
+                      key={i}
+                      leftAvatar={
+                        l.avatarUrl
+                        ?
+                        { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
+                        :
+                        { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
+                      }
+                      title={
+                        l.name[0] == '@'
+                        ?
+                        this.parseUserId(l.name)
+                        :
+                        this.capitalize(l.name)
+                      }
+                      titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                      containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                      onPress={() => {
+                        this.props.navigation.navigate('Profile', {
+                          userName: l.name,
+                          userIdName: this.parseUserId(l.userId),
+                          userId: l.userId,
+                          avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                          roomId: l.roomId,
+                          from: 'search',
+                        })
+                      }}  
+                    />
+                    </BoxShadow>
+                    </View>
+                ))
+              }  
+              </Block>  
+              :
+              null
+            }
+            </Block>
+            :
+            <Block>
+            <Block>
+            <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
+            <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
+                <ListItem
+                    key={'myProfile'}
+                    leftAvatar={
+                    (this.props.contacts.myProfile.avatarUrl == "")
+                    ?
+                    { title: this.props.contacts.myProfile.name[0], titleStyle:{textTransform: 'capitalize'} }
+                    :
+                    { source: { uri: this.parseAvatarUrl(this.props.contacts.myProfile.avatarUrl) } }
+                    }
+                    title={
+                    this.props.contacts.myProfile.name[0] == '@'
+                    ?
+                    this.parseUserId(this.props.contacts.myProfile.name)
+                    :
+                    this.capitalize(this.props.contacts.myProfile.name)
+                    }
+                    titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                    subtitle={this.props.contacts.myProfile.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={this.props.contacts.myProfile.lastSeen} interval={60000}/></Text>}
+                    subtitleStyle={styles.subtitle}
+                    containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                    onPress={() => {
+                    navigation.navigate('Profile')
+                }}
+                />
+            </BoxShadow>
+            </View>
+            </Block>
+            <Block>
+            {
+              this.props.p2chat.chatMembers.map((l, i) => (
+                <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
+                <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
                   {
                     l.name[0] == '@'
                     ?
@@ -328,22 +426,18 @@ parseUserId(props) {
                         this.capitalize(l.name)
                       }
                       titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
-                      subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>}
+                      subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen} interval={60000}/></Text>}
                       subtitleStyle={styles.subtitle}
                       containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
                       onPress={() => {
-                        this.props.createDirectChat(l.userId)
-                        this.props.navigation.navigate('Chat', {
+                        navigation.navigate('Profile', {
                           userName: this.parseUserId(this.capitalize(l.name)),
                           userIdName: this.parseUserId(l.userId),
                           userId: l.userId,
-                          avatarUrl: this.parseAvatarUrl(l.avatarUrl),
-                          isActive: l.isActive,
-                          lastSeen: l.lastSeen,
-                          previousScreen: 'NewChat',
+                          avatarLink: this.parseAvatarUrl(l.avatarUrl),
                           roomId: l.roomId,
-                        })  
-                      }}  
+                        })
+                    }}
                     />
                     :
                     <ListItem
@@ -363,117 +457,25 @@ parseUserId(props) {
                         this.capitalize(l.name)
                       }
                       titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
-                      subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>}
+                      subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen} interval={60000}/></Text>}
                       subtitleStyle={styles.subtitle}
                       containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
                       onPress={() => {
-                        this.props.createDirectChat(l.userId)
-                        this.props.navigation.navigate('Chat', {
-                          userName: this.capitalize(l.name),
+                        navigation.navigate('Profile', {
+                          userName: l.name,
                           userIdName: this.parseUserId(l.userId),
                           userId: l.userId,
-                          avatarUrl: this.parseAvatarUrl(l.avatarUrl),
-                          isActive: l.isActive,
-                          lastSeen: l.lastSeen,
-                          previousScreen: 'NewChat',
+                          avatarLink: this.parseAvatarUrl(l.avatarUrl),
                           roomId: l.roomId,
-                          })  
-                      }}  
+                        })
+                    }}
                     />
                   }
-                    </BoxShadow>
-                    </View>
-                ))
-              }  
-              </Block>  
-              :
-              null
-            }
-            </Block>
-            :
-            <Block>
-            {
-              this.props.contacts.contactList.map((l, i) => (
-                <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
-                <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
-                {
-                  l.name[0] == '@'
-                  ?
-                  <ListItem
-                    key={i}
-                    leftAvatar={
-                      (l.avatarUrl == "")
-                      ?
-                      { title: l.name[1], titleStyle:{textTransform: 'capitalize'} }
-                      :
-                      { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
-                    }
-                    title={
-                      l.name[0] == '@'
-                      ?
-                      this.parseUserId(l.name)
-                      :
-                      this.capitalize(l.name)
-                    }
-                    titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
-                    subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen} interval={60000}/></Text>}
-                    subtitleStyle={styles.subtitle}
-                    containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
-                    onPress={() => {
-                      this.props.createDirectChat(l.userId)
-                      this.props.navigation.navigate('Chat', {
-                        userName: this.parseUserId(this.capitalize(l.name)),
-                        userIdName: this.parseUserId(l.userId),
-                        userId: l.userId,
-                        avatarUrl: l.avatarUrl,
-                        avatarLink: this.parseAvatarUrl(l.avatarUrl),
-                        isActive: l.isActive,
-                        lastSeen: l.lastSeen,
-                        previousScreen: 'NewChat',
-                        roomId: l.roomId,
-                        })
-                    }}
-                  />
-                  :
-                  <ListItem
-                    key={i}
-                    leftAvatar={
-                      (l.avatarUrl == "")
-                      ?
-                      { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
-                      :
-                      { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
-                    }
-                    title={
-                      l.name[0] == '@'
-                      ?
-                      this.parseUserId(l.name)
-                      :
-                      this.capitalize(l.name)
-                    }
-                    titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
-                    subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen} interval={60000}/></Text>}
-                    subtitleStyle={styles.subtitle}
-                    containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
-                    onPress={() => {
-                      this.props.createDirectChat(l.userId)
-                      this.props.navigation.navigate('Chat', {
-                        userName: this.capitalize(l.name),
-                        userIdName: this.parseUserId(l.userId),
-                        userId: l.userId,
-                        avatarUrl: this.parseAvatarUrl(l.avatarUrl),
-                        isActive: l.isActive,
-                        lastSeen: l.lastSeen,
-                        previousScreen: 'NewChat',
-                        roomId: l.roomId,
-                        })
-                    }}
-                  />
-                }
                   </BoxShadow>
                   </View>
               ))
-            }  
+            }
+            </Block>  
             </Block>
           }
         </View>
@@ -503,7 +505,7 @@ const styles = StyleSheet.create({
       fontWeight: '600', 
       letterSpacing: -0.0241176,
       color: theme.colors.white,
-  },
+  },    
   searchBar: {
     backgroundColor: theme.colors.white,
     paddingHorizontal: 16,
@@ -606,6 +608,12 @@ const styles = StyleSheet.create({
     letterSpacing: -0.0241176,
     lineHeight: 24,
   },
+  subtitle: {
+    color: theme.colors.gray,
+    fontSize: theme.sizes.caption2,
+    marginTop: 2,
+    lineHeight: 16
+  },
   darkTitle: {
     color: theme.colors.white,
     fontSize: theme.sizes.headline,
@@ -619,12 +627,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     letterSpacing: -0.0241176,
     lineHeight: 24,
-  },
-  subtitle: {
-    color: theme.colors.gray,
-    fontSize: theme.sizes.caption2,
-    marginTop: 2,
-    lineHeight: 16
   },
   overlayContainer: {
     marginHorizontal: 64,
@@ -676,6 +678,7 @@ const styles = StyleSheet.create({
   },
 })
 
+
 function mapStateToProps (state) {
   return {
     contacts: state.contacts,
@@ -686,12 +689,15 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
   return {
-    getDirectChats: () => dispatch(getContactList()),
-    updateSearchBar: (data) => dispatch(searchBar(data)),
-    updateSearchList: (data) => dispatch(changeContactList(data)),
+    loadDirectChats: () => dispatch(getContactList()),
+    searchBar: (data) => dispatch(searchBar(data)),
+    changeContactList: (data) => dispatch(changeContactList(data)),
     clearSearchBar: () => dispatch(clearSearchBar()),
-    selectChat: (data) => dispatch(selectChat(data)),
-    createDirectChat: (data) => dispatch(createDirectChat(data)),
+    getMyUserId: () => dispatch(getMyUserId()),
+    getMyUserProfile: () => dispatch(getMyUserProfile()),
+    searchUserById: (data) => dispatch(searchUserById(data)),
+    getChatMembers: (data) => dispatch(getChatMembers(data)),
+    getCurrentTopics: () => dispatch(getCurrentTopics()),
     setMatchedUser: (data) => dispatch(setMatchedUser(data)),
     setVisible: (data) => dispatch(setVisible(data)),
   }
@@ -700,4 +706,4 @@ function mapDispatchToProps (dispatch) {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(NewChat)
+)(P2ChatListMembers)

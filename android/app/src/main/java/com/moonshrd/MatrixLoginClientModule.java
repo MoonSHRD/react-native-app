@@ -10,9 +10,8 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.moonshrd.utils.RNUtilsKt;
+import com.moonshrd.utils.TopicStorage;
 import com.moonshrd.utils.matrix.LoginHandler;
 import com.moonshrd.utils.matrix.Matrix;
 import com.moonshrd.utils.matrix.RegistrationManager;
@@ -38,9 +37,11 @@ import javax.inject.Inject;
 
 public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
     private static String LOG_TAG = MatrixLoginClientModule.class.getSimpleName();
+    @Inject TopicStorage topicStorage;
 
     MatrixLoginClientModule(@Nonnull ReactApplicationContext reactContext) {
         super(reactContext);
+        MainApplication.getComponent().inject(this);
     }
 
     @Nonnull
@@ -97,7 +98,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
             @Override
             public void onSuccess(Void info) {
                 promise.resolve(true);
-                startListeningEventStream();
+                onLoginSucceed();
             }
         });
     }
@@ -123,7 +124,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
             @Override
             public void onSuccess(Void info) {
                 promise.resolve(true);
-                startListeningEventStream();
+                onLoginSucceed();
             }
         });
     }
@@ -136,7 +137,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
             SharedPreferences prefs = getReactApplicationContext().getSharedPreferences("other_prefs", Context.MODE_PRIVATE);
             Globals.State.isInitialSyncComplete = prefs.getBoolean("isInitialSyncComplete", false);
             Matrix.getInstance(getReactApplicationContext()).createSession(credentialsList.get(0));
-            startListeningEventStream();
+            onLoginSucceed();
             promise.resolve(true);
         }
         promise.resolve(false);
@@ -152,6 +153,8 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
         }
         matrixInstance.clearSessions(getReactApplicationContext(), true, null);
         matrixInstance.getLoginStorage().clear();
+        MainApplication.getP2ChatService().setMatrixID("");
+        topicStorage.clear();
     }
 
     private void getRegFlowsAndRegister(HomeServerConnectionConfig hsConfig, RegistrationManager registrationManager, Promise promise) {
@@ -168,6 +171,12 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
 
                     @Override
                     public void onNetworkError(Exception e) {
+                        UnrecognizedCertificateException uException = CertUtil.getCertificateException(e);
+                        if(uException != null) {
+                            hsConfig.getAllowedFingerprints().add(uException.getFingerprint());
+                            getRegFlowsAndRegister(hsConfig, registrationManager, promise);
+                            return;
+                        }
                         promise.reject("onNetworkError", e.getMessage());
                     }
 
@@ -212,7 +221,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
             public void onRegistrationSuccess(String warningMessage) {
                 Log.i(LOG_TAG, "# onRegistrationSuccess(warningMessage=" + warningMessage + ")");
                 promise.resolve(warningMessage);
-                startListeningEventStream();
+                onLoginSucceed();
             }
 
             @Override
@@ -258,7 +267,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
         });
     }
 
-    private void startListeningEventStream() {
+    private void onLoginSucceed() {
         Matrix matrixInstance = Matrix.getInstance(getReactApplicationContext());
         matrixInstance.getDefaultSession().startEventStream(new EventsThreadListener() {
             private DefaultEventsThreadListener defaultListener = new DefaultEventsThreadListener(matrixInstance.getDefaultSession().getDataHandler());
@@ -284,5 +293,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
                 defaultListener.onConfigurationError(matrixErrorCode);
             }
         }, matrixInstance.getDefaultSession().getNetworkConnectivityReceiver(),null);
+
+        MainApplication.getP2ChatService().setMatrixID(matrixInstance.getDefaultSession().getMyUserId());
     }
 }

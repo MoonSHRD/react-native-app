@@ -4,13 +4,13 @@ import { Platform, View, Dimensions, Alert, ActivityIndicator, ScrollView, Keybo
 import {BoxShadow} from 'react-native-shadow';
 import Icon from 'react-native-vector-icons/Ionicons';
 import TimeAgo from 'react-native-timeago';
-import { SearchBar, ListItem, ThemeConsumer } from 'react-native-elements';
+import { Overlay, Avatar, SearchBar, ListItem, ThemeConsumer } from 'react-native-elements';
 import { theme } from '../constants';
-import { Text, Block } from '../components';
+import { Text, Block, Button } from '../components';
 
 import {connect} from 'react-redux';
-import { getContactList, searchBar, changeContactList, clearSearchBar, selectContact, deselectContact, getMyUserId, getMyUserProfile, searchUserById } from '../store/actions/contactsActions';
-import { getCurrentTopics } from '../store/actions/p2chatActions';
+import { getContactList, searchBar, changeContactList, clearSearchBar, selectContact, deselectContact, getMyUserId, getMyUserProfile, searchUserById, createDirectChat } from '../store/actions/contactsActions';
+import { getCurrentTopics, setMatchedUser, setVisible } from '../store/actions/p2chatActions';
 
 const { width, height } = Dimensions.get('window');
 
@@ -69,28 +69,21 @@ class ContactList extends Component {
   }
 
   componentDidMount() {
+    const {setMatchedUser} = this.props
     this.setHeaderParams()
+    this.props.loadDirectChats()
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
       this.props.getMyUserId()
       this.props.getMyUserProfile()
-      // this.props.getCurrentTopics()
+      this.props.getCurrentTopics()
       this.props.loadDirectChats()
     });
-
-    this.onNetworkErrorEvent = DeviceEventEmitter.addListener('onNetworkError', function(e) {
-      console.log('onNetworkError')
-      console.log(e)
-    });  
-    this.onMatrixErrorEvent = DeviceEventEmitter.addListener('onMatrixError', (e) => {
-      console.log('onMatrixError')
-      console.log(e)
-    });  
-    this.onUnexpectedErrorEvent = DeviceEventEmitter.addListener('onUnexpectedError', function(e) {
-      console.log('onUnexpectedError')
-      console.log(e)
-    });  
-    this.successSearch = DeviceEventEmitter.addListener('onSuccess', (e) => {
-        console.log('onSuccess')
+    this.NewMatchEvent = DeviceEventEmitter.addListener('NewMatchEvent', async (e) => {
+      await console.log(e)
+      data = await e.match
+      jsonData = await JSON.parse(data)
+      await console.log('NewMatchEvent')
+      await setMatchedUser(jsonData)
     })
   }
 
@@ -139,7 +132,8 @@ class ContactList extends Component {
   }
 
   parseAvatarUrl(props) {
-    if (props != '') {
+    if (props != null) {
+      if (props != '') {
         let parts = props.split('mxc://', 2);
         let urlWithoutMxc  = parts[1];
         let urlParts = urlWithoutMxc.split('/', 2)
@@ -147,16 +141,55 @@ class ContactList extends Component {
         let secondPart = urlParts[1] 
         let serverUrl = 'https://matrix.moonshard.tech/_matrix/media/r0/download/'
         return serverUrl + firstPart + '/' + secondPart    
+      }
     }
 }
 
 parseUserId(props) {
-  if (props != '') {
-    let parts = props.split('@', 2);
-    let userId  = parts[1];
-    let userIdParts = userId.split(':', 2)
-    let firstPart = userIdParts[0]
-    return this.capitalize(firstPart)
+  if (props != null) {
+    if (props != '') {
+      let parts = props.split('@', 2);
+      let userId  = parts[1];
+      let userIdParts = userId.split(':', 2)
+      let firstPart = userIdParts[0]
+      return this.capitalize(firstPart)
+    }
+  }
+}
+
+goToChatScreen = async (navigation) => {
+  if (this.props.p2chat.matchedUser.userModel.roomId != null) {
+      roomId = this.props.p2chat.matchedUser.userModel.roomId
+      await this.props.navigation.navigate('Chat', {
+          userName: this.capitalize(this.props.p2chat.matchedUser.userModel.name),
+          userIdName: this.parseUserId(this.props.p2chat.matchedUser.userModel.userId),
+          userId: this.props.p2chat.matchedUser.userModel.userId,
+          avatarUrl: this.props.p2chat.matchedUser.userModel.avatarUrl,
+          avatarLink: this.parseAvatarUrl(this.props.p2chat.matchedUser.userModel.avatarUrl),
+          isActive: this.props.p2chat.matchedUser.userModel.isActive,
+          lastSeen: this.props.p2chat.matchedUser.userModel.lastSeen,
+          roomId: roomId
+      })        
+  } else {
+      userId = this.props.p2chat.matchedUser.userModel.userId
+      const promise = MatrixClient.createDirectChat(userId)
+      promise.then(async (data) => {
+          await console.log(data)
+          await this.props.navigation.navigate('Chat', {
+              userName: this.capitalize(this.props.p2chat.matchedUser.userModel.name),
+              userIdName: this.parseUserId(this.props.p2chat.matchedUser.userModel.userId),
+              userId: this.props.p2chat.matchedUser.userModel.userId,
+              avatarUrl: this.props.p2chat.matchedUser.userModel.avatarUrl,
+              avatarLink: this.parseAvatarUrl(this.props.p2chat.matchedUser.userModel.avatarUrl),
+              isActive: this.props.p2chat.matchedUser.userModel.isActive,
+              lastSeen: this.props.p2chat.matchedUser.userModel.lastSeen,
+              roomId: data
+          })
+        },
+        (error) => {
+          console.log(error);
+        }
+      )    
   }
 }
 
@@ -164,7 +197,7 @@ parseUserId(props) {
     const { navigation } = this.props;
     const { loading, errors, searchChanged } = this.state;
     const hasErrors = key => errors.includes(key) ? styles.hasErrors : null;
-    const scrollEnabled = this.state.screenHeight > height - 100;
+    const scrollEnabled = this.state.screenHeight > height - 200;
 
     const shadowOpt = {
       width: width - 16,
@@ -196,6 +229,70 @@ parseUserId(props) {
           onContentSizeChange={this.onContentSizeChange}
           style={this.props.appState.nightTheme ? styles.darkBackground : styles.background}
         >
+        {
+          this.props.p2chat.isVisible 
+          ?
+            <Overlay 
+              isVisible
+              onBackdropPress={()=>this.props.setVisible(false)}
+              overlayStyle={styles.overlayContainer}
+              borderRadius={16}
+              height="auto"
+            >
+                <Block style={styles.overlayAvatarContainer}>
+                {
+                  this.props.p2chat.matchedUser.userModel.avatarUrl == ''
+                  ?
+                  <Avatar 
+                    rounded
+                    title={this.capitalize(this.props.p2chat.matchedUser.userModel.name[0])}
+                    titleStyle={{fontSize:36}}
+                    containerStyle={styles.overlayAvatar}
+                    avatarStyle={styles.overlayAvatarImage}
+                  />
+                  :
+                  <Avatar 
+                    rounded
+                    source={{
+                        uri:
+                        this.parseAvatarUrl(this.props.p2chat.matchedUser.userModel.avatarUrl),
+                    }}
+                    containerStyle={styles.overlayAvatar}
+                    avatarStyle={styles.overlayAvatarImage}
+                  />
+                }
+                </Block>
+                <View style={{paddingHorizontal:14, marginTop: 42}}>
+                <Text center h3 notBlack bold style={{marginTop:20, marginHorizontal: 14}}>{this.props.p2chat.matchedUser.userModel.name}</Text>
+                <Text center subhead notBlack style={{marginTop:8, marginHorizontal: 20}}>You have a match by {this.props.p2chat.matchedUser.userModel.topics.length > 1 ? <Text>{this.props.p2chat.matchedUser.userModel.topics.length} tags</Text> : <Text>{this.props.p2chat.matchedUser.userModel.topics.length} tag</Text>}</Text>
+                <Block style={styles.overlayTagContainer}>
+                  {
+                    this.props.p2chat.matchedUser.userModel.topics.map((l,i) => (
+                              <Button
+                                  key={i}
+                                  style={styles.overlayMatchedTag}>
+                                  <Text caption white center>{l}</Text>
+                              </Button>
+                      ))
+                  }
+                </Block>
+                <Block style={styles.overlayButtonContainer}>
+                  <Button style={styles.overlayCloseButton}               
+                      onPress={()=>this.props.setVisible(false)}
+                  >
+                    <Text headline bold blue center>Close</Text>
+                  </Button>
+                  <Button gradient style={styles.overlayConfirmButton}               
+                      onPress={() => this.goToChatScreen()}
+                  >
+                    <Text headline bold white center>Send message</Text>
+                  </Button>       
+                </Block>
+                </View>
+            </Overlay>
+          :
+          null
+        }          
         { Platform.OS === 'ios'
           ? 
           <SearchBar 
@@ -219,7 +316,7 @@ parseUserId(props) {
             inputStyle={this.props.appState.nightTheme ? styles.darkSearchInputText : styles.searchInputText}
           />
         }
-        <View>
+        <View style={{marginBottom: 130,}}>
           <ListItem
             title="Find matches on this place"
             titleStyle={this.props.appState.nightTheme ? styles.grayTitle : styles.title}
@@ -248,7 +345,13 @@ parseUserId(props) {
                         :
                         { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
                       }
-                      title={this.capitalize(l.name)}
+                      title={
+                        l.name[0] == '@'
+                        ?
+                        this.parseUserId(l.name)
+                        :
+                        this.capitalize(l.name)
+                      }
                       titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
                       containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
                       onPress={() => {
@@ -258,6 +361,7 @@ parseUserId(props) {
                           userId: l.userId,
                           avatarLink: this.parseAvatarUrl(l.avatarUrl),
                           roomId: l.roomId,
+                          from: 'search',
                         })
                       }}  
                     />
@@ -276,30 +380,71 @@ parseUserId(props) {
               this.props.contacts.contactList.map((l, i) => (
                 <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
                 <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
-                  <ListItem
-                    key={i}
-                    leftAvatar={
-                      (l.avatarUrl == "")
-                      ?
-                      { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
-                      :
-                      { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
-                    }
-                    title={this.capitalize(l.name)}
-                    titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
-                    subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen} interval={60000}/></Text>}
-                    subtitleStyle={styles.subtitle}
-                    containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
-                    onPress={() => {
-                      navigation.navigate('Profile', {
-                        userName: l.name,
-                        userIdName: this.parseUserId(l.userId),
-                        userId: l.userId,
-                        avatarLink: this.parseAvatarUrl(l.avatarUrl),
-                        roomId: l.roomId,
-                      })
-                  }}  
-                  />
+                  {
+                    l.name[0] == '@'
+                    ?
+                    <ListItem
+                      key={i}
+                      leftAvatar={
+                        (l.avatarUrl == "")
+                        ?
+                        { title: l.name[1], titleStyle:{textTransform: 'capitalize'} }
+                        :
+                        { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
+                      }
+                      title={
+                        l.name[0] == '@'
+                        ?
+                        this.parseUserId(l.name)
+                        :
+                        this.capitalize(l.name)
+                      }
+                      titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                      subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen} interval={60000}/></Text>}
+                      subtitleStyle={styles.subtitle}
+                      containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                      onPress={() => {
+                        navigation.navigate('Profile', {
+                          userName: this.parseUserId(this.capitalize(l.name)),
+                          userIdName: this.parseUserId(l.userId),
+                          userId: l.userId,
+                          avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                          roomId: l.roomId,
+                        })
+                    }}
+                    />
+                    :
+                    <ListItem
+                      key={i}
+                      leftAvatar={
+                        (l.avatarUrl == "")
+                        ?
+                        { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
+                        :
+                        { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
+                      }
+                      title={
+                        l.name[0] == '@'
+                        ?
+                        this.parseUserId(l.name)
+                        :
+                        this.capitalize(l.name)
+                      }
+                      titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                      subtitle={l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen} interval={60000}/></Text>}
+                      subtitleStyle={styles.subtitle}
+                      containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                      onPress={() => {
+                        navigation.navigate('Profile', {
+                          userName: l.name,
+                          userIdName: this.parseUserId(l.userId),
+                          userId: l.userId,
+                          avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                          roomId: l.roomId,
+                        })
+                    }}
+                    />
+                  }
                   </BoxShadow>
                   </View>
               ))
@@ -455,7 +600,55 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     letterSpacing: -0.0241176,
     lineHeight: 24,
-  }
+  },
+  overlayContainer: {
+    marginHorizontal: 64,
+    paddingBottom: 15.67,
+    paddingHorizontal: 0,
+    flexDirection: 'column',
+    alignSelf: 'center',
+  },
+  overlayAvatarContainer: {
+    alignSelf: 'center',
+    position: 'absolute',
+    top: -55
+  },
+  overlayAvatar: {
+      width: 110,
+      height: 110,
+      borderRadius: 50,
+      overflow: 'hidden',
+      borderColor: 'white',
+      borderStyle: 'solid',
+      borderWidth: 3,
+  },
+  overlayTagContainer: {
+    flex:0,
+    flexDirection: "row",
+    justifyContent: 'space-evenly',
+    flexWrap: 'wrap',
+    marginTop: 12,
+  },  
+  overlayMatchedTag: {
+    backgroundColor: theme.colors.blue,
+    borderRadius: 16,
+    overflow: 'hidden',
+    height: 24,
+    paddingVertical: 4,
+    paddingHorizontal: 16,
+    marginHorizontal: 2,
+  },
+  overlayButtonContainer: {
+    flex: 0,
+    marginTop:15.67,
+  },
+  overlayCloseButton: {
+    backgroundColor: theme.colors.white,
+    borderColor: theme.colors.blue,
+    borderWidth: 1,
+    borderRadius: 8,
+    overflow: 'hidden'
+  },
 })
 
 
@@ -479,6 +672,9 @@ function mapDispatchToProps (dispatch) {
     getMyUserProfile: () => dispatch(getMyUserProfile()),
     searchUserById: (data) => dispatch(searchUserById(data)),
     getCurrentTopics: () => dispatch(getCurrentTopics()),
+    setMatchedUser: (data) => dispatch(setMatchedUser(data)),
+    setVisible: (data) => dispatch(setVisible(data)),
+    createDirectChat: (data) => dispatch(createDirectChat(data)),
   }
 }
 

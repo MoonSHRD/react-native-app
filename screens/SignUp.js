@@ -85,8 +85,8 @@ class SignUp extends Component {
             [
             {
                 text: 'Continue', onPress: () => {
-                  confirmLogin(true)
-                  saveUserName(email)
+                  this.props.confirmLogin(true)
+                  // saveUserName(email)
                 }
             }
             ],

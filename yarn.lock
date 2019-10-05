@@ -5465,6 +5465,12 @@ react-native-timeago@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/react-native-timeago/-/react-native-timeago-0.4.0.tgz#653b3a11217a3c6a331de99f9d614b3e58faf523"
 
+react-native-v8@^0.59.10-patch.2:
+  version "0.59.10-patch.2"
+  resolved "https://registry.yarnpkg.com/react-native-v8/-/react-native-v8-0.59.10-patch.2.tgz#c5385f7cfc11403ce588cca7a56df9c5e6973604"
+  dependencies:
+    v8-android "^7.5.1"
+
 react-native-vector-icons@^4.4.2:
   version "4.6.0"
   resolved "https://registry.yarnpkg.com/react-native-vector-icons/-/react-native-vector-icons-4.6.0.tgz#e4014311ffa6de397d914ffc31b7097a874cc8d5"
@@ -6747,6 +6753,14 @@ uuid@3.3.0:
 uuid@^3.3.2:
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.3.2.tgz#1b4af4955eb3077c501c23872fc6513811587131"
+
+v8-android@7.5.0:
+  version "7.5.0"
+  resolved "https://registry.yarnpkg.com/v8-android/-/v8-android-7.5.0.tgz#53c9da1b92a8bea0f675e112af00669acb7a0f7d"
+
+v8-android@^7.5.1:
+  version "7.5.1"
+  resolved "https://registry.yarnpkg.com/v8-android/-/v8-android-7.5.1.tgz#490288785381826d6c96323cecfb3fdbf2200424"
 
 validate-npm-package-license@^3.0.1:
   version "3.0.4"

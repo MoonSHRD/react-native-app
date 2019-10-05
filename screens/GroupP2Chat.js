@@ -2,88 +2,32 @@ import React, { Component } from 'react';
 import { Text, Dimensions, StyleSheet, Platform, View, DeviceEventEmitter } from 'react-native';
 
 import { Block } from '../components';
-import { Avatar, Badge, Icon } from 'react-native-elements';
+import { Avatar, Icon } from 'react-native-elements';
 import { GiftedChat, Actions, Send, InputToolbar, Composer, GiftedAvatar } from 'react-native-gifted-chat';
 import {connect} from 'react-redux';
 import TimeAgo from 'react-native-timeago';
 import { theme } from '../constants';  
 import ImagePicker from 'react-native-image-crop-picker';
 import ActionSheet from 'react-native-action-sheet';
-import { getDirectChatHistory, updateDirectChatHistory, sendMessage, handleMessageChange, pushNewMessageSuccess, pushNewMessage, pushNewMessageToHistory, resetNewMessage, setNewMessage } from '../store/actions/chatActions';
+import { sendMessage, handleMessageChange, getP2ChatMessageHistory, setNewMessage, pushNewMessage, pushNewMessageSuccess, pushNewMessageToHistory, resetNewMessage } from '../store/actions/p2chatActions';
 import { getMyUserId } from '../store/actions/contactsActions';
 const { width, height } = Dimensions.get('window');
 
 
-class Chat extends React.Component {
+class GroupP2Chat extends React.Component {
     static navigationOptions = ({ navigation }) => {
-        const userName = navigation.getParam('userName', '')
-        const userIdName = navigation.getParam('userIdName', '')
-        const userId = navigation.getParam('userId', 'userId')
-        const isActive = navigation.getParam('isActive')
-        const lastSeen = navigation.getParam('lastSeen')
-        const avatarUrl = navigation.getParam('avatarUrl', '')
-        const avatarLink = navigation.getParam('avatarLink', '')
-        const previousScreen = navigation.getParam('previousScreen', '')
+        const chatName = navigation.getParam('chatName', '')
         return {
             headerTitle: (
                 <Block style={styles.userContainer}>
-                  {
-                    userName != ''
-                    ?
-                      avatarUrl != ''
-                        ? 
-                        <Avatar 
-                            source={{uri: avatarLink }}
-                            containerStyle={styles.avatar}
-                            avatarStyle={styles.avatarImage}
-                        />
-                        :
-                        <Avatar 
-                            containerStyle={styles.avatar}
-                            avatarStyle={styles.avatarImage}
-                            titleStyle={{fontSize: 12}}
-                            title={userName[0]}
-                          />
-                    :
-                    avatarUrl != ''
-                      ? 
-                      <Avatar 
-                          source={{uri: avatarLink }}
-                          containerStyle={styles.avatar}
-                          avatarStyle={styles.avatarImage}
-                      />
-                      :
-                      <Avatar 
-                          containerStyle={styles.avatar}
-                          avatarStyle={styles.avatarImage}
-                          titleStyle={{fontSize: 12}}
-                          title={userName[0]}
-                        />
-                  }
+                    <Avatar 
+                        containerStyle={styles.avatar}
+                        avatarStyle={styles.avatarImage}
+                        titleStyle={{fontSize: 12}}
+                        title={chatName[0]}
+                    />
                     <Block style={styles.nameContainer}>
-                      {
-                        userName != ''
-                        ?
-                        <Text style={styles.userNameText}>{userName}</Text>
-                        :
-                        <Text style={styles.userNameText}>{userIdName}</Text>
-                      }
-                        <Block styles={styles.statusContainer}>
-                            {
-                                isActive == true
-                                ?
-                                <Block>
-                                <Badge 
-                                    containerStyle={styles.userBadge}
-                                    badgeStyle={{height: 8, width: 8}}
-                                    status="primary"
-                                    />
-                                <Text style={styles.onlineStatusText}>Online</Text>
-                                </Block>
-                                :
-                                <Text style={styles.statusText}>Last seen <TimeAgo time={lastSeen} interval={60000}/></Text>
-                            }
-                        </Block>
+                        <Text style={styles.userNameText}>{chatName}</Text>
                     </Block>
                 </Block>
             ),
@@ -100,16 +44,7 @@ class Chat extends React.Component {
                         :
                         theme.colors.blue
                       }
-                        onPress={
-                          previousScreen == 'NewChat'
-                          ?
-                          () => {
-                            navigation.navigate('ChatList')
-                            console.log('sss')
-                          }
-                          :
-                          () => navigation.goBack()
-                        }
+                        onPress={() => navigation.goBack()}
                     containerStyle={{paddingVertical: 10, paddingHorizontal: 20,}}
                 />
               ),
@@ -126,12 +61,8 @@ class Chat extends React.Component {
                         theme.colors.blue
                     }
                     onPress={() => {
-                        navigation.navigate('Profile', {
-                            userName: userName,
-                            userIdName: userIdName,
-                            userId: userId,
-                            avatarLink: avatarLink,
-                            previousScreen: 'Chat',
+                        navigation.navigate('P2ChatListMembers', {
+                            chatName: chatName,
                         })
                     }}  
                     containerStyle={
@@ -167,32 +98,28 @@ class Chat extends React.Component {
       await this.getMessageHistory()
       var self = this;
       const { chat, setNewMessage, pushNewMessage, pushNewMessageSuccess, pushNewMessageToHistory, resetNewMessage } = this.props;
-      this.eventMessage = DeviceEventEmitter.addListener('eventMessage', function(e) {
-        console.log("new message event")
+      this.NewMessageEvent = DeviceEventEmitter.addListener('NewMessageEvent', function(e) {
         console.log(e)
-        const data = JSON.parse(e.message)
-        console.log(data)
-        jsonData = JSON.parse(data.event.contentAsString)
-        console.log(jsonData)
+        const data = e.message
+        const jsonData = JSON.parse(data)
         const time = new Date()
 
         var newMessage = new Object()
 
-        newMessage._id = data.event.eventId
+        newMessage._id = jsonData.Id
         newMessage.text = jsonData.body
-        newMessage.createdAt = time - data.event.unsigned.age
-        newMessage.status = data.event.mSentState
+        newMessage.createdAt = time - jsonData.Timestamp
 
         var user = new Object()
         newMessage.user = user
-        user._id = data.event.sender
-        user.name = data.user.name
-        user.userId = data.user.userId
-        user.avatarUrl = data.user.avatarUrl
-        user.roomId = data.event.roomId
-        
-        if (data.user.avatarUrl != '') {
-          let parts = data.user.avatarUrl.split('mxc://', 2);
+        user._id = jsonData.fromMatrixID
+        user.name = jsonData.User.name
+        user.userId = jsonData.User.userId
+        user.avatarUrl = jsonData.User.avatarUrl
+        user.roomId = jsonData.User.roomId
+
+        if (jsonData.User.avatarUrl != '') {
+          let parts = jsonData.User.avatarUrl.split('mxc://', 2);
           let urlWithoutMxc  = parts[1];
           let urlParts = urlWithoutMxc.split('/', 2)
           let firstPart = urlParts[0]
@@ -200,7 +127,7 @@ class Chat extends React.Component {
           let serverUrl = 'https://matrix.moonshard.tech/_matrix/media/r0/download/'
           let avatarLink =  serverUrl + firstPart + '/' + secondPart    
           user.avatar = avatarLink
-        }
+      }
 
         console.log(newMessage)
 
@@ -214,29 +141,41 @@ class Chat extends React.Component {
       })
     }
 
-  getMessageHistory() {
-    const roomId = this.props.navigation.getParam('roomId', '')
-    this.props.getDirectChatHistory(roomId, (messages) => {
-      console.log(messages)
-      const newMessages = messages.messages
-      this.setState((previousState) => {
-        return {
-          messages: GiftedChat.append(previousState.messages, newMessages),
-        };
+    getMessageHistory() {
+      const chatName = this.props.navigation.getParam('chatName', '')
+      this.props.getP2ChatMessageHistory(chatName, (messages) => {
+        console.log(messages)
+        const newMessages = messages.messages
+        this.setState((previousState) => {
+          return {
+            messages: GiftedChat.append(previousState.messages, newMessages),
+          };
+        });
       });
-    });
-  }
-
+    }
+  
   capitalize(props) {
     let text = props.slice(0,1).toUpperCase() + props.slice(1, props.length);
     return text
   }
 
+
   onSend = async () => {
-    const {chat, sendMessage, navigation} = await this.props
-    const roomId = await navigation.getParam('roomId', '')
-    if (chat.newTextMessage != '') {
-      await sendMessage(chat.newTextMessage, roomId)
+    const {p2chat, sendMessage, navigation} = await this.props
+    const chatName = await navigation.getParam('chatName', '')
+    if (p2chat.newTextMessage != '') {
+      await sendMessage(chatName, p2chat.newTextMessage)
+      var newMessage = new Object()
+
+      newMessage._id = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(2, 10);
+      newMessage.text = p2chat.newTextMessage
+      newMessage.createdAt = new Date()
+
+      var user = new Object()
+      newMessage.user = user
+      user._id = this.props.contacts.myProfile.userId
+      console.log(newMessage)
+      this.addNewMessage(newMessage)
     }
   }
 
@@ -339,10 +278,10 @@ isCloseToTop({ layoutMeasurement, contentOffset, contentSize }) {
 }
 
 loadPreviousMessages = async () => {
-  const roomId = await this.props.navigation.getParam('roomId', '')
+  const chatName = await this.props.navigation.getParam('chatName', '')
   await this.setState({refreshing: true});
-  await this.props.updateDirectChatHistory(roomId, this.props.chat.end);
-  const newMessages = this.props.chat.newMessageHistory.messages;
+  await this.props.getP2ChatUpdatedMessageHistory(chatName, this.props.p2chat.end);
+  const newMessages = this.props.p2chat.newMessageHistory.messages;
   await this.setState((previousState) => {
     return {
       messages: GiftedChat.prepend(previousState.messages, newMessages),
@@ -357,7 +296,7 @@ loadPreviousMessages = async () => {
 
     return (
       <GiftedChat
-        text={this.props.chat.newTextMessage}
+        text={this.props.p2chat.newTextMessage}
         onInputTextChanged={text => this.props.handleMessageChange(text)}    
         messages={this.state.messages}
         onSend={this.onSend}
@@ -369,9 +308,6 @@ loadPreviousMessages = async () => {
             }
           },
         }}
-        // loadEarlier={this.state.refreshing}
-        placeholder={'Type Message Here'}
-        renderSend={this.renderSend}
         onPressAvatar={(user) => {
           console.log(user)
           this.props.navigation.navigate('Profile', {
@@ -379,10 +315,11 @@ loadPreviousMessages = async () => {
             userId: user.userId,
             userIdName: user.name,
             avatarLink: user.avatar,
-            roomId: user.roomId,
             from: 'chat',
           })
         }}
+        placeholder={'Type Message Here'}
+        renderSend={this.renderSend}
         renderActions={this.renderCustomActions}
         onPressActionButton={this.openActionSheet}
         renderComposer={this.renderComposer}
@@ -392,6 +329,7 @@ loadPreviousMessages = async () => {
         user={{
           _id: myUserId,
         }}
+        containerStyle={{height:height}}
       />
     )
   }
@@ -405,7 +343,7 @@ const styles = StyleSheet.create({
         letterSpacing: -0.0241176,
         color: theme.colors.notBlack,
         position: 'absolute',
-        top: -5,
+        // top: -5,
         left: 8,
     },
     darkHeaderText: {
@@ -471,27 +409,26 @@ function mapStateToProps (state) {
     return {
       contacts: state.contacts,
       appState: state.appState,
-      chat: state.chat,
+      p2chat: state.p2chat,
     }
   }
 
   function mapDispatchToProps (dispatch) {
     return {
-      getDirectChatHistory: (roomId, callback) => dispatch(getDirectChatHistory(roomId, callback)),
-      updateDirectChatHistory: (roomId, end) => dispatch(updateDirectChatHistory(roomId, end)),
-      sendMessage: (message, roomId) => dispatch(sendMessage(message, roomId)),
-      handleMessageChange: (text) => dispatch(handleMessageChange(text)),
-      getMyUserId: () => dispatch(getMyUserId()),
-      setNewMessage: (data) => dispatch(setNewMessage(data)),
-      pushNewMessage: () => dispatch(pushNewMessage()),
-      pushNewMessageSuccess: () => dispatch(pushNewMessageSuccess()),
-      pushNewMessageToHistory: () => dispatch(pushNewMessageToHistory()),
-      resetNewMessage: () => dispatch(resetNewMessage()),
-      loadMessages: (roomId, callback) => dispatch(loadMessages(roomId, callback)),
+        getMyUserId: () => dispatch(getMyUserId()),
+        sendMessage: (topic, message) => dispatch(sendMessage(topic, message)),
+        handleMessageChange: (text) => dispatch(handleMessageChange(text)),
+        getP2ChatMessageHistory: (topic, callback) => dispatch(getP2ChatMessageHistory(topic, callback)),
+        getP2ChatUpdatedMessageHistory: (topic, token) => dispatch(getP2ChatUpdatedMessageHistory(topic, token)),
+        setNewMessage: (data) => dispatch(setNewMessage(data)),
+        pushNewMessage: () => dispatch(pushNewMessage()),
+        pushNewMessageSuccess: () => dispatch(pushNewMessageSuccess()),
+        pushNewMessageToHistory: () => dispatch(pushNewMessageToHistory()),
+        resetNewMessage: () => dispatch(resetNewMessage()),  
     }
   }  
     
   export default connect(
     mapStateToProps,
     mapDispatchToProps
-  )(Chat)
+  )(GroupP2Chat)

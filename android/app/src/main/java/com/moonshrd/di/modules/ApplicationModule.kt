@@ -2,6 +2,7 @@ package com.moonshrd.di.modules
 
 import android.content.Context
 import com.google.gson.Gson
+import com.moonshrd.utils.TopicStorage
 import com.moonshrd.utils.matrix.Matrix
 import dagger.Module
 import dagger.Provides
@@ -27,5 +28,11 @@ class ApplicationModule(var context: Context) {
     @Singleton
     fun provideMatrix(context: Context): Matrix {
         return Matrix.getInstance(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTopicStorage(context: Context): TopicStorage {
+        return TopicStorage(context)
     }
 }

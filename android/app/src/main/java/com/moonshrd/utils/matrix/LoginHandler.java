@@ -196,7 +196,8 @@ public class LoginHandler {
 
             @Override
             public void onNetworkError(Exception e) {
-                getSupportedRegistrationFlows(appCtx, hsConfig, callback);
+                callback.onNetworkError(e);
+             //   getSupportedRegistrationFlows(appCtx, hsConfig, callback);
             }
 
             @Override

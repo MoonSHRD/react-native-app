@@ -1,17 +1,17 @@
 import React, { Component } from 'react';
-import { Platform, View, Dimensions, Alert, ActivityIndicator, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet } from 'react-native';
+import { Platform, View, Dimensions, ScrollView, Keyboard, KeyboardAvoidingView, StyleSheet, DeviceEventEmitter } from 'react-native';
 
 import {BoxShadow} from 'react-native-shadow';
 import Moment from 'react-moment';
 import TimeAgo from 'react-native-timeago';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { Badge, SearchBar, ListItem } from 'react-native-elements';
+import { Overlay, Avatar, Badge, SearchBar, ListItem } from 'react-native-elements';
 import { theme } from '../constants';
-import { Text, Block } from '../components';
+import { Button, Text, Block } from '../components';
 
 import {connect} from 'react-redux';
 import { getContactList, searchBar, changeContactList, clearSearchBar, getMyUserId } from '../store/actions/contactsActions';
-
+import { getAllP2Chats, setMatchedUser, setVisible } from '../store/actions/p2chatActions';
 
 
 const { width, height } = Dimensions.get('window');
@@ -80,11 +80,20 @@ class ChatList extends Component {
   }
 
   componentDidMount() {
+    const {setMatchedUser} = this.props
     this.setHeaderParams()
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
-      this.props.loadDirectChats()
+        this.props.loadDirectChats()
+        this.props.getAllP2Chats()
       this.props.getMyUserId()
     });
+    this.NewMatchEvent = DeviceEventEmitter.addListener('NewMatchEvent', async (e) => {
+      await console.log(e)
+      data = await e.match
+      jsonData = await JSON.parse(data)
+      await console.log('NewMatchEvent')
+      await setMatchedUser(jsonData)
+    })
   }
 
   componentDidUpdate(prevProps) {
@@ -99,7 +108,8 @@ class ChatList extends Component {
   }
 
   parseAvatarUrl(props) {
-    if (props != '') {
+    if (props != null) {
+      if (props != '') {
         let parts = props.split('mxc://', 2);
         let urlWithoutMxc  = parts[1];
         let urlParts = urlWithoutMxc.split('/', 2)
@@ -107,10 +117,12 @@ class ChatList extends Component {
         let secondPart = urlParts[1] 
         let serverUrl = 'https://matrix.moonshard.tech/_matrix/media/r0/download/'
         return serverUrl + firstPart + '/' + secondPart    
+      }
     }
-  }
+}
 
-  parseUserId(props) {
+parseUserId(props) {
+  if (props != null) {
     if (props != '') {
       let parts = props.split('@', 2);
       let userId  = parts[1];
@@ -119,6 +131,43 @@ class ChatList extends Component {
       return this.capitalize(firstPart)
     }
   }
+}
+
+goToChatScreen = async (navigation) => {
+  if (this.props.p2chat.matchedUser.userModel.roomId != null) {
+      roomId = this.props.p2chat.matchedUser.userModel.roomId
+      await this.props.navigation.navigate('Chat', {
+          userName: this.capitalize(this.props.p2chat.matchedUser.userModel.name),
+          userIdName: this.parseUserId(this.props.p2chat.matchedUser.userModel.userId),
+          userId: this.props.p2chat.matchedUser.userModel.userId,
+          avatarUrl: this.props.p2chat.matchedUser.userModel.avatarUrl,
+          avatarLink: this.parseAvatarUrl(this.props.p2chat.matchedUser.userModel.avatarUrl),
+          isActive: this.props.p2chat.matchedUser.userModel.isActive,
+          lastSeen: this.props.p2chat.matchedUser.userModel.lastSeen,
+          roomId: roomId
+      })        
+  } else {
+      userId = this.props.p2chat.matchedUser.userModel.userId
+      const promise = MatrixClient.createDirectChat(userId)
+      promise.then(async (data) => {
+          await console.log(data)
+          await this.props.navigation.navigate('Chat', {
+              userName: this.capitalize(this.props.p2chat.matchedUser.userModel.name),
+              userIdName: this.parseUserId(this.props.p2chat.matchedUser.userModel.userId),
+              userId: this.props.p2chat.matchedUser.userModel.userId,
+              avatarUrl: this.props.p2chat.matchedUser.userModel.avatarUrl,
+              avatarLink: this.parseAvatarUrl(this.props.p2chat.matchedUser.userModel.avatarUrl),
+              isActive: this.props.p2chat.matchedUser.userModel.isActive,
+              lastSeen: this.props.p2chat.matchedUser.userModel.lastSeen,
+              roomId: data
+          })
+        },
+        (error) => {
+          console.log(error);
+        }
+      )    
+  }
+}
 
   updateSearch = async(text) => {
     await this.setState({ search: text , searchChanged: true});
@@ -182,6 +231,70 @@ class ChatList extends Component {
           onContentSizeChange={this.onContentSizeChange}
           style={this.props.appState.nightTheme ? styles.darkBackground : styles.background}
         >
+        {
+          this.props.p2chat.isVisible 
+          ?
+            <Overlay 
+              isVisible
+              onBackdropPress={()=>this.props.setVisible(false)}
+              overlayStyle={styles.overlayContainer}
+              borderRadius={16}
+              height="auto"
+            >
+                <Block style={styles.overlayAvatarContainer}>
+                {
+                  this.props.p2chat.matchedUser.userModel.avatarUrl == ''
+                  ?
+                  <Avatar 
+                    rounded
+                    title={this.capitalize(this.props.p2chat.matchedUser.userModel.name[0])}
+                    titleStyle={{fontSize:36}}
+                    containerStyle={styles.overlayAvatar}
+                    avatarStyle={styles.overlayAvatarImage}
+                  />
+                  :
+                  <Avatar 
+                    rounded
+                    source={{
+                        uri:
+                        this.parseAvatarUrl(this.props.p2chat.matchedUser.userModel.avatarUrl),
+                    }}
+                    containerStyle={styles.overlayAvatar}
+                    avatarStyle={styles.overlayAvatarImage}
+                  />
+                }
+                </Block>
+                <View style={{paddingHorizontal:14, marginTop: 42}}>
+                <Text center h3 notBlack bold style={{marginTop:20, marginHorizontal: 14}}>{this.props.p2chat.matchedUser.userModel.name}</Text>
+                <Text center subhead notBlack style={{marginTop:8, marginHorizontal: 20}}>You have a match by {this.props.p2chat.matchedUser.userModel.topics.length > 1 ? <Text>{this.props.p2chat.matchedUser.userModel.topics.length} tags</Text> : <Text>{this.props.p2chat.matchedUser.userModel.topics.length} tag</Text>}</Text>
+                <Block style={styles.overlayTagContainer}>
+                  {
+                    this.props.p2chat.matchedUser.userModel.topics.map((l,i) => (
+                              <Button
+                                  key={i}
+                                  style={styles.overlayMatchedTag}>
+                                  <Text caption white center>{l}</Text>
+                              </Button>
+                      ))
+                  }
+                </Block>
+                <Block style={styles.overlayButtonContainer}>
+                  <Button style={styles.overlayCloseButton}               
+                      onPress={()=>this.props.setVisible(false)}
+                  >
+                    <Text headline bold blue center>Close</Text>
+                  </Button>
+                  <Button gradient style={styles.overlayConfirmButton}               
+                      onPress={() => this.goToChatScreen()}
+                  >
+                    <Text headline bold white center>Send message</Text>
+                  </Button>       
+                </Block>
+                </View>
+            </Overlay>
+          :
+          null
+        }          
         { Platform.OS === 'ios'
           ? 
           <SearchBar 
@@ -205,7 +318,7 @@ class ChatList extends Component {
             inputStyle={this.props.appState.nightTheme ? styles.darkSearchInputText : styles.searchInputText}
           />
         }
-        <View style={{marginTop: 5}}>
+        <View style={{marginBottom: 130, marginTop: 5}}>
         {
           searchChanged
           ?
@@ -227,7 +340,13 @@ class ChatList extends Component {
                     :
                     { source: { uri: this.parseAvatarUrl(l.avatarUrl) }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
                     }
-                    title={this.capitalize(l.name)}
+                    title={
+                      l.name[0] == '@'
+                      ?
+                      this.parseUserId(l.name)
+                      :
+                      this.capitalize(l.name)
+                    }
                     titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
                     rightTitle={
                       <Moment element={Text} calendar={calendarStrings} style={styles.dateTag}>{new Date(l.lastSeen)}</Moment>
@@ -248,7 +367,8 @@ class ChatList extends Component {
                         userName: this.capitalize(l.name),
                         userIdName: this.parseUserId(l.userId),
                         userId: l.userId,
-                        avatarUrl: this.parseAvatarUrl(l.avatarUrl),
+                        avatarUrl: l.avatarUrl,
+                        avatarLink: this.parseAvatarUrl(l.avatarUrl),
                         isActive: l.isActive,
                         lastSeen: l.lastSeen,
                         previousScreen: 'ChatList',
@@ -292,77 +412,197 @@ class ChatList extends Component {
           </Block>
           :
           <Block>
+            <Block>
+            {
+              this.props.p2chat.p2chats.length > 0
+              ?
+              this.props.p2chat.p2chats.map((l, i) => (
+                <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
+                <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
+                <ListItem
+                  key={i}
+                  leftAvatar={{ title: l.name[0], titleStyle:{textTransform: 'capitalize'}, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }}
+                  title={this.capitalize(l.name)}
+                  titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                  rightTitle={
+                    <Moment element={Text} calendar={calendarStrings} style={styles.dateTag}>{new Date(l.lastMessageDate)}</Moment>
+                  }
+                  rightTitleStyle={styles.dateTag}
+                  subtitle={l.lastMessage}
+                  subtitleStyle={styles.subtitle}
+                  containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                  onPress={(navigation) => {
+                    this.props.navigation.navigate('GroupP2Chat', {
+                      chatName: l.name,
+                    })
+                  }}  
+                  />  
+                  </BoxShadow>
+                  </View>
+              ))
+              :
+              null
+            }
+            </Block>
+          <Block>
           {
             this.props.contacts.contactList.map((l, i) => (
               <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
               <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
-                <ListItem
-                  key={i}
-                  leftAvatar={
-                  (l.avatarUrl == "")
-                  ?
-                  { title: l.name[0], titleStyle:{textTransform: 'capitalize'}, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
-                  :
-                  { source: { uri: this.parseAvatarUrl(l.avatarUrl) }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
-                  }
-                  title={this.capitalize(l.name)}
-                  titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
-                  rightTitle={
-                    <Moment element={Text} calendar={calendarStrings} style={styles.dateTag}>{new Date(l.lastSeen)}</Moment>
-                  }
-                  rightTitleStyle={styles.dateTag}
-                  subtitle={
-                    l.lastMessage == "" 
+              {
+                l.name[0] == '@'
+                ?
+                <Block>
+                  <ListItem
+                    key={i}
+                    leftAvatar={
+                    (l.avatarUrl == "")
                     ?
-                    l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>
+                    { title: l.name[1], titleStyle:{textTransform: 'capitalize'}, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
                     :
-                    l.lastMessage
+                    { source: { uri: this.parseAvatarUrl(l.avatarUrl) }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
+                    }
+                    title={
+                      l.name[0] == '@'
+                      ?
+                      this.parseUserId(l.name)
+                      :
+                      this.capitalize(l.name)
+                    }
+                    titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                    rightTitle={
+                      <Moment element={Text} calendar={calendarStrings} style={styles.dateTag}>{new Date(l.lastSeen)}</Moment>
+                    }
+                    rightTitleStyle={styles.dateTag}
+                    subtitle={
+                      l.lastMessage == "" 
+                      ?
+                      l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>
+                      :
+                      l.lastMessage
+                    }
+                    subtitleStyle={styles.subtitle}
+                    containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                    onPress={(navigation) => {
+                      const myUserId = this.props.contacts.myUserID
+                      this.props.navigation.navigate('Chat', {
+                        userName: this.parseUserId(this.capitalize(l.name)),
+                        userIdName: this.parseUserId(l.userId),
+                        userId: l.userId,
+                        avatarUrl: l.avatarUrl,
+                        avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                        isActive: l.isActive,
+                        lastSeen: l.lastSeen,
+                        previousScreen: 'ChatList',
+                        roomId: l.roomId,
+                        myUserId: myUserId,
+                      })
+                    }}  
+                  />
+                  {
+                    l.unreadMessagesCount > 0 
+                    ?
+                    <Badge 
+                      value={l.unreadMessagesCount} 
+                      status="error" 
+                      badgeStyle={{ width: 24, height: 24, borderRadius: 50, overflow: 'hidden'}}
+                      containerStyle={{ position: 'absolute', top: 36, right: 16}}
+                      textStyle={{fontSize: 12}}
+                    />
+                    :
+                    null
                   }
-                  subtitleStyle={styles.subtitle}
-                  containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
-                  onPress={(navigation) => {
-                    const myUserId = this.props.contacts.myUserID
-                    this.props.navigation.navigate('Chat', {
-                      userName: this.capitalize(l.name),
-                      userIdName: this.parseUserId(l.userId),
-                      userId: l.userId,
-                      avatarUrl: this.parseAvatarUrl(l.avatarUrl),
-                      isActive: l.isActive,
-                      lastSeen: l.lastSeen,
-                      previousScreen: 'ChatList',
-                      roomId: l.roomId,
-                      myUserId: myUserId,
-                    })
-                  }}  
-                />
-                {
-                  l.unreadMessagesCount > 0 
-                  ?
-                  <Badge 
-                    value={l.unreadMessagesCount} 
-                    status="error" 
-                    badgeStyle={{ width: 24, height: 24, borderRadius: 50, overflow: 'hidden'}}
-                    containerStyle={{ position: 'absolute', top: 36, right: 16}}
-                    textStyle={{fontSize: 12}}
+                  {
+                    (l.isActive) 
+                    ? 
+                    <Badge 
+                      status="primary" 
+                      badgeStyle={{width: 12, height: 12, overflow: 'hidden', borderRadius: 50, backgroundColor: theme.colors.blue}}
+                      containerStyle={{ position: 'absolute', top: 48, left: 52}}
+                    />
+                    :
+                    null
+                  }
+                </Block>
+                :
+                <Block>
+                  <ListItem
+                    key={i}
+                    leftAvatar={
+                    (l.avatarUrl == "")
+                    ?
+                    { title: l.name[0], titleStyle:{textTransform: 'capitalize'}, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
+                    :
+                    { source: { uri: this.parseAvatarUrl(l.avatarUrl) }, containerStyle: { width: 48, height: 48, borderRadius: 50, overflow: 'hidden' } }
+                    }
+                    title={
+                      l.name[0] == '@'
+                      ?
+                      this.parseUserId(l.name)
+                      :
+                      this.capitalize(l.name)
+                    }
+                    titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                    rightTitle={
+                      <Moment element={Text} calendar={calendarStrings} style={styles.dateTag}>{new Date(l.lastSeen)}</Moment>
+                    }
+                    rightTitleStyle={styles.dateTag}
+                    subtitle={
+                      l.lastMessage == "" 
+                      ?
+                      l.isActive ? "Online" : <Text style={styles.subtitle}>Last seen <TimeAgo time={l.lastSeen}/></Text>
+                      :
+                      l.lastMessage
+                    }
+                    subtitleStyle={styles.subtitle}
+                    containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                    onPress={(navigation) => {
+                      const myUserId = this.props.contacts.myUserID
+                      this.props.navigation.navigate('Chat', {
+                        userName: this.capitalize(l.name),
+                        userIdName: this.parseUserId(l.userId),
+                        userId: l.userId,
+                        avatarUrl: l.avatarUrl,
+                        avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                        isActive: l.isActive,
+                        lastSeen: l.lastSeen,
+                        previousScreen: 'ChatList',
+                        roomId: l.roomId,
+                        myUserId: myUserId,
+                      })
+                    }}  
                   />
-                  :
-                  null
-                }
-                {
-                  (l.isActive) 
-                  ? 
-                  <Badge 
-                    status="primary" 
-                    badgeStyle={{width: 12, height: 12, overflow: 'hidden', borderRadius: 50, backgroundColor: theme.colors.blue}}
-                    containerStyle={{ position: 'absolute', top: 48, left: 52}}
-                  />
-                  :
-                  null
-                }
-                </BoxShadow>
-                </View>
+                  {
+                    l.unreadMessagesCount > 0 
+                    ?
+                    <Badge 
+                      value={l.unreadMessagesCount} 
+                      status="error" 
+                      badgeStyle={{ width: 24, height: 24, borderRadius: 50, overflow: 'hidden'}}
+                      containerStyle={{ position: 'absolute', top: 36, right: 16}}
+                      textStyle={{fontSize: 12}}
+                    />
+                    :
+                    null
+                  }
+                  {
+                    (l.isActive) 
+                    ? 
+                    <Badge 
+                      status="primary" 
+                      badgeStyle={{width: 12, height: 12, overflow: 'hidden', borderRadius: 50, backgroundColor: theme.colors.blue}}
+                      containerStyle={{ position: 'absolute', top: 48, left: 52}}
+                    />
+                    :
+                    null
+                  }
+                </Block>
+              }
+              </BoxShadow>
+              </View>
             ))
           }  
+          </Block>
           </Block>
         }
         </View>
@@ -504,13 +744,62 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -22,
     right: 0
-  }
+  },
+  overlayContainer: {
+    marginHorizontal: 64,
+    paddingBottom: 15.67,
+    paddingHorizontal: 0,
+    flexDirection: 'column',
+    alignSelf: 'center',
+  },
+  overlayAvatarContainer: {
+    alignSelf: 'center',
+    position: 'absolute',
+    top: -55
+  },
+  overlayAvatar: {
+      width: 110,
+      height: 110,
+      borderRadius: 50,
+      overflow: 'hidden',
+      borderColor: 'white',
+      borderStyle: 'solid',
+      borderWidth: 3,
+  },
+  overlayTagContainer: {
+    flex:0,
+    flexDirection: "row",
+    justifyContent: 'space-evenly',
+    flexWrap: 'wrap',
+    marginTop: 12,
+  },  
+  overlayMatchedTag: {
+    backgroundColor: theme.colors.blue,
+    borderRadius: 16,
+    overflow: 'hidden',
+    height: 24,
+    paddingVertical: 4,
+    paddingHorizontal: 16,
+    marginHorizontal: 2,
+  },
+  overlayButtonContainer: {
+    flex: 0,
+    marginTop:15.67,
+  },
+  overlayCloseButton: {
+    backgroundColor: theme.colors.white,
+    borderColor: theme.colors.blue,
+    borderWidth: 1,
+    borderRadius: 8,
+    overflow: 'hidden'
+  },
 })
 
 function mapStateToProps (state) {
   return {
     contacts: state.contacts,
     appState: state.appState,
+    p2chat: state.p2chat,
   }
 }
 
@@ -521,6 +810,9 @@ function mapDispatchToProps (dispatch) {
     getMyUserId: () => dispatch(getMyUserId()),
     changeContactList: (data) => dispatch(changeContactList(data)),
     clearSearchBar: () => dispatch(clearSearchBar()),
+    getAllP2Chats: () => dispatch(getAllP2Chats()),
+    setMatchedUser: (data) => dispatch(setMatchedUser(data)),
+    setVisible: (data) => dispatch(setVisible(data)),
   }
 }
 

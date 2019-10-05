@@ -5,13 +5,20 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 
 import com.BV.LinearGradient.LinearGradientPackage;
 import com.actionsheet.ActionSheetPackage;
 import com.facebook.react.ReactApplication;
-import com.facebook.react.bridge.ReactContext;
+import com.orhanobut.logger.AndroidLogAdapter;
+import com.orhanobut.logger.FormatStrategy;
+import com.orhanobut.logger.Logger;
+import com.orhanobut.logger.PrettyFormatStrategy;
+
 import com.reactnative.ivpusic.imagepicker.PickerPackage;
+import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -50,11 +57,11 @@ public class MainApplication extends Application implements ReactApplication {
         @Override
         protected List<ReactPackage> getPackages() {
           return Arrays.asList(
-              new MainReactPackage(),
+                new MainReactPackage(),
+                new RNGestureHandlerPackage(),
                 new PickerPackage(),
                 new VectorIconsPackage(),
                 new SvgPackage(),
-                new RNGestureHandlerPackage(),
                 new ActionSheetPackage(),
                 new LinearGradientPackage(),
                 new MatrixClientPackage(),
@@ -76,14 +83,19 @@ public class MainApplication extends Application implements ReactApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+        
+        setupLogger();
+
         component = DaggerApplicationComponent.builder()
                 .applicationModule(new ApplicationModule(getApplicationContext()))
                 .build();
 
         SoLoader.init(this, /* native exopackage */ false);
 
-        getApplicationContext().startService(new Intent(getApplicationContext(), P2ChatService.class));
-        reactContext = mReactNativeHost.getReactInstanceManager().getCurrentReactContext();
+
+
+
+
 
         ServiceConnection serviceConnection = new ServiceConnection() {
             @Override
@@ -99,7 +111,25 @@ public class MainApplication extends Application implements ReactApplication {
             }
         };
 
-        getApplicationContext().bindService(new Intent(getApplicationContext(), P2ChatService.class), serviceConnection, Context.BIND_AUTO_CREATE);
+        new Handler().postDelayed(() -> {
+            reactContext = mReactNativeHost.getReactInstanceManager().getCurrentReactContext();
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                getApplicationContext().startForegroundService(new Intent(getApplicationContext(), P2ChatService.class));
+            } else {
+                getApplicationContext().startService(new Intent(getApplicationContext(), P2ChatService.class));
+            }
+
+            getApplicationContext().bindService(new Intent(getApplicationContext(), P2ChatService.class), serviceConnection, Context.BIND_AUTO_CREATE);
+        }, 2000);
+    }
+
+    private static void setupLogger() {
+        FormatStrategy formatStrategy = PrettyFormatStrategy.newBuilder()
+                .showThreadInfo(false)
+                .tag("MoonShard")
+                .build();
+        Logger.addLogAdapter(new AndroidLogAdapter(formatStrategy));
     }
 
     public static ReactContext getReactContext() {
