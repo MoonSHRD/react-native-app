@@ -10,7 +10,7 @@ import com.moonshrd.models.LocalChat
 import com.moonshrd.models.LocalChatModel
 import com.moonshrd.models.MessageModel
 import com.moonshrd.models.UserModel
-import com.moonshrd.repository.ContactRepository
+import com.moonshrd.repository.MatchContactsRepository
 import com.moonshrd.repository.LocalChatsRepository
 import com.moonshrd.utils.TopicStorage
 import com.moonshrd.utils.matrix.Matrix
@@ -116,7 +116,7 @@ class P2ChatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
     @ReactMethod
     fun getMatchedChats(promise: Promise){
         Logger.i("getMatchedChats call success")
-        val contactsWithTopics = ContactRepository.getAllContacts().filter {
+        val contactsWithTopics = MatchContactsRepository.getAllContacts().filter {
             it.topics.size!=0
         }
         promise.resolve(gson.toJson(contactsWithTopics))

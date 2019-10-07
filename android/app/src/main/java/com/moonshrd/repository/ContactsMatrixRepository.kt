@@ -2,7 +2,7 @@ package com.moonshrd.repository
 
 import com.moonshrd.models.UserModel
 
-object ContactsRepository {
+object ContactsMatrixRepository {
     private var contacts = ArrayList<UserModel>()
 
     fun getAllContacts(): ArrayList<UserModel> {

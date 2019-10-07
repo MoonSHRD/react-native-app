@@ -15,6 +15,7 @@ import com.moonshrd.utils.TopicStorage;
 import com.moonshrd.utils.matrix.LoginHandler;
 import com.moonshrd.utils.matrix.Matrix;
 import com.moonshrd.utils.matrix.RegistrationManager;
+import com.orhanobut.logger.Logger;
 
 import org.matrix.androidsdk.HomeServerConnectionConfig;
 import org.matrix.androidsdk.core.JsonUtils;
@@ -131,6 +132,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void onAppStart(Promise promise) {
+        MainApplication.createReactNative(getReactApplicationContext());
         Matrix matrixInstance = Matrix.getInstance(getReactApplicationContext());
         List<HomeServerConnectionConfig> credentialsList = matrixInstance.getLoginStorage().getCredentialsList();
         if(credentialsList.size() != 0) {
@@ -269,6 +271,7 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
 
     private void onLoginSucceed() {
         Matrix matrixInstance = Matrix.getInstance(getReactApplicationContext());
+        String userId = matrixInstance.getDefaultSession().getMyUserId();
         matrixInstance.getDefaultSession().startEventStream(new EventsThreadListener() {
             private DefaultEventsThreadListener defaultListener = new DefaultEventsThreadListener(matrixInstance.getDefaultSession().getDataHandler());
 
@@ -293,7 +296,10 @@ public class MatrixLoginClientModule extends ReactContextBaseJavaModule {
                 defaultListener.onConfigurationError(matrixErrorCode);
             }
         }, matrixInstance.getDefaultSession().getNetworkConnectivityReceiver(),null);
-
-        MainApplication.getP2ChatService().setMatrixID(matrixInstance.getDefaultSession().getMyUserId());
+        Logger.i("myUserId is " + matrixInstance.getDefaultSession().getMyUserId());
+        if(MainApplication.getP2ChatService()==null){
+            Logger.i("Service is null");
+        }
+        MainApplication.getP2ChatService().setMatrixID(userId);
     }
 }
