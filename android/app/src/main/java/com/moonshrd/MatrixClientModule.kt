@@ -1,10 +1,13 @@
 package com.moonshrd
 
+import android.location.Location
 import android.util.Base64
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.moonshrd.di.modules.MessageEventModel
@@ -14,6 +17,7 @@ import com.moonshrd.repository.ContactsMatrixRepository
 import com.moonshrd.utils.matrix.Matrix
 import com.moonshrd.utils.matrix.MatrixSdkHelper
 import com.moonshrd.utils.sendEventWithOneStringArg
+import com.orhanobut.logger.Logger
 import java9.util.concurrent.CompletableFuture
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -41,6 +45,8 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     @Inject
     lateinit var matrixInstance: Matrix
+
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     init {
         MainApplication.getComponent().inject(this)
@@ -269,6 +275,29 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                 promise.reject("onNetworkError", e!!.message)
             }
         })
+    }
+
+    @ReactMethod
+    fun getLocation(promise: Promise) {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(reactApplicationContext)
+
+        fusedLocationClient.lastLocation
+                .addOnSuccessListener { location: Location? ->
+                    // Got last known location. In some rare situations this can be null.
+                    if (location != null) {
+                        val locationParams = HashMap<String, String>()
+                        locationParams["lat"] = location.latitude.toString()
+                        locationParams["lng"] = location.longitude.toString()
+                        promise.resolve(gson.toJson(locationParams))
+                        Logger.i("LOCATION IS "+gson.toJson(locationParams))
+                        return@addOnSuccessListener
+                    } else {
+                        promise.resolve(null)
+                    }
+                }.addOnFailureListener {
+                    Logger.i(it.localizedMessage)
+                    promise.reject(it)
+                }
     }
 
     @ReactMethod
