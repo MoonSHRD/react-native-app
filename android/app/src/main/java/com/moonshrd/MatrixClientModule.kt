@@ -360,16 +360,14 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                 future.completeExceptionally(RuntimeException("Error occurred! Response code=$serverResponseCode, error message=$serverErrorMessage"))
             }
         })
-
         return future
     }
 
     @ReactMethod
-    private fun sendMessage(message: String, roomId: String, promise: Promise) {
+    fun sendMessage(message: String, roomId: String, promise: Promise) {
         val room = matrixInstance.defaultSession.dataHandler.getRoom(roomId)
         room.sendTextMessage(message, message, message, object : RoomMediaMessage.EventCreationListener {
             override fun onEventCreated(roomMediaMessage: RoomMediaMessage?) {
-                //  getHistoryMessageTest(roomId,null)
                 promise.resolve(true)
             }
 
@@ -384,7 +382,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
     }
 
     @ReactMethod
-    private fun getHistoryMessage(roomId: String, tokenMessageEnd: String, promise: Promise) {
+    fun getHistoryMessage(roomId: String, tokenMessageEnd: String, promise: Promise) {
         val room = matrixInstance.defaultSession.dataHandler.getRoom(roomId)
 
         matrixInstance.defaultSession.roomsApiClient.getRoomMessagesFrom(room.roomId, tokenMessageEnd, EventTimeline.Direction.BACKWARDS, 15, null, object : ApiCallback<TokensChunkEvents> {
@@ -403,7 +401,6 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                         val user = ContactsMatrixRepository.getUser(info.chunk[i].sender)
                         messages.add(MessageHistory(info.chunk[i].toJsonObject(), user!!))
                     }
-
                 }
 
                 newInfo["start"] = info.start
@@ -430,7 +427,6 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     @ReactMethod
     fun acceptInvite(roomId: String, promise: Promise) {
-        val room = matrixInstance.defaultSession.dataHandler.getRoom(roomId)
         matrixInstance.defaultSession.roomsApiClient.joinRoom(roomId, null, null, object : ApiCallback<RoomResponse> {
             override fun onSuccess(info: RoomResponse?) {
                 val infoRoom = gson.toJson(info)
@@ -470,9 +466,6 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
                 newInfo["end"] = info.end
                 newInfo["messages"] = messages
 
-                val jsonMessages = gson.toJson(newInfo)
-
-
                 matrixInstance.defaultSession.roomsApiClient.getRoomMessagesFrom(room.roomId, info.end, EventTimeline.Direction.BACKWARDS, 15, null, object : ApiCallback<TokensChunkEvents> {
 
                     override fun onSuccess(info: TokensChunkEvents) {
@@ -501,7 +494,7 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
         })
     }
 
-    fun getMyProfile(): UserModel {
+   private fun getMyProfile(): UserModel {
         val currentSession = matrixInstance.defaultSession
         val httpUrlAvatar = currentSession.contentManager.getDownloadableUrl(currentSession.dataHandler.myUser.avatarUrl, false)
         return UserModel(currentSession.myUserId,

@@ -190,7 +190,7 @@ dependencies {
     implementation project(':react-native-linear-gradient')
     implementation project(path: ':p2mobile')
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    // Add v8-android - prebuilt libv8.so into APK 
+    // Add v8-android - prebuilt libv8.so into APK
     implementation 'org.chromium:v8-android:+'
     implementation 'androidx.appcompat:appcompat:1.0.0'
     implementation ('com.facebook.react:react-native:0.59.10') { force = true } // From node_modules
@@ -208,7 +208,7 @@ dependencies {
 
     //kapt
     kapt 'com.google.dagger:dagger-compiler:2.15'
-    
+
     implementation 'androidx.multidex:multidex:2.0.0'
     implementation 'com.orhanobut:logger:2.2.0'
 }
