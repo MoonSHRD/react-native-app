@@ -1,5 +1,11 @@
 import React from 'react'
-import { View, requireNativeComponent, StyleSheet } from 'react-native'
+import { View, requireNativeComponent, StyleSheet, Text, Platform } from 'react-native'
+import {connect} from 'react-redux';
+import { Icon } from 'react-native-elements';
+import { theme } from '../constants';  
+
+
+
 
 const NativeMap = requireNativeComponent('MapViewManager')
 
@@ -70,6 +76,24 @@ class MapScreen extends React.Component {
   }
 }
 
+const styles = StyleSheet.create({
+  headerText: {
+    marginLeft: "auto", 
+    marginRight: "auto",
+    fontSize: 14, 
+    fontWeight: '600', 
+    letterSpacing: -0.0241176,
+    color: theme.colors.notBlack,
+  },
+  darkHeaderText: {
+      marginLeft: "auto", 
+      marginRight: "auto",
+      fontSize: 14, 
+      fontWeight: '600', 
+      letterSpacing: -0.0241176,
+      color: theme.colors.white,
+  },    
+})
 
 function mapStateToProps (state) {
     return {
