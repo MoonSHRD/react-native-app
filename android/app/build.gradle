@@ -200,7 +200,7 @@ dependencies {
     implementation 'net.sourceforge.streamsupport:android-retrofuture:1.7.1'
 
     //google play services
-    implementation 'com.google.android.gms:play-services-location:17.0.0'
+    implementation 'com.google.android.gms:play-services:12.0.1'
 
     // dagger2
     implementation 'com.google.dagger:dagger:2.23.1'

@@ -6,6 +6,9 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+
+
 
     <application
         android:name=".MainApplication"
@@ -34,6 +37,10 @@
             android:enabled="true"
             android:exported="true"
             android:stopWithTask="true" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyC9fbodxQoDVheIZKRiU5GYfsWb31EiXvI"/>
 
     </application>
     <uses-feature
