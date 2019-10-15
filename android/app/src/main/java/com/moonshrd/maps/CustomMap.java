@@ -7,23 +7,23 @@ import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 
-public class TomTomMap extends MapView implements OnMapReadyCallback {
+public class CustomMap extends MapView implements OnMapReadyCallback {
 
     GoogleMap googleMap;
     Boolean isMapReady = false;
-    public TomTomMap(Context context) {
+    public CustomMap(Context context) {
         super(context);
     }
 
-    public TomTomMap(Context context, AttributeSet attributeSet) {
+    public CustomMap(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
     }
 
-    public TomTomMap(Context context, AttributeSet attributeSet, int i) {
+    public CustomMap(Context context, AttributeSet attributeSet, int i) {
         super(context, attributeSet, i);
     }
 
-    public TomTomMap(Context context, GoogleMapOptions googleMapOptions) {
+    public CustomMap(Context context, GoogleMapOptions googleMapOptions) {
         super(context, googleMapOptions);
     }
 

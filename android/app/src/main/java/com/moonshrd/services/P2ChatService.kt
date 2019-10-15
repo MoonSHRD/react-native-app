@@ -129,11 +129,13 @@ class P2ChatService : Service() {
                 getMatch()
             }
         }, 0, 1, TimeUnit.SECONDS)
+
         scheduledExecutorService!!.scheduleAtFixedRate({
             if (isServiceRunning) {
                 getWifiChat()
             }
         }, 0, 5, TimeUnit.SECONDS)
+
         isServiceRunning = true
         for (topic in topicStorage.getTopicList()) {
             subscribeToTopic(topic)
