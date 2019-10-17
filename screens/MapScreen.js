@@ -1,11 +1,8 @@
 import React from 'react'
-import { View, requireNativeComponent, StyleSheet, Text, Platform } from 'react-native'
+import { KeyboardAvoidingView, requireNativeComponent, StyleSheet, Text, Platform } from 'react-native'
 import {connect} from 'react-redux';
-import { Icon } from 'react-native-elements';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { theme } from '../constants';  
-
-
-
 
 const NativeMap = requireNativeComponent('MapViewManager')
 
@@ -69,14 +66,24 @@ class MapScreen extends React.Component {
 
   render() {
       return (
-          <View>
+          <KeyboardAvoidingView style={this.props.appState.nightTheme ? styles.darkContainer : styles.container} behavior="padding">
             <NativeMap style={StyleSheet.absoluteFillObject} />
-          </View>
+          </KeyboardAvoidingView>
       )
   }
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: theme.colors.blueBackground,
+  },
+  darkContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: theme.colors.notBlack,
+  },
   headerText: {
     marginLeft: "auto", 
     marginRight: "auto",
