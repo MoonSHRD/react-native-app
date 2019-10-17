@@ -214,7 +214,7 @@ class P2ChatService : Service() {
                 val wifiName = connectivityManager.activeNetworkInfo.extraInfo
                 if (currentWifiName != wifiName) {
                     currentWifiName = wifiName
-                    P2mobile.subscribeToTopic(currentWifiName)
+                    //P2mobile.subscribeToTopic(currentWifiName)
                     LocalChatsRepository.addLocalChat(currentWifiName, LocalChat())
                 }
             } else {

@@ -61,7 +61,7 @@ public class MainApplication extends Application implements ReactApplication {
                     new LinearGradientPackage(),
                     new MatrixClientPackage(),
                     new P2ChatPackage(),
-                  new NativeMapPackage()
+                    new NativeMapPackage()
             );
         }
 
