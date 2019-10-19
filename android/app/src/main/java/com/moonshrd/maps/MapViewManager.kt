@@ -1,9 +1,8 @@
 package com.moonshrd.maps
 
-import com.google.android.gms.maps.MapView;
-
-import com.facebook.react.uimanager.SimpleViewManager;
-import com.facebook.react.uimanager.ThemedReactContext;
+import com.google.android.gms.maps.MapView
+import com.facebook.react.uimanager.SimpleViewManager
+import com.facebook.react.uimanager.ThemedReactContext
 
 
 class MapViewManager : SimpleViewManager<MapView>() {

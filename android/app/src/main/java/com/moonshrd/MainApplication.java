@@ -20,6 +20,7 @@ import com.horcrux.svg.SvgPackage;
 import com.moonshrd.di.components.ApplicationComponent;
 import com.moonshrd.di.components.DaggerApplicationComponent;
 import com.moonshrd.di.modules.ApplicationModule;
+import com.moonshrd.di.modules.WebModule;
 import com.moonshrd.services.P2ChatService;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.orhanobut.logger.AndroidLogAdapter;
@@ -88,6 +89,7 @@ public class MainApplication extends Application implements ReactApplication {
 
         component = DaggerApplicationComponent.builder()
                 .applicationModule(new ApplicationModule(getApplicationContext()))
+                .webModule(new WebModule(getApplicationContext()))
                 .build();
 
         SoLoader.init(this, /* native exopackage */ false);

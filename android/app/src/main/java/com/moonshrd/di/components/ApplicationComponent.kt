@@ -4,12 +4,13 @@ import com.moonshrd.MatrixClientModule
 import com.moonshrd.MatrixLoginClientModule
 import com.moonshrd.P2ChatModule
 import com.moonshrd.di.modules.ApplicationModule
+import com.moonshrd.di.modules.WebModule
 import com.moonshrd.services.P2ChatService
 import com.moonshrd.utils.matrix.MatrixSdkHelper
 import dagger.Component
 import javax.inject.Singleton
 
-@Component(modules = [ApplicationModule::class])
+@Component(modules = [ApplicationModule::class,WebModule::class])
 @Singleton
 interface ApplicationComponent {
     fun inject(matrixClientModule: MatrixClientModule)

@@ -1,4 +1,4 @@
-package com.moonshrd.di.modules
+package com.moonshrd.models
 
 import com.google.gson.JsonObject
 import com.moonshrd.models.UserModel

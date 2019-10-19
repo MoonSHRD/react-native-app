@@ -39,6 +39,5 @@ fun removeUrlScheme(aUrl: String?): String? {
             urlRetValue = aUrl.substring(HTTPS_SCHEME.length)
         }
     }
-
     return urlRetValue
 }

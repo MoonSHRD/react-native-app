@@ -1,4 +1,4 @@
-package com.moonshrd.di.modules
+package com.moonshrd.models
 
 import com.moonshrd.models.UserModel
 import org.matrix.androidsdk.rest.model.Event

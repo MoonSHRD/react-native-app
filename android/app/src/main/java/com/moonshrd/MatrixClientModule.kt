@@ -10,8 +10,8 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.moonshrd.di.modules.MessageEventModel
-import com.moonshrd.di.modules.MessageHistory
+import com.moonshrd.models.MessageEventModel
+import com.moonshrd.models.MessageHistory
 import com.moonshrd.models.UserModel
 import com.moonshrd.repository.ContactsMatrixRepository
 import com.moonshrd.utils.matrix.Matrix
@@ -45,6 +45,9 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     @Inject
     lateinit var matrixInstance: Matrix
+
+    @Inject
+    internal lateinit var api: API
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
