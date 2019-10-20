@@ -1,18 +1,30 @@
 package com.moonshrd.services
 
+import android.R
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
+import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
+import android.net.ConnectivityManager
+import android.net.wifi.WifiManager
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
+import androidx.core.app.NotificationCompat
 import com.facebook.react.bridge.Arguments
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.moonshrd.MainActivity
 import com.moonshrd.MainApplication
 import com.moonshrd.models.LocalChat
 import com.moonshrd.models.MatchModel
 import com.moonshrd.models.MessageModel
 import com.moonshrd.models.UserModel
-import com.moonshrd.repository.MatchContactsRepository
 import com.moonshrd.repository.LocalChatsRepository
+import com.moonshrd.repository.MatchContactsRepository
 import com.moonshrd.utils.TopicStorage
 import com.moonshrd.utils.matrix.Matrix
 import com.moonshrd.utils.matrix.MatrixSdkHelper
@@ -26,27 +38,18 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import android.content.Context.NOTIFICATION_SERVICE
-import android.R
-import android.app.*
-import android.media.RingtoneManager
-import android.os.Build
-import android.content.Context
-import com.moonshrd.MainActivity
-import android.graphics.BitmapFactory
-import android.graphics.Bitmap
-import android.graphics.Color
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationCompat.DEFAULT_VIBRATE
 
 
 class P2ChatService : Service() {
     private val newMatchEventName = "NewMatchEvent"
     private val newMatchMemberEventName = "newMatchMemberEventName"
     private val newMessageEventName = "NewMessageEvent"
+    private val newWifiEventName = "NewMatchEvent"
 
     private val CHANNEL_ID = "1250012"
     private val TAG = P2ChatService::class.java.simpleName
+
+    private var currentWifiName = ""
 
     @Inject
     lateinit var gson: Gson
@@ -73,7 +76,6 @@ class P2ChatService : Service() {
         MainApplication.getComponent().inject(this)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
             val icon = BitmapFactory.decodeResource(resources, R.mipmap.sym_def_app_icon)
 
             val intent = Intent(this, MainActivity::class.java)
@@ -82,10 +84,10 @@ class P2ChatService : Service() {
 
             val notificationBuilder: NotificationCompat.Builder = NotificationCompat.Builder(this, CHANNEL_ID)
             val notificationChannel = NotificationChannel(CHANNEL_ID, TAG, NotificationManager.IMPORTANCE_DEFAULT)
-                notificationChannel.enableVibration(true)
-                (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(notificationChannel)
+            notificationChannel.enableVibration(true)
+            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(notificationChannel)
 
-            val notification=   notificationBuilder
+            val notification = notificationBuilder
                     .setContentText("Service is start")
                     .setAutoCancel(true)
                     .setContentIntent(pendingIntent)
@@ -118,7 +120,7 @@ class P2ChatService : Service() {
                     getMessage()
                 }
             } catch (e: Exception) {
-              //  Logger.i("ERROR - ${e.message}")
+                //  Logger.i("ERROR - ${e.message}")
             }
         }, 0, 500, TimeUnit.MILLISECONDS)
 
@@ -127,6 +129,13 @@ class P2ChatService : Service() {
                 getMatch()
             }
         }, 0, 1, TimeUnit.SECONDS)
+
+        scheduledExecutorService!!.scheduleAtFixedRate({
+            if (isServiceRunning) {
+                getWifiChat()
+            }
+        }, 0, 5, TimeUnit.SECONDS)
+
         isServiceRunning = true
         for (topic in topicStorage.getTopicList()) {
             subscribeToTopic(topic)
@@ -164,8 +173,9 @@ class P2ChatService : Service() {
 
                 directChats.forEach { room ->
                     val contactID = room.state.loadedMembers.filter {
-                        it.userId != matrixInstance.defaultSession.myUserId }[0].userId
-                    if(match.matrixID==contactID){
+                        it.userId != matrixInstance.defaultSession.myUserId
+                    }[0].userId
+                    if (match.matrixID == contactID) {
                         val roomSummary = room.roomSummary
 
                         val contact = matrixInstance.defaultSession.dataHandler.store.getUser(contactID)
@@ -181,15 +191,41 @@ class P2ChatService : Service() {
                                 roomSummary.mUnreadEventsCount,
                                 roomId = room.roomId
                         )
-                        MatchContactsRepository.addTopicUser(match.topic,chat)
+                        MatchContactsRepository.addTopicUser(match.topic, chat)
                         match.userModel = MatchContactsRepository.getUser(chat.userId)
                     }
-                  }
+                }
                 Logger.i("getMatch - ${gson.toJson(match)}")
                 sendEventWithOneStringArg(MainApplication.getReactContext(), newMatchEventName, "match", gson.toJson(match))
             } else {
                 LocalChatsRepository.getLocalChat(match.topic)!!.removeMember(match.matrixID)
             }
+        }
+    }
+
+    private fun getWifiChat() {
+        val wifiMgr = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        if (wifiMgr.isWifiEnabled) { // Wi-Fi adapter is ON
+            val wifiInfo = wifiMgr.connectionInfo
+
+            if (wifiInfo.networkId != -1) {
+                // Connected to an access point
+                val connectivityManager = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                val wifiName = connectivityManager.activeNetworkInfo.extraInfo
+                if (currentWifiName != wifiName) {
+                    currentWifiName = wifiName
+                    //P2mobile.subscribeToTopic(currentWifiName)
+                    LocalChatsRepository.addLocalChat(currentWifiName, LocalChat())
+                }
+            } else {
+                // Not connected to an access point
+                LocalChatsRepository.removeLocalChat(currentWifiName)
+                currentWifiName = ""
+            }
+        } else {
+            // Wi-Fi adapter is OFF
+            LocalChatsRepository.removeLocalChat(currentWifiName)
+            currentWifiName = ""
         }
     }
 

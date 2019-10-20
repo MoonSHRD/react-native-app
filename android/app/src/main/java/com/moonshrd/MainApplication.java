@@ -42,6 +42,7 @@ public class MainApplication extends Application implements ReactApplication {
     private static P2ChatService service = null;
     private static ReactContext reactContext;
 
+
     private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
         @Override
         public boolean getUseDeveloperSupport() {
@@ -59,7 +60,8 @@ public class MainApplication extends Application implements ReactApplication {
                     new ActionSheetPackage(),
                     new LinearGradientPackage(),
                     new MatrixClientPackage(),
-                    new P2ChatPackage()
+                    new P2ChatPackage(),
+                    new NativeMapPackage()
             );
         }
 

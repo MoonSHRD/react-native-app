@@ -23,6 +23,7 @@ import NewChat from "../screens/NewChat";
 import NewGroupChat from "../screens/NewGroupChat";
 import Profile from "../screens/Profile";
 import ChatBackground from "../screens/ChatBackground";
+import MapScreen from "../screens/MapScreen";
 
 const headerStyle = {
   // marginTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
@@ -141,7 +142,23 @@ export const TabNavigator = createBottomTabNavigator({
         ),
     }
   },
+  Map: {
+    screen: createStackNavigator({
+      MapScreen: {
+          screen: MapScreen,
+          navigationOptions: {
+              headerTitleStyle: theme.headerTitle,
+          }
+      },
+    },{ headerLayoutPreset: 'center'}),
+    navigationOptions: {
+      title: 'Map',            
+      tabBarIcon: ({ tintColor }) => (
+          <Icon name="ios-map" size={24} color={tintColor} />
+      ),
+  }
   },
+},
   {
     tabBarOptions: {
       showLabel: false,

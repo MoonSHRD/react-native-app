@@ -59,5 +59,6 @@ allprojects {
         maven {
             url "https://github.com/MoonSHRD/maven-repo/raw/master/releases"
         }
+
     }
 }
