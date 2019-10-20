@@ -18,6 +18,8 @@ import com.moonshrd.utils.matrix.Matrix
 import com.moonshrd.utils.matrix.MatrixSdkHelper
 import com.moonshrd.utils.sendEventWithOneStringArg
 import com.orhanobut.logger.Logger
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import java9.util.concurrent.CompletableFuture
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -60,6 +62,15 @@ class MatrixClientModule(reactContext: ReactApplicationContext) : ReactContextBa
     }
 
     private fun isSessionExists(promise: Promise): Boolean {
+        /*
+        api.test().subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe( { result->
+                    var kek = ""
+                },{
+                    var kek = ""
+                })
+         */
         if (matrixInstance.defaultSession == null) {
             promise.reject("NullSession", "Session must not be null!")
             return false

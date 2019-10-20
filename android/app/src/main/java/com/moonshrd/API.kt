@@ -2,10 +2,8 @@ package com.moonshrd
 
 import com.moonshrd.models.maps.RoomPin
 import io.reactivex.Observable
-import retrofit2.http.DELETE
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Query
+import okhttp3.ResponseBody
+import retrofit2.http.*
 
 
 interface API {
@@ -24,8 +22,10 @@ interface API {
             @Query("ttl") ttl: String
     ): Observable<String>
 
-    @DELETE
-    fun removeRoom():Observable<String>
+    @DELETE("removeRoom")
+    fun removeRoom(@Query("id") roomID: String):Observable<String>
 
+    @GET("/api/v1/employees")
+    fun test():Observable<ResponseBody>
 
 }
