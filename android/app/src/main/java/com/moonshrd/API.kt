@@ -12,7 +12,7 @@ interface API {
             @Query("gps_lat") lat: String,
             @Query("gps_lon") lng: String,
             @Query("radius") radius: String
-    ): Observable<RoomPin>
+    ): Observable<ArrayList<RoomPin>>
 
     @POST("putRoom")
     fun putRoom(
