@@ -29,7 +29,7 @@
     "react-native-modal": "^11.3.1",
     "react-native-shadow": "^1.2.2",
     "react-native-slider": "^0.11.0",
-    "react-native-svg": "^9.5.3",
+    "react-native-svg": "9.8.4",
     "react-native-svg-uri": "^1.2.3",
     "react-native-timeago": "^0.4.0",
     "react-native-v8": "^0.59.10-patch.2",
