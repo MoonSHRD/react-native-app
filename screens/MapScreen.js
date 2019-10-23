@@ -18,7 +18,7 @@ class MapScreen extends React.Component {
                     styles.headerText
                   }
                   >
-                  Profile</Text>
+                  Map</Text>
             ),      
           headerRight: (
             <Icon
@@ -41,21 +41,6 @@ class MapScreen extends React.Component {
                 }
             />
           ),  
-          headerLeft: (
-            <Icon
-                name="ios-arrow-back" 
-                size={24} 
-                color={
-                    navigation.getParam('nightTheme') 
-                    ?
-                    theme.colors.white
-                    :
-                    theme.colors.blue
-                  }
-                    onPress={() => navigation.goBack()}
-                style={{paddingVertical: 10, paddingHorizontal: 20,}}
-            />
-          ),
           headerStyle:  {
             backgroundColor: navigation.getParam('nightTheme') ? theme.colors.notBlack : theme.colors.white
           }
