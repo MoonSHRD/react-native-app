@@ -10,7 +10,7 @@ import { Button, Text, Block } from '../components';
 
 import {connect} from 'react-redux';
 import { getContactList, searchBar, changeContactList, clearSearchBar, selectContact, getMatchedContactList } from '../store/actions/contactsActions';
-import { getAllMatches, setMatchedUser, setVisible } from '../store/actions/p2chatActions';
+import { getAllP2Chats, getAllMatches, setMatchedUser, setVisible } from '../store/actions/p2chatActions';
 
 const { width, height } = Dimensions.get('window');
 
@@ -82,7 +82,8 @@ class MatchesList extends Component {
     const {setMatchedUser, setVisible} = this.props
     this.setHeaderParams()
     this.willFocus = this.props.navigation.addListener('willFocus', () => {
-      this.props.getMatchedContactList();
+      this.props.getMatchedContactList()
+      this.props.getAllP2Chats()
     });
     this.NewMatchEvent = DeviceEventEmitter.addListener('NewMatchEvent', async (e) => {
       await console.log(e)
@@ -363,75 +364,105 @@ goToChatScreen = async (navigation) => {
             </Block>
             :
             <Block>
-            {
-              this.props.contacts.matchedContactList.map((l, i) => (
-                <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
-                <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
-                {
-                  l.name[0] == '@'
-                  ?
-                  <ListItem
-                    key={i}
-                    leftAvatar={
-                      (l.avatarUrl == "")
-                      ?
-                      { title: l.name[1], titleStyle:{textTransform: 'capitalize'} }
-                      :
-                      { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
-                    }
-                    title={
-                      l.name[0] == '@'
-                      ?
-                      this.parseUserId(l.name)
-                      :
-                      this.capitalize(l.name)
-                    }
-                  titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
-                    subtitle={l.topics.join(", ")}
-                    subtitleStyle={styles.subtitle}
-                    containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
-                    onPress={() => {
-                      navigation.navigate('Profile', {
-                        userName: l.name,
-                        userIdName: this.parseUserId(l.userId),
-                        userId: l.userId,
-                        avatarLink: this.parseAvatarUrl(l.avatarUrl),
-                        roomId: l.roomId,
-                        type: "match",
-                      })
-                    }}  
-                  />
-                  :
-                  <ListItem
-                    key={i}
-                    leftAvatar={
-                      (l.avatarUrl == "")
-                      ?
-                      { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
-                      :
-                      { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
-                    }
-                    title={this.capitalize(l.name)}
+              <Block>
+              {
+                this.props.p2chat.p2chats.length > 0
+                ?  
+                  this.props.p2chat.p2chats.map((l, i) => (
+                    <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
+                    <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
+                    <ListItem
+                      key={i}
+                      leftAvatar={{ title: l.name[0], titleStyle:{textTransform: 'capitalize'}}}
+                      title={this.capitalize(l.name)}
+                      titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                      subtitle={l.lastMessage}
+                      subtitleStyle={styles.subtitle}
+                      containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                      onPress={() => {
+                        navigation.navigate('GroupP2Chat', {
+                          chatName: l.name,
+                        })
+                      }}  
+                    />
+                    </BoxShadow>
+                    </View>
+                  ))
+                :
+                null
+              }  
+              </Block>
+              <Block>
+              {
+                this.props.contacts.matchedContactList.map((l, i) => (
+                  <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
+                  <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
+                  {
+                    l.name[0] == '@'
+                    ?
+                    <ListItem
+                      key={i}
+                      leftAvatar={
+                        (l.avatarUrl == "")
+                        ?
+                        { title: l.name[1], titleStyle:{textTransform: 'capitalize'} }
+                        :
+                        { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
+                      }
+                      title={
+                        l.name[0] == '@'
+                        ?
+                        this.parseUserId(l.name)
+                        :
+                        this.capitalize(l.name)
+                      }
                     titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
-                    subtitle={l.topics.join(", ")}
-                    subtitleStyle={styles.subtitle}
-                    containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
-                    onPress={() => {
-                      navigation.navigate('Profile', {
-                        userName: l.name,
-                        userIdName: this.parseUserId(l.userId),
-                        userId: l.userId,
-                        avatarLink: this.parseAvatarUrl(l.avatarUrl),
-                        roomId: l.roomId,
-                        type: "match",
-                      })
-                    }}  
-                  />
-                }
-                </BoxShadow>
-                </View>
-              ))
-            }  
+                      subtitle={l.topics.join(", ")}
+                      subtitleStyle={styles.subtitle}
+                      containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                      onPress={() => {
+                        navigation.navigate('Profile', {
+                          userName: l.name,
+                          userIdName: this.parseUserId(l.userId),
+                          userId: l.userId,
+                          avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                          roomId: l.roomId,
+                          type: "match",
+                        })
+                      }}  
+                    />
+                    :
+                    <ListItem
+                      key={i}
+                      leftAvatar={
+                        (l.avatarUrl == "")
+                        ?
+                        { title: l.name[0], titleStyle:{textTransform: 'capitalize'} }
+                        :
+                        { source: { uri: this.parseAvatarUrl(l.avatarUrl) } }
+                      }
+                      title={this.capitalize(l.name)}
+                      titleStyle={this.props.appState.nightTheme ? styles.darkTitle : styles.title}
+                      subtitle={l.topics.join(", ")}
+                      subtitleStyle={styles.subtitle}
+                      containerStyle={this.props.appState.nightTheme ? styles.darkList : styles.list}
+                      onPress={() => {
+                        navigation.navigate('Profile', {
+                          userName: l.name,
+                          userIdName: this.parseUserId(l.userId),
+                          userId: l.userId,
+                          avatarLink: this.parseAvatarUrl(l.avatarUrl),
+                          roomId: l.roomId,
+                          type: "match",
+                        })
+                      }}  
+                    />
+                  }
+                  </BoxShadow>
+                  </View>
+                ))
+              }  
+              </Block>
             </Block>
           }
         </View>
@@ -652,6 +683,7 @@ function mapDispatchToProps (dispatch) {
     getMatchedContactList: () => dispatch(getMatchedContactList()),
     setMatchedUser: (data) => dispatch(setMatchedUser(data)),
     setVisible: (data) => dispatch(setVisible(data)),
+    getAllP2Chats: () => dispatch(getAllP2Chats()),
   }
 }
 
