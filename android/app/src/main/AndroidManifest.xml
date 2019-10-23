@@ -10,6 +10,9 @@
 
 
     <application
+        tools:targetApi="28"
+        tools:ignore="GoogleAppIndexingWarning"
+        android:networkSecurityConfig="@xml/react_native_config"
         android:name=".MainApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
