@@ -9,8 +9,8 @@ import { theme } from '../constants';
 import { Button, Text, Block } from '../components';
 
 import {connect} from 'react-redux';
-import { getContactList, searchBar, changeContactList, clearSearchBar, selectContact, getMatchedContactList } from '../store/actions/contactsActions';
-import { getAllP2Chats, getAllMatches, setMatchedUser, setVisible } from '../store/actions/p2chatActions';
+import { selectContact } from '../store/actions/contactsActions';
+import { getAllP2Chats, getMatchedContactList, setMatchedUser, setVisible, clearSearchBar, searchBar, changeContactList } from '../store/actions/p2chatActions';
 
 const { width, height } = Dimensions.get('window');
 
@@ -166,19 +166,30 @@ goToChatScreen = async (navigation) => {
   updateSearch = async(text) => {
     await this.setState({ search: text , searchChanged: true});
     if (this.state.search == '') {
-      if (this.props.contacts.searchChanged) {
+      if (this.props.p2chat.searchChanged) {
         await this.props.clearSearchBar();
-        await this.props.getDirectChats();  
-      }
+        this.props.getMatchedContactList()
+        this.props.getAllP2Chats()
+        }
     }
 
-      const newData = await this.props.contacts.contactList.filter((item)=>{
+    if (this.props.p2chat.matchesList.length > 0) {
+      const newData = await this.props.p2chat.matchesList.filter((item)=>{
         const itemData = item.name.toUpperCase()
         const textData = text.toUpperCase()
         return itemData.indexOf(textData)>-1
       });
       await this.props.updateSearchBar(text)
       await this.props.updateSearchList(newData) 
+    } else {
+      const newData = await this.props.p2chat.p2chats.filter((item)=>{
+        const itemData = item.name.toUpperCase()
+        const textData = text.toUpperCase()
+        return itemData.indexOf(textData)>-1
+      });
+      await this.props.updateSearchBar(text)
+      await this.props.updateSearchList(newData) 
+    }
   };
 
   capitalize(props) {
@@ -294,7 +305,7 @@ goToChatScreen = async (navigation) => {
             placeholder="Search"
             onChangeText={(text) => this.updateSearch(text)}
             platform="ios"
-            value={this.props.contacts.search}
+            value={this.props.p2chat.search}
             containerStyle={this.props.appState.nightTheme ? styles.darkSearchBar: styles.searchBar}
             inputContainerStyle={this.props.appState.nightTheme ? styles.darkSearchInputBar : styles.searchInputBar}
             inputStyle={this.props.appState.nightTheme ? styles.darkSearchInputText : styles.searchInputText}
@@ -305,7 +316,7 @@ goToChatScreen = async (navigation) => {
             platform="ios"
             onChangeText={(text) => this.updateSearch(text)}
             cancelButtonTitle={null}
-            value={this.props.contacts.search}
+            value={this.props.p2chat.search}
             containerStyle={this.props.appState.nightTheme ? styles.darkSearchBar: styles.searchBar}
             inputContainerStyle={this.props.appState.nightTheme ? styles.darkSearchInputBar : styles.searchInputBar}
             inputStyle={this.props.appState.nightTheme ? styles.darkSearchInputText : styles.searchInputText}
@@ -317,11 +328,11 @@ goToChatScreen = async (navigation) => {
             ?
             <Block>
             {
-              this.props.contacts.searchList.length > 0
+              this.props.p2chat.searchList != null && this.props.p2chat.searchList.length > 0
               ?
               <Block>
               {
-                this.props.contacts.searchList.map((l, i) => (
+                this.props.p2chat.searchList.map((l, i) => (
                   <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
                   <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
                     <ListItem
@@ -394,7 +405,7 @@ goToChatScreen = async (navigation) => {
               </Block>
               <Block>
               {
-                this.props.contacts.matchedContactList.map((l, i) => (
+                this.props.p2chat.matchesList.map((l, i) => (
                   <View style={this.props.appState.nightTheme ? styles.darkViewList : styles.viewList}>
                   <BoxShadow setting={this.props.appState.nightTheme ? darkShadowOpt : shadowOpt}>
                   {
@@ -679,10 +690,10 @@ function mapDispatchToProps (dispatch) {
     updateSearchList: (data) => dispatch(changeContactList(data)),
     clearSearchBar: () => dispatch(clearSearchBar()),
     selectContact: (data) => dispatch(selectContact(data)),
-    getAllMatches: () => dispatch(getAllMatches()),
-    getMatchedContactList: () => dispatch(getMatchedContactList()),
+    getAllMatchesOnMatchesList: () => dispatch(getAllMatchesOnMatchesList()),
     setMatchedUser: (data) => dispatch(setMatchedUser(data)),
     setVisible: (data) => dispatch(setVisible(data)),
+    getMatchedContactList: () => dispatch(getMatchedContactList()),
     getAllP2Chats: () => dispatch(getAllP2Chats()),
   }
 }

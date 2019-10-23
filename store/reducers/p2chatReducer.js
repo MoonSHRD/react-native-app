@@ -1,4 +1,4 @@
-import { GET_ALL_TOPICS, GET_TOPIC, NEW_TOPIC, ADD_TOPIC_TO_ARRAY, GET_MATCHES, GET_ALL_P2CHATS, GET_ALL_P2CHATS_FAILURE, GET_ALL_P2CHATS_SUCCESS, GET_CHAT_MEMBERS, HANDLE_P2CHAT_MESSAGE_CHANGE, SET_START_P2CHAT, SET_END_P2CHAT, GET_P2CHAT_MESSAGE_HISTORY, GET_P2CHAT_MESSAGE_HISTORY_FAILURE, GET_P2CHAT_MESSAGE_HISTORY_SUCCESS, GET_P2CHAT_UPDATED_MESSAGE_HISTORY, P2CHAT_PUSH_NEW_MESSAGE, P2CHAT_PUSH_NEW_MESSAGE_SUCCESS, P2CHAT_PUSH_NEW_MESSAGE_FAILURE, P2CHAT_NEW_MESSAGE, P2CHAT_RESET_NEW_MESSAGE, P2CHAT_PUSH_NEW_MESSAGE_TO_HISTORY, SET_MATCHED_USER, SET_VISIBLE } from '../actions/constants'
+import { GET_ALL_TOPICS, GET_TOPIC, NEW_TOPIC, ADD_TOPIC_TO_ARRAY, GET_MATCHES, GET_ALL_P2CHATS, GET_ALL_P2CHATS_FAILURE, GET_ALL_P2CHATS_SUCCESS, GET_CHAT_MEMBERS, HANDLE_P2CHAT_MESSAGE_CHANGE, SET_START_P2CHAT, SET_END_P2CHAT, GET_P2CHAT_MESSAGE_HISTORY, GET_P2CHAT_MESSAGE_HISTORY_FAILURE, GET_P2CHAT_MESSAGE_HISTORY_SUCCESS, GET_P2CHAT_UPDATED_MESSAGE_HISTORY, P2CHAT_PUSH_NEW_MESSAGE, P2CHAT_PUSH_NEW_MESSAGE_SUCCESS, P2CHAT_PUSH_NEW_MESSAGE_FAILURE, P2CHAT_NEW_MESSAGE, P2CHAT_RESET_NEW_MESSAGE, P2CHAT_PUSH_NEW_MESSAGE_TO_HISTORY, SET_MATCHED_USER, SET_VISIBLE, P2CHAT_SEARCH_BAR, P2CHAT_SEARCH_LIST, P2CHAT_CLEAR_SEARCH_BAR, FETCHING_MATCHED_CONTACTS_SUCCESS } from '../actions/constants'
 
 const initialState = {
     topics: [],
@@ -7,6 +7,7 @@ const initialState = {
     matches: {},
     p2chats: [],
     chatMembers: [],
+    matchesList: [],
     messageHistory: {
         end: '',
         messages: [],
@@ -164,7 +165,34 @@ export default function p2chatReducer (state = initialState, action) {
             return {
                 ...state,
                 isVisible: action.data,
-            }         
+            }     
+        case P2CHAT_SEARCH_BAR: {
+            return {
+                ...state,
+                search: action.data,
+                searchChanged: true,
+            }
+        }
+        case P2CHAT_SEARCH_LIST: {
+            return {
+                ...state,
+                searchList: action.data
+            }
+        }
+        case P2CHAT_CLEAR_SEARCH_BAR:  {
+            return {
+                ...state,
+                search: '',
+                searchChanged: false,
+            }
+        }
+        case FETCHING_MATCHED_CONTACTS_SUCCESS:
+            return {
+              ...state,
+              isLoading: false,
+              matchesList: action.data,
+              alreadyLoaded: true,
+            }                      
         default:
             return state               
     }

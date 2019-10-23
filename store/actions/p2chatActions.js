@@ -1,4 +1,4 @@
-import { GET_ALL_TOPICS, GET_TOPIC, NEW_TOPIC, ADD_TOPIC_TO_ARRAY, GET_MATCHES, GET_ALL_P2CHATS, GET_ALL_P2CHATS_FAILURE, GET_ALL_P2CHATS_SUCCESS, GET_CHAT_MEMBERS, HANDLE_P2CHAT_MESSAGE_CHANGE, SET_START_P2CHAT, SET_END_P2CHAT, GET_P2CHAT_MESSAGE_HISTORY, GET_P2CHAT_MESSAGE_HISTORY_FAILURE, GET_P2CHAT_MESSAGE_HISTORY_SUCCESS, GET_P2CHAT_UPDATED_MESSAGE_HISTORY, P2CHAT_PUSH_NEW_MESSAGE, P2CHAT_PUSH_NEW_MESSAGE_SUCCESS, P2CHAT_PUSH_NEW_MESSAGE_FAILURE, P2CHAT_NEW_MESSAGE, P2CHAT_RESET_NEW_MESSAGE, P2CHAT_PUSH_NEW_MESSAGE_TO_HISTORY, SET_MATCHED_USER, SET_VISIBLE } from '../actions/constants'
+import { GET_ALL_TOPICS, GET_TOPIC, NEW_TOPIC, ADD_TOPIC_TO_ARRAY, GET_MATCHES, GET_ALL_P2CHATS, GET_ALL_P2CHATS_FAILURE, GET_ALL_P2CHATS_SUCCESS, GET_CHAT_MEMBERS, HANDLE_P2CHAT_MESSAGE_CHANGE, SET_START_P2CHAT, SET_END_P2CHAT, GET_P2CHAT_MESSAGE_HISTORY, GET_P2CHAT_MESSAGE_HISTORY_FAILURE, GET_P2CHAT_MESSAGE_HISTORY_SUCCESS, GET_P2CHAT_UPDATED_MESSAGE_HISTORY, P2CHAT_PUSH_NEW_MESSAGE, P2CHAT_PUSH_NEW_MESSAGE_SUCCESS, P2CHAT_PUSH_NEW_MESSAGE_FAILURE, P2CHAT_NEW_MESSAGE, P2CHAT_RESET_NEW_MESSAGE, P2CHAT_PUSH_NEW_MESSAGE_TO_HISTORY, SET_MATCHED_USER, SET_VISIBLE, P2CHAT_SEARCH_BAR, P2CHAT_SEARCH_LIST, P2CHAT_CLEAR_SEARCH_BAR, FETCHING_MATCHED_CONTACTS_SUCCESS, GET_ALL_MATCHES_LIST } from '../actions/constants'
 import P2Chat from '../../native/P2Chat';
 
 export function getCurrentTopics() {
@@ -195,6 +195,24 @@ export function getP2ChatUpdatedMessageHistory(topic, token) {
     }
 }
 
+export function getMatchedContactList() {
+    return (dispatch) => {
+      console.log('getMatchedContactList')
+      const matchesChats = P2Chat.getMatchedChats()
+      matchesChats.then((data) => {
+        console.log(data)
+        const jsonData = JSON.parse(data)
+        dispatch(getMatchedContactsSuccess(jsonData))
+        console.log(jsonData)
+        },
+        (error) => {
+        console.log(error);
+        }
+      );
+    }
+}
+
+
 export function getAllTopics(data) {
     return {
         type: GET_ALL_TOPICS,
@@ -351,3 +369,32 @@ export function getMessageHistory() {
           data
       }
   }
+
+  export function searchBar(data) {
+    return {
+      type: P2CHAT_SEARCH_BAR,
+      data,
+    }
+  }
+  
+  export function changeContactList(data) {
+    return {
+      type: P2CHAT_SEARCH_LIST,
+      data,
+    }
+  }
+
+  export function clearSearchBar() {
+    return {
+      type: P2CHAT_CLEAR_SEARCH_BAR,
+    }
+  }
+
+  export function getMatchedContactsSuccess(data) {
+    return {
+      type: FETCHING_MATCHED_CONTACTS_SUCCESS,
+      data,
+    }
+  }
+
+  
