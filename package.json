@@ -14,7 +14,7 @@
     "babel-preset-react-native": "2.1.0",
     "javascript-time-ago": "^2.0.1",
     "jetifier": "^1.6.4",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "moment-timezone": "^0.5.26",
     "react": "16.8.3",
     "react-chat-elements": "^10.7.1",
